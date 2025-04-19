@@ -3,47 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pet Clinic Prototype</title>
+    <title>User Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="user.js"></script>
   </head>
   <body class="bg-gray-100 text-gray-900 min-h-screen flex">
     <!-- Sidebar (Left Menu) -->
-    <aside class="bg-white w-1/5 h-full p-6 fixed left-0 top-0 flex flex-col items-center shadow-lg">
+  <!-- Sidebar (Left Menu) -->
+  <aside class="bg-white w-1/5 h-full p-6 fixed left-0 top-0 flex flex-col justify-between shadow-lg">
+    <!-- Top Section (Logo + Menu) -->
+    <div class="flex flex-col items-center">
       <!-- Logo -->
       <div class="h-24 w-24 rounded-full bg-sky-700 flex items-center justify-center mb-6">
         <img id="logo" src="images/logo.png" alt="Logo" class="h-20 w-20 rounded-full object-cover" />
       </div>
 
-      <!-- Menu -->
-      <nav class="w-full">
-        <!-- Menu Items -->
-        <ul class="space-y-4 text-left">
-          <li><a href="#" class="text-sky-700 font-semibold hover:underline">Home</a></li>
-          <li><a href="#" class="text-sky-700 font-semibold hover:underline">About</a></li>
-          <li><a href="#" class="text-sky-700 font-semibold hover:underline">Services</a></li>
-          <li><a href="#" class="text-sky-700 font-semibold hover:underline">Contact</a></li>
-        </ul>
-      </nav>
+        <!-- Menu -->
+        <nav class="w-full">
+          <ul class="space-y-4 text-left">
+            <li><a href="index.html" class="text-sky-700 font-semibold hover:underline">HomePage</a></li>
+            <li><a href="treatment-booking.html" class="text-sky-700 font-semibold hover:underline">Treatment coordination</a></li>
+            <li><a href="#" class="text-sky-700 font-semibold hover:underline">My profile</a></li>
+            <li><a href="#" class="text-sky-700 font-semibold hover:underline">Payments</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Bottom Section (Sign Out) -->
+      <div class="w-full mt-10">
+        <button
+          onclick="signOut()"
+          class="text-sky-700 font-semibold hover:underline w-full text-left">
+          Logout
+        </button>
+      </div>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-grow ml-[20%] mr-[25%] p-6">
       <!-- Content Area -->
       <div class="bg-white shadow-lg rounded-lg p-6">
-        <h1 class="text-5xl font-bold text-sky-700 text-center mb-4">🐾 Welcome to Pet Clinic</h1>
-        <p class="text-lg text-gray-600 text-center">Your trusted partner for pet care.</p>
+        <h1 id="greeting" class="text-2xl font-semibold text-center text-gray-800 mb-2"></h1>
+        <h2 class="text-4xl font-bold text-sky-700 text-center mb-6">🐾 My Pets</h2>
+
+        <!-- Dynamic pet container -->
+        <div id="petsGrid" class="grid grid-cols-3 gap-6"></div>
       </div>
     </main>
 
     <!-- Chatbot Window (Right Section) -->
     <aside class="bg-white w-1/4 h-full p-4 fixed right-0 top-0 flex flex-col shadow-lg">
-      <!-- Login Button -->
-      <div class="mb-4 flex justify-end">
-        <a href="login.html" class="bg-sky-700 text-white px-4 py-2 rounded-lg hover:bg-sky-800">
-          Login
-        </a>
-      </div>
-
       <!-- Chatbot Header -->
       <div class="bg-sky-700 text-white p-4 rounded-t-lg">
         <h2 class="text-lg font-semibold">Chat Assistant</h2>

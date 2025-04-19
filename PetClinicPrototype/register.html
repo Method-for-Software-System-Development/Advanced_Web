@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register PetClinic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="register.js" defer></script>
+  </head>
+  <body class="bg-gray-100 text-gray-900 min-h-screen flex">
+    <!-- Sidebar (Left Menu) -->
+    <aside class="bg-white w-1/5 h-full p-6 fixed left-0 top-0 flex flex-col items-center shadow-lg">
+      <!-- Logo -->
+      <div class="h-24 w-24 rounded-full bg-sky-700 flex items-center justify-center mb-6">
+        <img id="logo" src="images/logo.png" alt="Logo" class="h-20 w-20 rounded-full object-cover" />
+      </div>
+
+      <!-- Menu -->
+      <nav class="w-full">
+        <ul class="space-y-4 text-left">
+          <li><a href="index.html" class="text-sky-700 font-semibold hover:underline">HomePage</a></li>
+          <li><a href="treatment-booking.html" class="text-sky-700 font-semibold hover:underline">Treatment coordination</a></li>
+          <li><a href="#" class="text-sky-700 font-semibold hover:underline">My profile</a></li>
+          <li><a href="#" class="text-sky-700 font-semibold hover:underline">Payments</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-grow ml-[20%] mr-[25%] flex items-center justify-center p-6">
+      <div class="bg-white p-8 rounded shadow-md w-96">
+        <h1 class="text-2xl font-semibold mb-6 text-center">🐾 Register 🐾</h1>
+        <form>
+          <!-- User Info -->
+          <label for="userInput">Username</label>
+          <input type="text" id="userInput" class="w-full p-3 mb-4 border rounded" required />
+
+          <label for="mailInput">Email</label>
+          <input type="email" id="mailInput" class="w-full p-3 mb-4 border rounded" required />
+
+          <label for="passInput">Password</label>
+          <input type="password" id="passInput" class="w-full p-3 mb-4 border rounded" required />
+
+          <label for="confirmInput">Confirm Password</label>
+          <input type="password" id="confirmInput" class="w-full p-3 mb-4 border rounded" required />
+
+          <hr class="my-6" />
+
+          <!-- Animal Info -->
+          <h2 class="text-xl font-semibold mb-2">Add Your First Pet</h2>
+
+          <label for="petName">Pet Name</label>
+          <input type="text" id="petName" class="w-full p-3 mb-4 border rounded" required />
+
+          <label for="petBreed">Pet Breed</label>
+          <input type="text" id="petBreed" class="w-full p-3 mb-4 border rounded" required />
+
+          <!-- Submit -->
+          <button type="submit" class="w-full p-3 bg-blue-500 text-white rounded hover:bg-blue-600">Register</button>
+          <a href="login.html" class="block text-right mt-4 text-blue-500 hover:underline">Already have an account?</a>
+        </form>
+      </div>
+    </main>
+
+    <!-- Chatbot Window (Right Section) -->
+    <aside class="bg-white w-1/4 h-full p-4 fixed right-0 top-0 flex flex-col shadow-lg">
+      <!-- Chatbot Header -->
+      <div class="bg-sky-700 text-white p-4 rounded-t-lg">
+        <h2 class="text-lg font-semibold">Chat Assistant</h2>
+      </div>
+
+      <!-- Chatbot Messages -->
+      <div class="flex-grow overflow-y-auto p-4 space-y-4 bg-gray-50">
+        <div class="bg-gray-200 p-3 rounded-lg self-start max-w-[80%]">
+          Hello! How can I assist you today?
+        </div>
+        <div class="bg-sky-100 p-3 rounded-lg self-end max-w-[80%]">
+          I need help with my pet's appointment.
+        </div>
+      </div>
+
+      <!-- Chatbot Input -->
+      <form class="mt-auto flex items-center space-x-2 p-2 bg-gray-200 rounded-b-lg">
+        <input
+          type="text"
+          placeholder="Type a message..."
+          class="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-sky-500"
+        />
+        <button type="submit" class="bg-sky-700 text-white px-4 py-2 rounded-lg hover:bg-sky-800">
+          Send
+        </button>
+      </form>
+    </aside>
+  </body>
+</html>
