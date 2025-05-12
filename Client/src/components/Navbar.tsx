@@ -1,6 +1,6 @@
 import React from 'react';
 import logo from '../assets/logo.png';
-
+import { Link } from 'react-router-dom';
 const Navbar = () => {
   return (
     <nav className="bg-gradient-to-r from-[#F7C9D3] to-[#F3AEBD] shadow-md fixed top-0 w-full z-50">
@@ -16,11 +16,12 @@ const Navbar = () => {
         </div>
 
         {/* Navigation Links */}
-        <div className="space-x-6 font-[Nunito] text-lg text-[#664147] font-bold">
-            <a href="#about" className="hover:text-[#3B3B3B] transition-colors duration-200">About Us</a>
-            <a href="#team" className="hover:text-[#3B3B3B] transition-colors duration-200">Our Team</a>
-            <a href="#testimonials" className="hover:text-[#3B3B3B] transition-colors duration-200">Testimonials</a>
-            <a href="#login" className="bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#3B3B3B] transition-colors duration-200">Login</a>
+        <div className="space-x-6 text-sm text-[#664147] font-medium">
+          <a href="#about" className="hover:text-[#664147]">About Us</a>
+          <a href="#team" className="hover:text-[#664147]">Our Team</a>
+          <a href="#reviews" className="hover:text-[#664147]">Reviews</a>
+          <Link to="/login" className="hover:text-[#664147]">Login</Link>
+
         </div>
       </div>
     </nav>

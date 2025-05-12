@@ -6,3 +6,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+@keyframes fade-in { from {opacity:0;transform:scale(0.9)} to {opacity:1;} }
+.animate-fade-in { animation: fade-in 0.2s ease-out; }
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.bg-user {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.bg-bot {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
