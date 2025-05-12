@@ -1,28 +1,23 @@
-import React from "react";
+import React from 'react';
+import Navbar from '../components/Navbar';
 
-
-const Home: React.FC = () => {
+const Home = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center 
-                    bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 p-8 gap-6">
-      {/*Test1*/}
-      <h1 className="text-6xl font-extrabold text-white drop-shadow-lg animate-bounce">
-        Welcome to Pet Clinic!
-      </h1>
-
-      {/*Test2*/}
-      <p className="text-xl text-white/80 hover:text-yellow-200 transition-colors">
-        Look at this colourful gradient &amp; hover effects 👀
-      </p>
-
-      {/* Test3*/}
-      <button className="bg-teal-400 hover:bg-teal-600 active:bg-teal-700
-                         text-white font-semibold py-3 px-8 rounded-xl
-                         shadow-lg hover:shadow-2xl transition 
-                         duration-300 ease-out hover:scale-110">
-        Click Me if you like Kayo!
-      </button>
-    </div>
+    <>
+      <Navbar />
+      <section id="about" className="pt-24 h-screen bg-[#FDF6F0]">
+        <h2 className="text-center text-3xl text-[#3B3B3B] font-semibold">About Us</h2>
+      </section>
+      <section id="team" className="h-screen bg-[#F7C9D3]">
+        <h2 className="text-center text-3xl text-[#3B3B3B] font-semibold">Our Team</h2>
+      </section>
+      <section id="reviews" className="h-screen bg-[#664147]">
+        <h2 className="text-center text-3xl text-white font-semibold">Reviews</h2>
+      </section>
+      <section id="login" className="h-screen bg-[#3B3B3B]">
+        <h2 className="text-center text-3xl text-white font-semibold">Login</h2>
+      </section>
+    </>
   );
 };
 
