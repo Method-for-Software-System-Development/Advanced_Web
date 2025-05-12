@@ -2,7 +2,7 @@
 module.exports = {
     content: [
       "./index.html",
-      "./src/**/*.{js,ts,jsx,tsx}",   // סריקת כל הקבצים ב-src
+      "./src/**/*.{js,ts,jsx,tsx}",   
     ],
     theme: {
       extend: {},
