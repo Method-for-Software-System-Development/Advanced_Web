@@ -1,6 +1,6 @@
 import React from 'react';
 import logo from '../assets/logo.png';
-
+import { Link } from 'react-router-dom';
 const Navbar = () => {
   return (
     <nav className="bg-[#F7C9D3] shadow-md fixed top-0 w-full z-50">
@@ -17,7 +17,8 @@ const Navbar = () => {
           <a href="#about" className="hover:text-[#664147]">About Us</a>
           <a href="#team" className="hover:text-[#664147]">Our Team</a>
           <a href="#reviews" className="hover:text-[#664147]">Reviews</a>
-          <a href="#login" className="hover:text-[#664147]">Login</a>
+          <Link to="/login" className="hover:text-[#664147]">Login</Link>
+
         </div>
       </div>
     </nav>

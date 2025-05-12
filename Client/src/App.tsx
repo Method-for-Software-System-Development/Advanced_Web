@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import "./styles/index.css";
 import ChatButton from "./components/chatbot/ChatButton";
 import ChatWindow from "./components/chatbot/ChatWindow";
-
+import Login from "./components/auth/Login";
 import Home from "./pages/Home";
 
 
@@ -14,11 +14,12 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
 
       {/* floating chat toggle */}
       <ChatButton onClick={() => setChatOpen(!chatOpen)} />
-
+      
       {/* ChatWindow 
           {chatOpen && <ChatWindow onClose={() => setChatOpen(false)} />}
       */}
