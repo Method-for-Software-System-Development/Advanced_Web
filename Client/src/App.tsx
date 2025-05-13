@@ -1,32 +1,31 @@
-import React, { useState } from "react"; 
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./styles/index.css";
 import ChatButton from "./components/chatbot/ChatButton";
 import ChatWindow from "./components/chatbot/ChatWindow";
 import Login from "./components/auth/Login";
 import Home from "./pages/Home";
 
-
 const App = () => {
   const [chatOpen, setChatOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false); // State for showing/hiding login modal
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home onLoginClick={() => setLoginOpen(true)} />} />
       </Routes>
 
-      {/* floating chat toggle */}
+      {/* Floating chat toggle */}
       <ChatButton onClick={() => setChatOpen(!chatOpen)} />
-      
-      {/* ChatWindow 
-          {chatOpen && <ChatWindow onClose={() => setChatOpen(false)} />}
-      */}
-       <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
+      <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
+
+      {/* Login modal */}
+      {loginOpen && (
+        <Login onClose={() => setLoginOpen(false)} />
+      )}
     </Router>
   );
 };
-
 
 export default App;
