@@ -47,9 +47,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
                  animate-fade-in"
     >
       {/* Header */}
-      <div className="flex justify-between items-center bg-blue-600 text-white px-4 py-2 rounded-t-xl">
+      <div className="flex justify-between items-center bg-[#664147] font-[Nunito] text-white px-4 py-2 rounded-t-xl">
         <span className="font-semibold">Virtual Assistant</span>
-        <button aria-label="Close chat" onClick={onClose}>
+        <button aria-label="Close chat" onClick={onClose} className="cursor-pointer">
           <X size={20} />
         </button>
       </div>
@@ -75,12 +75,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a message…"
-            className="flex-1 px-4 py-3 text-sm border rounded-l-md
+            className="flex-1 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
                        focus:outline-none"
           />
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-r-md"
+            className="bg-[#664147] hover:bg-[#58383E] cursor-pointer text-white px-6 rounded-r-md"
           >
             Send
           </button>

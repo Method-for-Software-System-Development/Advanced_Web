@@ -1,7 +1,9 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-import AboutSection from '../components/AboutSection';
-import TeamSection from '../components/TeamSection';
+import AboutSection from '../components/homePage/AboutSection';
+import TeamSection from '../components/homePage/TeamSection';
+import ContactSection from '../components/homePage/ContactSection';
+import FooterSection from '../components/FooterSection';
 
 interface HomeProps {
   onLoginClick: () => void; // Pass login modal trigger function to Navbar
@@ -11,9 +13,11 @@ const Home: React.FC<HomeProps> = ({ onLoginClick }) => {
   return (
     <>
       <Navbar onLoginClick={onLoginClick} />
-      <main className="pt-40 bg-gradient-to-b from-[#F5D2B3] to-[#FDF6F0]">
+      <main className="pt-40 bg-[#F5D2B3]">
         <AboutSection />
         <TeamSection />
+        <ContactSection />
+        <FooterSection />
       </main>
     </>
   );

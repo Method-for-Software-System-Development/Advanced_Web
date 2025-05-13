@@ -21,9 +21,9 @@ const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => (
       fixed bottom-6 right-6 z-50
       flex items-center justify-center
       w-14 h-14 rounded-full
-      bg-blue-600 text-white shadow-lg
-      hover:bg-blue-700 active:bg-blue-800
-      hover:scale-110 transition duration-300 ease-out
+      bg-[#664147] text-white shadow-md
+      hover:bg-[#58383E] active:bg-[#58383E]
+      hover:scale-110 cursor-pointer transition duration-200 ease-out
     "
   >
     {/* Lucide chat icon */}

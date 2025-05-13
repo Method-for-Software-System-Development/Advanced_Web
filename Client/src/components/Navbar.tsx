@@ -7,7 +7,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
   return (
-    <nav className="bg-gradient-to-r from-[#F7C9D3] to-[#F3AEBD] shadow-md fixed top-0 w-full z-50">
+    <nav className="bg-gradient-to-r from-[#F7C9D3] to-[#EF92A6] shadow-md fixed top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
 
         {/* Logo and Clinic Name */}
@@ -21,17 +21,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
         {/* Navigation Links */}
         <div className="space-x-6 font-[Nunito] text-lg text-[#664147] font-bold">
-          <a href="#about" className="hover:text-[#3B3B3B] transition-colors duration-200">About Us</a>
-          <a href="#team" className="hover:text-[#3B3B3B] transition-colors duration-200">Our Team</a>
-          <a href="#reviews" className="hover:text-[#3B3B3B] transition-colors duration-200">Testimonials</a>
-          {/* Button to open Login modal */}
-          <button
-            onClick={onLoginClick}
-            className="bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#3B3B3B] transition-colors duration-200"
-          >
-            Login
-          </button>
+          <a href="#about" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">About Us</a>
+          <a href="#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Our Team</a>
+          <a href="#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Contact Us</a>
+          <button onClick={onLoginClick} className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transform transition duration-200 hover:scale-110 cursor-pointer">Login</button>
         </div>
+
       </div>
     </nav>
   );
