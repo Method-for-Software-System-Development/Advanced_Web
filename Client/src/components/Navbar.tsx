@@ -1,8 +1,9 @@
 import React from 'react';
 import logo from '../assets/logo.png';
+import { Link } from 'react-router-dom'; // Import Link for client-side routing
 
 interface NavbarProps {
-  onLoginClick: () => void; // Prop for triggering Login modal
+  onLoginClick?: () => void; // Prop for triggering Login modal - now optional
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
@@ -21,10 +22,20 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
         {/* Navigation Links */}
         <div className="space-x-6 font-[Nunito] text-lg text-[#664147] font-bold">
-          <a href="#about" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">About Us</a>
-          <a href="#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Our Team</a>
-          <a href="#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Contact Us</a>
-          <button onClick={onLoginClick} className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transform transition duration-200 hover:scale-110 cursor-pointer">Login</button>
+          <a href="/#about" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">About Us</a>
+          <a href="/#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Our Team</a>
+          <a href="/#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Contact Us</a>
+          {/* Temporary link to Secretary Page */}
+          <Link to="/secretary" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Secretary</Link>
+          {/* Conditionally render Login button */}
+          {onLoginClick && (
+            <button 
+              onClick={onLoginClick} 
+              className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transform transition duration-200 hover:scale-110 cursor-pointer"
+            >
+              Login
+            </button>
+          )}
         </div>
 
       </div>

@@ -5,6 +5,7 @@ import ChatButton from "./components/chatbot/ChatButton";
 import ChatWindow from "./components/chatbot/ChatWindow";
 import Login from "./components/auth/Login";
 import Home from "./pages/Home";
+import SecretaryPage from "./pages/SecretaryPage"; // Import the new page
 
 const App = () => {
   const [chatOpen, setChatOpen] = useState(false);
@@ -14,6 +15,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Home onLoginClick={() => setLoginOpen(true)} />} />
+        <Route path="/secretary" element={<SecretaryPage />} /> {/* Add route for SecretaryPage */}
       </Routes>
 
       {/* Floating chat toggle */}
