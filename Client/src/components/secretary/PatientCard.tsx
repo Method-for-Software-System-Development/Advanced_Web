@@ -1,31 +1,25 @@
 import React from 'react';
-
-// Assuming Pet and Patient interfaces are defined in a shared types file or passed as props
-// For now, let's redefine them here for clarity, but ideally, they should be imported.
-interface Pet {
-  id: string;
-  name: string;
-  species: string;
-  breed?: string;
-  age?: number;
-}
-
-interface Patient {
-  id: string;
-  ownerName: string;
-  contact: string;
-  pets: Pet[];
-}
+import { Patient } from '../../types'; // Import Patient type
 
 interface PatientCardProps {
   patient: Patient;
+  onEditPatient: (patient: Patient) => void; // Add onEditPatient prop
 }
 
-const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
+const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient }) => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg border border-gray-200">
-      <h3 className="text-xl font-semibold text-[#664147] mb-2">{patient.ownerName}</h3>
-      <p className="text-sm text-gray-600 mb-3">Contact: {patient.contact}</p>
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="text-xl font-semibold text-[#664147]">{patient.ownerName}</h3>
+        <button 
+          onClick={() => onEditPatient(patient)}
+          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+        >
+          Edit
+        </button>
+      </div>
+      <p className="text-sm text-gray-600 mb-1">Contact: {patient.contact}</p>
+      {patient.phone && <p className="text-sm text-gray-600 mb-3">Phone: {patient.phone}</p>} {/* Display phone if available */}
       <h4 className="text-md font-semibold text-gray-700 mb-2">Pets:</h4>
       {patient.pets.length > 0 ? (
         <ul className="list-disc list-inside pl-4 space-y-1 text-sm text-gray-700">
@@ -40,7 +34,6 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
       ) : (
         <p className="text-sm text-gray-500 italic">No pets registered for this owner.</p>
       )}
-      {/* TODO: Add buttons for Edit Patient, Delete Patient here if needed at this level */}
     </div>
   );
 };

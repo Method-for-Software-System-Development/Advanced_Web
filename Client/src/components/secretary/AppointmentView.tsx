@@ -2,6 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import Calendar from 'react-calendar';
 import '../../styles/react-calendar.css'; // Adjusted path
+import DashboardButton from './DashboardButton'; 
+
+interface AppointmentViewProps {
+  onBack: () => void;
+}
 
 // Define the structure of an Appointment
 interface Appointment {
@@ -40,7 +45,7 @@ const fetchAppointmentsForDate = async (date: Date): Promise<Appointment[]> => {
   });
 };
 
-const AppointmentView: React.FC = () => {
+const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -64,6 +69,13 @@ const AppointmentView: React.FC = () => {
     };
     loadAppointments();
   }, [selectedDate]);
+
+  const handleCancelAppointment = (appointmentId: string) => {
+    setAppointments(prevAppointments => 
+      prevAppointments.filter(apt => apt.id !== appointmentId)
+    );
+    alert('Appointment cancelled.');
+  };
 
   type ValuePiece = Date | null;
   type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -135,6 +147,9 @@ const AppointmentView: React.FC = () => {
 
   return (
     <>
+        <div className="mb-8 text-center">
+        <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
+      </div>
       {/* Calendar and Export Section */}
       <section className="mb-8 p-6 bg-white rounded-lg shadow-xl max-w-3xl mx-auto">
         <h2 className="text-2xl font-semibold text-[#4A3F35] mb-4">Select Date to View Appointments</h2>
@@ -186,11 +201,19 @@ const AppointmentView: React.FC = () => {
           <ul className="space-y-6">
             {appointments.map((apt) => (
               <li key={apt.id} className="p-6 border border-gray-200 rounded-lg shadow-md bg-gray-50 hover:shadow-lg transition-shadow duration-200 ease-in-out">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="font-bold text-xl text-[#664147]">{apt.time}</p>
-                  <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full">{apt.service}</span>
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="font-bold text-xl text-[#664147]">{apt.time}</p>
+                    <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full inline-block mt-1">{apt.service}</span>
+                  </div>
+                  <button
+                    onClick={() => handleCancelAppointment(apt.id)}
+                    className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
+                  >
+                    Cancel
+                  </button>
                 </div>
-                <p className="text-gray-800"><strong className="font-medium text-gray-600">Client:</strong> {apt.clientName}</p>
+                <p className="text-gray-800 mt-2"><strong className="font-medium text-gray-600">Client:</strong> {apt.clientName}</p>
                 {apt.notes && <p className="mt-2 text-sm text-gray-600"><strong className="font-medium">Notes:</strong> {apt.notes}</p>}
               </li>
             ))}

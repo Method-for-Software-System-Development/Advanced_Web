@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import SecretaryWelcome from '../components/secretary/SecretaryWelcome';
 import AppointmentView from '../components/secretary/AppointmentView';
-import ManagePatientsView from '../components/secretary/ManagePatientsView'; // Import ManagePatientsView
+import ManagePatientsView from '../components/secretary/ManagePatientsView';
+import EditVeterinariansView from '../components/secretary/EditVeterinariansView'; // Import EditVeterinariansView
 import FooterSection from '../components/FooterSection';
 
-export type SecretaryView = 'welcome' | 'appointments' | 'managePatients'; // Add 'managePatients'
+export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editVeterinarians'; // Add 'editVeterinarians'
 
 const SecretaryPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<SecretaryView>('welcome');
@@ -21,34 +22,18 @@ const SecretaryPage: React.FC = () => {
         {currentView === 'welcome' && (
           <SecretaryWelcome 
             onNavigateToAppointments={() => navigateTo('appointments')} 
-            onNavigateToManagePatients={() => navigateTo('managePatients')} // Pass navigation function
+            onNavigateToManagePatients={() => navigateTo('managePatients')}
+            onNavigateToEditVeterinarians={() => navigateTo('editVeterinarians')} // Pass navigation function for edit veterinarians
           />
         )}
         {currentView === 'appointments' && (
-          <>
-            <div className="mb-8 text-center">
-                <button 
-                    onClick={() => navigateTo('welcome')} 
-                    className="px-6 py-3 bg-[#664147] text-white font-semibold rounded-lg shadow-md hover:bg-[#58383E] transition-colors duration-200"
-                >
-                    Back to Secretary Dashboard
-                </button>
-            </div>
-            <AppointmentView />
-          </>
+          <AppointmentView onBack={() => navigateTo('welcome')} />
         )}
-        {currentView === 'managePatients' && ( // Add block for ManagePatientsView
-          <>
-            <div className="mb-8 text-center">
-                <button 
-                    onClick={() => navigateTo('welcome')} 
-                    className="px-6 py-3 bg-[#664147] text-white font-semibold rounded-lg shadow-md hover:bg-[#58383E] transition-colors duration-200"
-                >
-                    Back to Secretary Dashboard
-                </button>
-            </div>
-            <ManagePatientsView />
-          </>
+        {currentView === 'managePatients' && (
+          <ManagePatientsView onBack={() => navigateTo('welcome')}/>
+        )}
+        {currentView === 'editVeterinarians' && ( // Add block for EditVeterinariansView
+          <EditVeterinariansView onBack={() => navigateTo('welcome')} />
         )}
       </main>
       <FooterSection />
