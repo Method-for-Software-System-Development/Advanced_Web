@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,} from "react";
 import SignUpForm from "./SignUpForm";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
   onClose: () => void;
@@ -9,6 +10,8 @@ interface LoginProps {
 type Step = "login" | "signup" | "forgot-email" | "forgot-verify" | "forgot-reset";
 
 const Login: React.FC<LoginProps> = ({ onClose }) => {
+  const navigate = useNavigate();
+
   /* ─────────── Login state ─────────── */
   const [step, setStep] = useState<Step>("login");
   const [email, setEmail] = useState("");
@@ -58,7 +61,10 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     });
 
     setLoginMessage("Login successful! Redirecting…");
-    setTimeout(onClose, 1500);
+    setTimeout(() =>{
+      onClose();
+      navigate("/client"); // Redirect to client page
+    }, 1000);
   } catch (err: any) {
     // Axios errors may be in err.response.data or just err.message
     if (err.response && err.response.data && err.response.data.error) {
