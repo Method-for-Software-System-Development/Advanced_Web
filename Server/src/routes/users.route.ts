@@ -41,7 +41,7 @@ usersRouter.post("/register", async (req: Request, res: Response) => {
 /**
  * POST /api/users/login
  * Authenticates a user by email and password.
- 
+ */
 usersRouter.post("/login", async (req: Request,res: Response) => {
     try {
         const { email, password } = req.body;
@@ -58,5 +58,5 @@ usersRouter.post("/login", async (req: Request,res: Response) => {
         }
     }
 });
-*/
+
 export default usersRouter;
