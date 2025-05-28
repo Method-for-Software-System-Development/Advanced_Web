@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,} from "react";
 import SignUpForm from "./SignUpForm";
+import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
   onClose: () => void;
@@ -8,6 +9,8 @@ interface LoginProps {
 type Step = "login" | "signup" | "forgot-email" | "forgot-verify" | "forgot-reset";
 
 const Login: React.FC<LoginProps> = ({ onClose }) => {
+  const navigate = useNavigate();
+
   /* ─────────── Login state ─────────── */
   const [step, setStep] = useState<Step>("login");
   const [email, setEmail] = useState("");
@@ -43,9 +46,12 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
       return;
     }
     // demo credentials – החלף ב-API אמיתי
-    if (email === "test@example.com" && password === "password") {
+    if (email === "test@example.com" && password === "1") {
       setLoginMessage("Login successful! Redirecting…");
-      setTimeout(onClose, 1500);
+      setTimeout(() =>{
+        onClose();
+        navigate("/client"); // Redirect to client page
+      }, 1000);
     } else {
       setLoginMessage("Invalid email or password.");
     }
