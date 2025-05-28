@@ -9,7 +9,7 @@ import member6 from '../../assets/noa.png';
 
 const TeamSection = () => {
   return (
-    <section id="team" className="scroll-mt-32 relative w-full bg-white pt-10 pb-10 px-6 md:px-20">
+    <section id="team" className="scroll-mt-32 relative w-full bg-white dark:bg-wine pt-10 pb-10 px-6 md:px-20">
 
       {/* SVG Shape Divider – Positioned at the top */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] -translate-y-full rotate-180">
