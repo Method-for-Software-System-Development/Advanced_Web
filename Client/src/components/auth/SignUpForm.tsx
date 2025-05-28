@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 interface SignUpFormProps {
   onSuccess: () => void;
@@ -41,17 +42,43 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
   const isEmail = (v: string) => /[^@]+@[^.]+\..+/.test(v);
   const isPhone = (v: string) => /^(\+?\d{7,15})$/.test(v);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firstName || !lastName) return setMsg("Name is required");
-    if (!isEmail(email)) return setMsg("Invalid email");
-    if (!isPhone(phone)) return setMsg("Invalid phone");
-    if (!city) return setMsg("City is required");
-    if (password.length < 6) return setMsg("Password ≥ 6 chars");
-    if (password !== repeatPwd) return setMsg("Passwords mismatch");
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  // Client-side validation (before server)
+  if (!firstName || !lastName) return setMsg("Name is required");
+  if (!isEmail(email)) return setMsg("Invalid email");
+  if (!isPhone(phone)) return setMsg("Invalid phone");
+  if (!city) return setMsg("City is required");
+  if (password.length < 6) return setMsg("Password ≥ 6 chars");
+  if (password !== repeatPwd) return setMsg("Passwords mismatch");
+
+  setMsg("Registering…");
+
+  try {
+    /**
+     * Send a POST request to our backend API endpoint to register a new user.
+     * The API is expected to respond with { message, user } on success,
+     * or { error } on failure.
+     */
+    const response = await axios.post("http://localhost:3000/api/users/register", {
+      firstName, lastName, email, phone, password, city, country, postalCode
+    });
+
+    // In Axios, response.data contains the returned JSON object
     setMsg("Account created! Redirecting…");
     setTimeout(onSuccess, 1500);
-  };
+
+  } catch (err: any) {
+    // Axios errors may be in err.response.data or just err.message
+    if (err.response && err.response.data && err.response.data.error) {
+      setMsg(err.response.data.error);
+    } else {
+      setMsg("Network error. Please try again.");
+    }
+  }
+};
+
 
   return (
     <div>
