@@ -10,6 +10,9 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 
 import usersRouter from './routes/users.route';
+import petRouter from './routes/pet.route';
+import treatmentRouter from './routes/treatment.route';
+import prescriptionRouter from './routes/prescription.route';
 
 const app: Application = express();
 const PORT = 3000;
@@ -33,6 +36,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 /** User routes API */
 app.use("/api/users", usersRouter);
+
+/** Pet routes API */
+app.use("/api/pets", petRouter);
+
+/** Prescriptions routes API */
+app.use("/api/prescriptions", prescriptionRouter);
 
 /** Simple health check route */
 app.get("/", (req: Request, res: Response) => {

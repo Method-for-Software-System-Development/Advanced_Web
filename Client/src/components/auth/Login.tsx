@@ -40,39 +40,40 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
 
   /* ─────────── handlers ─────────── */
   const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (captchaAnswer !== captcha) {
-    setLoginMessage("Incorrect captcha answer.");
-    generateCaptcha();
-    return;
-  }
-  setLoginMessage("Logging in…");
-
-  try {
-    /**
-     * Send a POST request to the login endpoint.
-     * The API should return { message, user } on success,
-     * or { error } on failure.
-     */
-    const response = await axios.post("http://localhost:3000/api/users/login", {
-      email,
-      password,
-    });
-
-    setLoginMessage("Login successful! Redirecting…");
-    setTimeout(() =>{
-      onClose();
-      navigate("/client"); // Redirect to client page
-    }, 1000);
-  } catch (err: any) {
-    // Axios errors may be in err.response.data or just err.message
-    if (err.response && err.response.data && err.response.data.error) {
-      setLoginMessage(err.response.data.error);
-    } else {
-      setLoginMessage("Network error. Please try again.");
+    if (captchaAnswer !== captcha) {
+      setLoginMessage("Incorrect captcha answer.");
+      generateCaptcha();
+      return;
     }
-  }
+    setLoginMessage("Logging in…");
+
+    try {
+      /**
+       * Send a POST request to the login endpoint.
+       * The API should return { message, user } on success,
+       * or { error } on failure.
+       */
+      const response = await axios.post("http://localhost:3000/api/users/login", {
+        email,
+        password,
+      });
+
+      setLoginMessage("Login successful! Redirecting…");
+      localStorage.setItem("client", JSON.stringify(response.data.user));
+      setTimeout(() =>{
+        onClose();
+        navigate("/client"); // Redirect to client page
+      }, 1000);
+    } catch (err: any) {
+      // Axios errors may be in err.response.data or just err.message
+      if (err.response && err.response.data && err.response.data.error) {
+        setLoginMessage(err.response.data.error);
+      } else {
+        setLoginMessage("Network error. Please try again.");
+      }
+    }
 };
 
   const handleSendCode = () => {

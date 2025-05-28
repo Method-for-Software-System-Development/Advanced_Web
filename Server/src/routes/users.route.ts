@@ -25,7 +25,8 @@ usersRouter.post("/register", async (req: Request, res: Response) => {
             password,
             city,
             country,
-            postalCode
+            postalCode,
+            pets: [] 
         });
         await user.save();
         res.status(201).send({ message: "User registered successfully", user });
@@ -56,6 +57,27 @@ usersRouter.post("/login", async (req: Request,res: Response) => {
         } else {
             res.status(500).send({ error: "An unknown error occurred" });
         }
+    }
+});
+
+/**
+ * PUT /api/users/:id
+ * Update user's email and phone
+ */
+usersRouter.put("/:id", async (req: Request, res: Response) => {
+    try {
+        const { email, phone } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { email, phone },
+            { new: true }
+        );
+        if (!updatedUser) {
+            return res.status(404).send({ error: "User not found" });
+        }
+        res.status(200).send({ message: "User updated successfully", user: updatedUser });
+    } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
     }
 });
 

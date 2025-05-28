@@ -14,6 +14,7 @@ export interface IUser extends Document {
     city: string;
     country: string;
     postalCode?: string; // optional
+    pets: mongoose.Types.ObjectId[];
 }
 
 const UserSchema: Schema = new Schema({
@@ -24,7 +25,8 @@ const UserSchema: Schema = new Schema({
     password:  { type: String, required: true },
     city:      { type: String, required: true },
     country:   { type: String, required: true },
-    postalCode:{ type: String } // optional
+    postalCode:{ type: String }, // optional
+    pets:      [{ type: mongoose.Schema.Types.ObjectId, ref: "Pet", default: [] }]
 }, { collection: "Users", versionKey: false });
 
 export default mongoose.model<IUser>("Users", UserSchema);

@@ -1,9 +1,24 @@
 export interface Pet {
-  id: string;
+  _id: string;
   name: string;
-  species: string;
-  breed?: string;
-  age?: number;
+  type: string;
+  breed: string;
+  birthYear: number;
+  weight: number;
+  prescriptions: string[]; 
+  treatments: string[];
+}
+
+export interface Prescription {
+  _id: string;
+  issueDate: string;
+  medicineType: string;
+  quantity: number;
+  expirationDate: string;
+  fulfilled: boolean;
+  referralType: string;
+  cost: number;
+  appointmentId: string; 
 }
 
 export interface Patient {

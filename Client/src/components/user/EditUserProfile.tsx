@@ -29,11 +29,13 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
   }, [initialEmail, initialPhone]);
 
   const isValidEmail = (email: string): boolean => {
-    return email.includes("@") && email.endsWith(".com");
+    // Must have text before @, then @, then text, then .com at the end
+    return /^\S+@\S+\.com$/.test(email);
   };
 
   const isValidPhone = (phone: string): boolean => {
-    return /^\d{10}$/.test(phone) && phone.startsWith("05");
+    // Must be 10 digits, only numbers, starts with 05
+    return /^05\d{8}$/.test(phone);
   };
 
   const handleSubmit = () => {
@@ -96,13 +98,13 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
         <div className="flex justify-end gap-3 pt-4">
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            className="w-44 px-4 py-2 bg-[#664147] text-white rounded-md hover:bg-[#4d3034] font-semibold"
           >
             Save
           </button>
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+            className="w-44 px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
           >
             Cancel
           </button>
