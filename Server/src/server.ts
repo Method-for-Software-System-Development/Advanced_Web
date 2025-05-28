@@ -16,9 +16,8 @@ const PORT = 3000;
 
 /**
  * Connect to MongoDB database.
- * Make sure to replace 'YourDBName' with your actual database name.
  */
-mongoose.connect('mongodb://127.0.0.1:27017/petclinic')
+mongoose.connect('mongodb+srv://matantal606:GqDLkYkM59dcDvig@petclinic.zj4wsof.mongodb.net/FurEverFriends?retryWrites=true&w=majority&appName=petclinic')
     .then(() => console.log('Connected to MongoDB!'))
     .catch(err => console.error('Failed to connect to MongoDB:', err));
 
