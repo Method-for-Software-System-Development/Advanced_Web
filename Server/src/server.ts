@@ -8,6 +8,9 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import dotenv from "dotenv";
+dotenv.config();
+
 
 import usersRouter from './routes/users.route';
 import petRouter from './routes/pet.route';
@@ -20,7 +23,7 @@ const PORT = 3000;
 /**
  * Connect to MongoDB database.
  */
-mongoose.connect('mongodb+srv://matantal606:GqDLkYkM59dcDvig@petclinic.zj4wsof.mongodb.net/FurEverFriends?retryWrites=true&w=majority&appName=petclinic')
+mongoose.connect(process.env.MONGO_URI!)
     .then(() => console.log('Connected to MongoDB!'))
     .catch(err => console.error('Failed to connect to MongoDB:', err));
 
