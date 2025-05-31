@@ -44,6 +44,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
   const [selectedPatientIdForPet, setSelectedPatientIdForPet] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null); // For editing
+  const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
 
   const handleSaveNewPatient = (patientData: Omit<Patient, 'id' | 'pets'>) => {
     const newPatient: Patient = {
@@ -84,20 +85,11 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     setSelectedPatientIdForPet(null);
     alert('New pet added successfully!');
   };
-  
-  // Ensure a patient is selected by default if the list is not empty when opening add pet form
-  const openAddPetForm = () => {
-    if (patients.length > 0 && !selectedPatientIdForPet) {
-      setSelectedPatientIdForPet(patients[0].id);
-    }
-    setShowAddPetForm(true);
-    setShowAddPatientForm(false);
-    setEditingPatient(null); // Close edit form if open
-  };
 
   const openAddPatientForm = () => {
     setShowAddPatientForm(true);
-    setShowAddPetForm(false);
+    setOpenAddPetForId(null); // Close any open Add New Pet form
+    setShowAddPetForm(false); // (if you still use this state elsewhere)
     setEditingPatient(null); // Close edit form if open
   }
 
@@ -150,17 +142,10 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       {/* Action Buttons */}
       <div className="mb-8 flex flex-col sm:flex-row justify-center gap-4">
         <button
-          onClick={openAddPatientForm} // Use new handler
+          onClick={openAddPatientForm}
           className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200"
         >
           Add New Patient
-        </button>
-        <button
-          onClick={openAddPetForm}
-          disabled={patients.length === 0}
-          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Add Pet to Existing Patient
         </button>
       </div>
 
@@ -181,7 +166,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
 
       {showAddPetForm && (
         <AddPetForm
-          patients={patients} // Pass all patients to AddPetForm for the dropdown
+          patients={patients}
           selectedPatientId={selectedPatientIdForPet}
           onAddPet={handleAddNewPet}
           onCancel={() => { setShowAddPetForm(false); setSelectedPatientIdForPet(null); }}
@@ -189,7 +174,35 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
         />
       )}
 
-      <PatientList patients={filteredPatients} onEditPatient={openEditPatientForm} />
+      <PatientList
+        patients={filteredPatients}
+        onEditPatient={openEditPatientForm}
+        onAddPet={(patientId, petName, petType, petBreed, petBirthYear, petWeight) => {
+          setPatients(currentPatients =>
+            currentPatients.map(p => {
+              if (p.id === patientId) {
+                const newPet: Pet = {
+                  _id: `pet${p.pets.length + Date.now()}`,
+                  name: petName,
+                  type: petType,
+                  breed: petBreed,
+                  birthYear: petBirthYear,
+                  weight: petWeight,
+                };
+                return { ...p, pets: [...p.pets, newPet] };
+              }
+              return p;
+            })
+          );
+          setOpenAddPetForId(null);
+          alert('New pet added successfully!');
+        }}
+        openAddPetForId={openAddPetForId}
+        setOpenAddPetForId={(id) => {
+          setOpenAddPetForId(id);
+          setShowAddPatientForm(false); // Always close add-client form when opening or closing add-pet
+        }}
+      />
 
     </div>
     </>
