@@ -5,7 +5,8 @@
 
 import { Router, Request, Response } from 'express';
 import User, { IUser } from '../models/userSchema';
-
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 const usersRouter = Router();
 
 /**
@@ -42,23 +43,45 @@ usersRouter.post("/register", async (req: Request, res: Response) => {
 /**
  * POST /api/users/login
  * Authenticates a user by email and password.
+ * If successful, returns a JWT token for client authentication.
  */
-usersRouter.post("/login", async (req: Request,res: Response) => {
+usersRouter.post("/login", async (req: Request, res: Response) => {
     try {
+        // 1. Extract email and password from request body
         const { email, password } = req.body;
-        const user = await User.findOne({ email, password });
+
+        // 2. Find the user by email
+        const user = await User.findOne({ email });
         if (!user) {
+            // User not found
             return res.status(401).send({ error: "Invalid email or password" });
         }
-        res.status(200).send({ message: "Login successful", user });
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(500).send({ error: error.message });
-        } else {
-            res.status(500).send({ error: "An unknown error occurred" });
+
+        // 3. Compare given password with hashed password in DB
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            // Password does not match
+            return res.status(401).send({ error: "Invalid email or password" });
         }
+
+        // 4. Create a JWT token with user info
+        const token = jwt.sign(
+            { userId: user._id, email: user.email },
+            process.env.JWT_SECRET!,
+            { expiresIn: "1h" }
+        );
+
+        // 5. Return user info and JWT token
+        res.status(200).send({
+            message: "Login successful",
+            user,
+            token
+        });
+    } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
     }
 });
+
 
 /**
  * PUT /api/users/:id

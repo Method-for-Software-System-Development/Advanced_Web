@@ -3,13 +3,18 @@ import logo from '../assets/logo.png';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import LogoutButton from "./auth/LogoutButton";
+
 
 interface NavbarProps {
   onLoginClick?: () => void;
 }
 
+
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  // Track whether the user is logged in by checking for a JWT token in localStorage
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
   return (
     <nav className="bg-gradient-to-r from-[#F7C9D3] to-[#EF92A6] shadow-md fixed top-0 w-full z-50">
@@ -30,14 +35,17 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
           <a href="/#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Our Team</a>
           <a href="/#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Contact Us</a>
           <Link to="/secretary" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Secretary</Link>
-          {onLoginClick && (
-            <button
-              onClick={onLoginClick}
-              className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transform transition duration-200 hover:scale-110 cursor-pointer"
-            >
-              Login
-            </button>
-          )}
+        {isLoggedIn ? (<LogoutButton onLogout={() => setIsLoggedIn(false)} />) : (
+              onLoginClick && (
+                <button
+                  onClick={onLoginClick}
+                  className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transform transition duration-200 hover:scale-110 cursor-pointer"
+                >
+                  Login
+                </button>
+              )
+            )}
+
 
           {/* Theme Toggle Button */}
           <ThemeToggle />
@@ -62,14 +70,18 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
             <a href="/#team" className="w-full text-center transition hover:text-[#58383E]" onClick={() => setMenuOpen(false)}>Our Team</a>
             <a href="/#contact" className="w-full text-center transition hover:text-[#58383E]" onClick={() => setMenuOpen(false)}>Contact Us</a>
             <Link to="/secretary" className="w-full text-center transition hover:text-[#58383E]" onClick={() => setMenuOpen(false)}>Secretary</Link>
-            {onLoginClick && (
+           {isLoggedIn ? (
+            <LogoutButton onLogout={() => setIsLoggedIn(false)} />) : (
+            onLoginClick && (
               <button
                 onClick={() => { setMenuOpen(false); onLoginClick(); }}
                 className="w-[90%] bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transition cursor-pointer"
               >
                 Login
               </button>
-            )}
+            )
+          )}
+
             <ThemeToggle variant="button" />
           </div>
         </div>

@@ -4,7 +4,7 @@
  */
 
 import mongoose, { Document, Schema } from "mongoose";
-
+import bcrypt from 'bcryptjs';
 export interface IUser extends Document {
     firstName: string;
     lastName: string;
@@ -28,5 +28,25 @@ const UserSchema: Schema = new Schema({
     postalCode:{ type: String }, // optional
     pets:      [{ type: mongoose.Schema.Types.ObjectId, ref: "Pet", default: [] }]
 }, { collection: "Users", versionKey: false });
+
+/**
+ * Pre-save hook for User schema.
+ * If the password field is modified, hash the password before saving to the database.
+ * This ensures that plaintext passwords are never stored in the database.
+ * Uses bcryptjs for hashing.
+ * 
+ * TypeScript note:
+ * We specify <IUser> to help TypeScript understand what `this` refers to inside the hook.
+ */
+UserSchema.pre<IUser>('save', async function (next) {
+  if (!this.isModified('password')) return next(); // Only hash if password was changed
+  try {
+    this.password = await bcrypt.hash(this.password, 10); // Hash with saltRounds=10
+    next(); // Proceed to save
+  } catch (err) {
+    next(err as any); // Pass error to mongoose
+  }
+});
+
 
 export default mongoose.model<IUser>("Users", UserSchema);
