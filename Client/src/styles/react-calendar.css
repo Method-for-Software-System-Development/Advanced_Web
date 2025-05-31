@@ -88,7 +88,7 @@
 }
 
 .react-calendar__month-view__days__day--weekend {
-  color: #d10000;
+  color: #4A3F35; /* Changed from #d10000 to match weekday color */
 }
 
 .react-calendar__month-view__days__day--neighboringMonth {
@@ -99,13 +99,19 @@
 /* Default Sunday text black (overrides weekend red if applicable) */
 /* Does not apply if Sunday is the active/selected day or today */
 .react-calendar__month-view__days .react-calendar__tile:nth-child(7n+1):not(.react-calendar__tile--active):not(.react-calendar__tile--now) {
-  color: black;
+  color: #000000; /* Changed to black */
 }
 
 /* Default Friday text red */
 /* Does not apply if Friday is the active/selected day or today */
 .react-calendar__month-view__days .react-calendar__tile:nth-child(7n+6):not(.react-calendar__tile--active):not(.react-calendar__tile--now) {
-  color: #d10000; /* Using the same red as default weekend color */
+  color: #4A3F35; /* Changed to standard weekday color */
+}
+
+/* Make Saturday same color as Friday */
+/* Does not apply if Saturday is the active/selected day or today */
+.react-calendar__month-view__days .react-calendar__tile:nth-child(7n):not(.react-calendar__tile--active):not(.react-calendar__tile--now) {
+  color: #d10000; /* Match Friday's color */
 }
 
 .react-calendar__year-view .react-calendar__tile,
@@ -166,4 +172,16 @@
 
 .react-calendar--selectRange .react-calendar__tile--hover {
   background-color: #e6e6e6;
+}
+
+/* Style for the appointment dot indicator */
+.appointment-dot {
+  height: 8px;
+  width: 8px;
+  background-color: #EF92A6; /* Theme color, adjust as needed */
+  border-radius: 50%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 4px; /* Adjust spacing from the number */
 }

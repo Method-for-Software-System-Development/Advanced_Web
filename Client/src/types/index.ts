@@ -58,3 +58,50 @@ export interface Staff {
   createdAt: string;
   updatedAt: string;
 }
+
+export enum AppointmentStatus {
+  SCHEDULED = "scheduled",
+  CONFIRMED = "confirmed", 
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+  NO_SHOW = "no_show"
+}
+
+export enum AppointmentType {
+  CONSULTATION = "consultation",
+  CHECKUP = "checkup",
+  VACCINATION = "vaccination",
+  SURGERY = "surgery",
+  EMERGENCY = "emergency",
+  FOLLOW_UP = "follow_up",
+  DENTAL = "dental",
+  GROOMING = "grooming"
+}
+
+export interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  pets: Pet[]; // Added pets property
+}
+
+export interface Appointment {
+  _id: string;
+  userId: User | string; // Can be populated or just ID
+  petId: Pet | string; // Can be populated or just ID  
+  staffId: Staff | string; // Can be populated or just ID
+  date: string; // ISO date string
+  time: string; // Format: "10:30 AM"
+  duration: number; // Duration in minutes
+  type: AppointmentType;
+  status: AppointmentStatus;
+  description: string;
+  notes?: string;
+  cost?: number;
+  reminderSent: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

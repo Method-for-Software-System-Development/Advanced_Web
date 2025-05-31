@@ -131,4 +131,42 @@ usersRouter.put("/:id", async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * GET /api/users
+ * Retrieves all users.
+ */
+usersRouter.get("/", async (req: Request, res: Response) => {
+    try {
+        const users = await User.find().populate('pets'); // Populate pets if needed
+        res.status(200).send(users);
+    } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+});
+
+/**
+ * GET /api/users/search
+ * Searches for users by name or email.
+ */
+usersRouter.get("/search", async (req: Request, res: Response) => {
+    try {
+        const query = req.query.q as string; // Changed from req.query.query
+        if (!query) {
+            return res.status(400).send({ error: "Search query is required" });
+        }
+
+        const users = await User.find({
+            $or: [
+                { firstName: { $regex: query, $options: "i" } },
+                { lastName: { $regex: query, $options: "i" } },
+                { email: { $regex: query, $options: "i" } },
+            ],
+        }).populate('pets'); // Populate pets if needed
+
+        res.status(200).send(users);
+    } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+});
+
 export default usersRouter;
