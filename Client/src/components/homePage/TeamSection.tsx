@@ -16,16 +16,18 @@ const TeamSection = () => {
         <svg
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"
-          className="relative block w-[calc(150%+1.3px)] h-[80px]"
+          className="relative block w-[calc(150%+1.3px)] h-[80px] text-white dark:text-wine"
         >
           <path
             d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
-            fill="#ffffff"
+            fill="currentColor" /* text color changes with mode */
+            className="fill-current"
           />
         </svg>
       </div>
-      <h2 className="text-4xl font-bold text-[#664147] mb-6 text-center font-[Nunito]">Our Team</h2>
-      <div className="flex overflow-x-auto gap-6">
+
+      <h2 className="text-4xl font-bold text-[#664147] dark:text-white mb-6 text-center font-[Nunito]">Our Team</h2>
+      <div className="flex overflow-x-auto gap-6 custom-scrollbar 2xl:justify-center">
         <TeamMemberCard
           image={member1}
           name="Dr. Michael Levin"
@@ -63,7 +65,6 @@ const TeamSection = () => {
           description="The friendly voice who greets every client. Noa coordinates appointments and keeps everything running efficiently."
         />
       </div>
-
 
     </section>
   );

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "./styles/index.css";
 import ChatButton from "./components/chatbot/ChatButton";
 import ChatWindow from "./components/chatbot/ChatWindow";
 import Login from "./components/auth/Login";

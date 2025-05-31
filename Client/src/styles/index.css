@@ -1,40 +1,46 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *)); /* Allows styling elements when the .dark class is present anywhere in the tree */
+
+@theme {
+  --font-heading: "Nunito", sans-serif;
+  --font-sans: "Poppins", sans-serif;
+
+  --color-cream:       #FDF6F0;
+  --color-creamDark:   #F5D2B3;
+  --color-pink:        #F7C9D3;
+  --color-pinkDark:    #EF92A6;
+  --color-sky:         #C7DFF5;
+  --color-skyDark:     #91C0EC;
+  --color-wine:        #664147;
+  --color-wineDark:    #58383E;
+  --color-greyText:    #3B3B3B;
+  --color-darkMode:    #121212;
+}
+
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: smooth; /* Enable smooth scrolling for anchor links */
 }
 
 body {
-  @apply font-sans;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;      /* Improves font rendering on WebKit browsers for crisper text */
+  -webkit-tap-highlight-color: transparent; /* Removes the tap highlight color on mobile for a cleaner look */
+  -moz-osx-font-smoothing: grayscale;       /* Improves font rendering on macOS Firefox for smoother text */
+  text-rendering: optimizeLegibility;       /* Enables advanced text rendering for better readability */
 }
-@keyframes fade-in { from {opacity:0;transform:scale(0.9)} to {opacity:1;} }
-.animate-fade-in { animation: fade-in 0.2s ease-out; }
+
+.custom-scrollbar {
+  scrollbar-color: #664147 white;
+}
+.dark .custom-scrollbar {
+  scrollbar-color: #FDF6F0 #664147;
+}
+
+/* Chatbot styles */
 @keyframes fade-in {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; }
 }
-
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
-}
-
-.bg-user {
-  background-color: #007bff;
-  color: #ffffff;
-}
-
-.bg-bot {
-  background-color: #e9ecef;
-  color: #495057;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-left {
-  text-align: left;
 }
