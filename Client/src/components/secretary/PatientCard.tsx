@@ -5,21 +5,21 @@ import AddPetForm from './AddPetForm';
 interface PatientCardProps {
   patient: Patient;
   onEditPatient: (patient: Patient) => void;
-  onAddPet: (patientId: string, petName: string, petSpecies: string) => void;
+  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number) => void;
   showAddPetForm: boolean;
   onToggleAddPetForm: () => void;
 }
 
 const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAddPet, showAddPetForm, onToggleAddPetForm }) => {
-  const handleAddPet = (patientId: string, petName: string, petSpecies: string) => {
-    onAddPet(patientId, petName, petSpecies);
+  const handleAddPet = (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number) => {
+    onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight);
     onToggleAddPetForm();
   };
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg border border-gray-200 mb-4">
       <div className="flex justify-between items-start mb-2">
-        <h3 className="text-xl font-semibold text-[#664147]">{patient.ownerName}</h3>
+        <h3 className="text-xl font-semibold text-[#664147]">{patient.firstName+' '+patient.lastName}</h3>
         <button 
           onClick={() => onEditPatient(patient)}
           className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
@@ -27,8 +27,11 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAdd
           Edit
         </button>
       </div>
-      <p className="text-sm text-gray-600 mb-1">Contact: {patient.contact}</p>
+      <p className="text-sm text-gray-600 mb-1">Email: {patient.email} </p>
       {patient.phone && <p className="text-sm text-gray-600 mb-3">Phone: {patient.phone}</p>}
+      {patient.city && <p className="text-sm text-gray-600 mb-1">City: {patient.city}</p>}
+      {patient.country && <p className="text-sm text-gray-600 mb-1">Country: {patient.country}</p>}
+      {patient.postalCode && <p className="text-sm text-gray-600 mb-1">Postal Code: {patient.postalCode}</p>}
       <h4 className="text-md font-semibold text-gray-700 mb-2">Pets:</h4>
       {patient.pets.length > 0 ? (
         <ul className="list-disc list-inside pl-4 space-y-1 text-sm text-gray-700">

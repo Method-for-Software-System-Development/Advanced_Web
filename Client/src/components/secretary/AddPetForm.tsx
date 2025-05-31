@@ -3,8 +3,13 @@ import React, { useState, useEffect } from 'react';
 // Assuming Patient interface is defined elsewhere or passed
 interface Patient {
   id: string;
-  ownerName: string;
-  // other fields if necessary for display in select
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  postalCode?: string; // Optional field for postal code
 }
 
 interface AddPetFormProps {
@@ -54,7 +59,7 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700">Client:</label>
             <div className="mt-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-100">
-              {patients.find(p => p.id === selectedPatientId)?.ownerName}
+              {patients.find(p => p.id === selectedPatientId)?.firstName} {patients.find(p => p.id === selectedPatientId)?.lastName}
             </div>
           </div>
         ) : (
@@ -68,7 +73,9 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
               disabled={patients.length === 0}
             >
               <option value="" disabled={selectedPatientId !== null}>-- Select a Patient --</option>
-              {patients.map(p => <option key={p.id} value={p.id}>{p.ownerName}</option>)}
+              {patients.map(p =>
+                <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
+              )}
             </select>
           </div>
         )}

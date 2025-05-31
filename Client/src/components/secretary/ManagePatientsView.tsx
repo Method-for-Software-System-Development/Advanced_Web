@@ -1,44 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo,useEffect } from 'react';
 import PatientList from './PatientList';
 import AddPatientForm from './AddPatientForm';
 import AddPetForm from './AddPetForm';
 import DashboardButton from './DashboardButton';
 import { Patient, Pet } from '../../types'; // Import Patient and Pet from types
+import { patientService } from '../../services/patientService';
 
 interface ManagePatientsViewProps { // Renamed from EditManagePatientsViewProps for clarity
   onBack: () => void;
 }
 
-// Mock data - replace with actual API call in a real application
-const mockPatients: Patient[] = [
-  {
-    id: 'p1',
-    ownerName: 'John Doe',
-    contact: 'john.doe@example.com',
-    phone: '123-456-7890', // Added phone
-    pets: [
-      { id: 'pet1', name: 'Buddy', species: 'Dog', breed: 'Golden Retriever', age: 5 },
-      { id: 'pet2', name: 'Whiskers', species: 'Cat', breed: 'Siamese', age: 3 },
-    ],
-  },
-  {
-    id: 'p2',
-    ownerName: 'Jane Smith',
-    contact: 'jane.smith@example.com',
-    phone: '098-765-4321', // Added phone
-    pets: [{ id: 'pet3', name: 'Charlie', species: 'Dog', breed: 'Labrador', age: 2 }],
-  },
-  {
-    id: 'p3',
-    ownerName: 'Alice Wonderland',
-    contact: 'alice.wonder@example.com',
-    phone: '111-222-3333', // Added phone
-    pets: [{ id: 'pet4', name: 'Dinah', species: 'Cat', breed: 'Cheshire', age: 1 }],
-  },
-];
-
 const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
-  const [patients, setPatients] = useState<Patient[]>(mockPatients);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
   const [showAddPetForm, setShowAddPetForm] = useState(false);
   const [selectedPatientIdForPet, setSelectedPatientIdForPet] = useState<string | null>(null);
@@ -46,13 +21,36 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null); // For editing
   const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
 
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  const loadPatients = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await patientService.getAllPatients();
+      setPatients(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch patients');
+      console.error('Error loading veterinarians:', err);
+      setPatients([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSaveNewPatient = (patientData: Omit<Patient, 'id' | 'pets'>) => {
     const newPatient: Patient = {
       id: `p${patients.length + 1}-${Date.now()}`, // Consider a more robust ID strategy for production
-      ownerName: patientData.ownerName,
-      contact: patientData.contact,
+      firstName: patientData.firstName,
+      lastName: patientData.lastName,
+      email: patientData.email,
       phone: patientData.phone,
-      pets: [],
+      city: patientData.city,
+      country: patientData.country,
+      pets: [], // Initialize with an empty array
+      postalCode: patientData.postalCode, // Optional field
     };
     setPatients(currentPatients => [...currentPatients, newPatient]);
     setShowAddPatientForm(false);
@@ -67,14 +65,19 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     alert('Patient details updated successfully!');
   };
 
-  const handleAddNewPet = (patientId: string, petName: string, petSpecies: string) => {
+  const handleAddNewPet = (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number) => {
     setPatients(currentPatients =>
       currentPatients.map(p => {
         if (p.id === patientId) {
           const newPet: Pet = {
-            id: `pet${p.pets.length + Date.now()}`, // More unique ID
+            _id: `pet${p.pets.length + Date.now()}`, // More unique ID
             name: petName,
-            species: petSpecies,
+            type: petType,
+            breed: petBreed,
+            birthYear: petBirthYear,
+            weight: petWeight,
+            prescriptions: [], // Initialize with empty arrays
+            treatments: []     // Initialize with empty arrays
           };
           return { ...p, pets: [...p.pets, newPet] };
         }
@@ -85,7 +88,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     setSelectedPatientIdForPet(null);
     alert('New pet added successfully!');
   };
-
+  
   const openAddPatientForm = () => {
     setShowAddPatientForm(true);
     setOpenAddPetForId(null); // Close any open Add New Pet form
@@ -105,11 +108,19 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       return patients;
     }
     return patients.filter(patient =>
-      patient.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.postalCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.pets.some(pet => pet.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [patients, searchTerm]);
+
+  if (loading) return <div>Loading patients...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <>
@@ -188,6 +199,8 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
                   breed: petBreed,
                   birthYear: petBirthYear,
                   weight: petWeight,
+                  prescriptions: [], // Initialize with empty arrays
+                  treatments: []     // Initialize with empty arrays
                 };
                 return { ...p, pets: [...p.pets, newPet] };
               }

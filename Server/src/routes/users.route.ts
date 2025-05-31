@@ -10,6 +10,33 @@ import bcrypt from "bcryptjs";
 const usersRouter = Router();
 
 /**
+ * GET /api/Users
+ * Get all users
+ * Query params: 
+ */
+usersRouter.get("/", async (req: Request, res: Response) => {
+    try {    
+        const users = await User.find().sort({ firstName: 1, lastName: 1 }).populate('pets');
+        // Map DB fields to frontend Patient interface
+        const mappedUsers = users.map((user: any) => ({
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+          city: user.city,
+          country: user.country,
+          postalCode: user.postalCode,
+          contact: user.email,
+          pets: user.pets || [],
+        }));
+        res.send(mappedUsers);
+      } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+      }
+    });
+
+/**
  * POST /api/users/login
  * Authenticates a user by email and password.
  * POST /api/users/register

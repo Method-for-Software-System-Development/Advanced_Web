@@ -23,9 +23,13 @@ export interface Prescription {
 
 export interface Patient {
   id: string;
-  ownerName: string;
-  contact: string; // Existing contact (e.g., email)
-  phone?: string; // New field for phone number
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  postalCode?: string; // Optional field for postal code
   pets: Pet[];
 }
 
