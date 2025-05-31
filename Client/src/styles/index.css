@@ -29,6 +29,13 @@ body {
   text-rendering: optimizeLegibility;       /* Enables advanced text rendering for better readability */
 }
 
+@media (min-width: 2172px) {
+  .justify-center-2172 {
+    justify-content: center !important;
+  }
+}
+
+/* Custom scrollbar styles */
 .custom-scrollbar {
   scrollbar-color: #664147 white;
 }
