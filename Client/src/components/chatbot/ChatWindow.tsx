@@ -42,9 +42,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
 
   return (
     <div
-      className="fixed bottom-24 right-6 w-96 h-[500px] bg-white dark:bg-gray-900
-                 rounded-xl shadow-xl flex flex-col z-50
-                 animate-fade-in"
+        className="
+          fixed
+          bottom-24 right-6 w-96 h-[500px]
+          bg-white dark:bg-darkMode
+          rounded-xl shadow-xl flex flex-col z-50
+          animate-fade-in dark:border-2 dark:border-white
+
+          max-sm:left-1/2 max-sm:-translate-x-1/2   /* Center horizontally on mobile */
+          max-sm:right-auto                         /* Remove right offset on mobile */
+          max-sm:w-[90vw]                           /* 90% width on mobile */
+          max-sm:h-[70vh]                           /* Responsive height on mobile */
+        "
     >
       {/* Header */}
       <div className="flex justify-between items-center bg-[#664147] font-[Nunito] text-white px-4 py-2 rounded-t-xl">
@@ -62,7 +71,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-3 border-t border-gray-200 dark:border-[#3B3B3B]">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -76,7 +85,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a message…"
             className="flex-1 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
-                       focus:outline-none"
+                       focus:outline-none dark:text-white"
           />
           <button
             type="submit"

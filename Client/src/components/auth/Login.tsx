@@ -110,7 +110,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="relative w-full max-w-lg p-8 bg-white rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
-        <button onClick={onClose} className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black">×</button>
+        <button onClick={onClose} className="absolute top-4 right-4 text-2xl text-[#3B3B3B] hover:text-black cursor-pointer">×</button>
 
         {/* -------- Sign-Up -------- */}
         {step === "signup" && (
@@ -123,15 +123,15 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         {/* -------- Login -------- */}
         {step === "login" && (
           <>
-            <h2 className="mb-6 text-4xl font-bold text-center text-[#4A3F35]">Welcome Back!</h2>
+            <h2 className="mb-6 text-2xl font-bold text-center text-[#3B3B3B]">Welcome Back!</h2>
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block mb-2 text-lg text-[#4A3F35]">Email</label>
+                <label className="block mb-2 text-sm text-[#3B3B3B]">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border rounded-lg"
+                  className="w-full px-4 py-2 text-[#3B3B3B] border border-[#3B3B3B] rounded-lg"
                   required
                 />
               </div>
