@@ -17,7 +17,7 @@ import usersRouter from './routes/users.route';
 import petRouter from './routes/pet.route';
 import treatmentRouter from './routes/treatment.route';
 import prescriptionRouter from './routes/prescription.route';
-import vetRouter from './routes/vet.route';
+import staffRouter from './routes/staff.route';
 
 const app: Application = express();
 const PORT = 3000;
@@ -51,8 +51,9 @@ app.use("/api/pets", petRouter);
 /** Prescriptions routes API */
 app.use("/api/prescriptions", prescriptionRouter);
 
-/** Veterinarian routes API */
-app.use("/api/vets", vetRouter);
+
+/** Staff routes API */
+app.use("/api/staff", staffRouter);
 
 /** Treatment routes API */
 app.use("/api/treatments", treatmentRouter);

@@ -3,13 +3,13 @@ import React from 'react';
 interface SecretaryWelcomeProps {
   onNavigateToAppointments: () => void;
   onNavigateToManagePatients: () => void;
-  onNavigateToEditVeterinarians: () => void; // Added new prop
+  onNavigateToEditStaff: () => void; // Updated prop name
 }
 
 const SecretaryWelcome: React.FC<SecretaryWelcomeProps> = ({ 
   onNavigateToAppointments, 
   onNavigateToManagePatients,
-  onNavigateToEditVeterinarians // Added new prop
+  onNavigateToEditStaff // Updated prop name
 }) => {
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-2xl">
@@ -36,14 +36,13 @@ const SecretaryWelcome: React.FC<SecretaryWelcomeProps> = ({
           <h2 className="text-2xl font-semibold mb-2">Manage Patients</h2>
           <p className="text-sm opacity-90">Access and update patient records, view history, and manage contact information.</p>
         </button>
-        
-        {/* Edit Veterinarian Details Card */}
+          {/* Manage Staff Card */}
         <button
-          onClick={onNavigateToEditVeterinarians} // Use the new prop here
+          onClick={onNavigateToEditStaff} // Updated function name
           className="block p-8 bg-gradient-to-br from-purple-400 to-purple-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-opacity-50"
         >
-          <h2 className="text-2xl font-semibold mb-2">Edit Veterinarian Details</h2>
-          <p className="text-sm opacity-90">Update veterinarian profiles, specializations, and availability.</p>
+          <h2 className="text-2xl font-semibold mb-2">Manage Staff</h2>
+          <p className="text-sm opacity-90">Update staff profiles, roles, specializations, and availability.</p>
         </button>
 
         <div className="block p-8 bg-gray-100 text-gray-700 rounded-lg shadow-lg cursor-not-allowed opacity-60">

@@ -29,14 +29,23 @@ export interface Patient {
   pets: Pet[];
 }
 
-export interface Veterinarian {
+
+export enum StaffRole {
+  VETERINARIAN = "veterinarian",
+  VETERINARY_ASSISTANT = "veterinary_assistant",
+  RECEPTIONIST = "receptionist",
+  CLINIC_DIRECTOR = "clinic_director"
+}
+
+export interface Staff {
   _id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  specialization: string;
-  licenseNumber: string;
+  role: StaffRole;
+  specialization?: string; // Optional, mainly for veterinarians
+  licenseNumber?: string; // Optional, mainly for veterinarians
   yearsOfExperience: number;
   description: string;
   availableSlots: string[];

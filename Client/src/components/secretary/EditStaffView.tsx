@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import DashboardButton from './DashboardButton';
-import { Veterinarian } from '../../types';
-import { veterinarianService } from '../../services/veterinarianService';
+import { Staff, StaffRole } from '../../types';
+import { staffService } from '../../services/staffService';
 
-interface EditVeterinariansViewProps {
+interface EditStaffViewProps {
   onBack: () => void;
 }
 
-const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack }) => {  // CSS to force 24-hour format in time inputs
+const EditStaffView: React.FC<EditStaffViewProps> = ({ onBack }) => {  // CSS to force 24-hour format in time inputs
   React.useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -79,12 +79,12 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
     'Friday',
     'Saturday'
   ];
-
-  const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingVet, setEditingVet] = useState<Veterinarian | null>(null);
-  const [showInactive, setShowInactive] = useState(false); // Hide inactive vets by default
+  const [error, setError] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
+  const [showInactive, setShowInactive] = useState(false); // Hide inactive staff by default
   
   // Image upload state
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -96,6 +96,7 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
     lastName: '',
     email: '',
     phone: '',
+    role: StaffRole.VETERINARIAN,
     specialization: '',
     licenseNumber: '',
     yearsOfExperience: 0,
@@ -118,20 +119,20 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
     Friday: { selected: false, startTime: '09:00', endTime: '17:00' },
     Saturday: { selected: false, startTime: '09:00', endTime: '13:00' }
   });
-
-  // Load veterinarians on component mount
+  // Load staff on component mount
   useEffect(() => {
-    loadVeterinarians();
+    loadStaff();
   }, []);
-  const loadVeterinarians = async () => {
+  
+  const loadStaff = async () => {
     try {
       setLoading(true);
       setError(null);
-      const vets = await veterinarianService.getAllVeterinariansIncludingInactive();
-      setVeterinarians(vets);
+      const staffMembers = await staffService.getAllStaffIncludingInactive();
+      setStaff(staffMembers);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load veterinarians');
-      console.error('Error loading veterinarians:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load staff');
+      console.error('Error loading staff:', err);
     } finally {
       setLoading(false);
     }
@@ -297,13 +298,13 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
       fileInput.value = '';
     }
   };
-
   const resetForm = () => {
     setFormData({
       firstName: '',
       lastName: '',
       email: '',
       phone: '',
+      role: StaffRole.VETERINARIAN,
       specialization: '',
       licenseNumber: '',
       yearsOfExperience: 0,
@@ -318,84 +319,85 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
       Thursday: { selected: false, startTime: '09:00', endTime: '17:00' },
       Friday: { selected: false, startTime: '09:00', endTime: '17:00' },
       Saturday: { selected: false, startTime: '09:00', endTime: '13:00' }
-    });
-    setEditingVet(null);
+    });setEditingStaff(null);
     setShowAddForm(false);
     // Clear image state
     setSelectedImage(null);
     setImagePreview(null);
-  };  const handleSubmit = async (e: React.FormEvent) => {
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      // Convert availability to slots before submitting
+    try {      // Convert availability to slots before submitting
       const availableSlots = convertAvailabilityToSlots();
       const submitData = {
         ...formData,
-        availableSlots
+        availableSlots,
+        isActive: true
       };
 
-      if (editingVet) {
-        // Update existing veterinarian
-        await veterinarianService.updateVeterinarian(editingVet._id, submitData, selectedImage || undefined);
+      if (editingStaff) {
+        // Update existing staff member
+        await staffService.updateStaff(editingStaff._id, submitData, selectedImage || undefined);
       } else {
-        // Create new veterinarian
-        await veterinarianService.createVeterinarian(submitData, selectedImage || undefined);
+        // Create new staff member
+        await staffService.createStaff(submitData, selectedImage || undefined);
       }
       
       resetForm();
-      await loadVeterinarians(); // Reload the list
+      await loadStaff(); // Reload the list
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save veterinarian');
-      console.error('Error saving veterinarian:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save staff member');
+      console.error('Error saving staff member:', err);
     }
-  };  const handleEdit = (vet: Veterinarian) => {
+  };  const handleEdit = (staffMember: Staff) => {
     setFormData({
-      firstName: vet.firstName,
-      lastName: vet.lastName,
-      email: vet.email,
-      phone: vet.phone,
-      specialization: vet.specialization,
-      licenseNumber: vet.licenseNumber,
-      yearsOfExperience: vet.yearsOfExperience,
-      description: vet.description || '',
-      availableSlots: vet.availableSlots
+      firstName: staffMember.firstName,
+      lastName: staffMember.lastName,
+      email: staffMember.email,
+      phone: staffMember.phone,
+      role: staffMember.role,
+      specialization: staffMember.specialization || '',
+      licenseNumber: staffMember.licenseNumber || '',
+      yearsOfExperience: staffMember.yearsOfExperience,
+      description: staffMember.description || '',
+      availableSlots: staffMember.availableSlots
     });
     
     // Convert availableSlots to availability format
-    const newAvailability = convertSlotsToAvailability(vet.availableSlots);
+    const newAvailability = convertSlotsToAvailability(staffMember.availableSlots);
     setAvailability(newAvailability);
     
     // Handle existing image
-    if (vet.imageUrl) {
-      setImagePreview(`http://localhost:3000${vet.imageUrl}`);
+    if (staffMember.imageUrl) {
+      setImagePreview(`http://localhost:3000${staffMember.imageUrl}`);
     } else {
       setImagePreview(null);
     }
     setSelectedImage(null); // Clear selected image when editing
     
-    setEditingVet(vet);
+    setEditingStaff(staffMember);
     setShowAddForm(true);
-  };
-  const handleDeactivate = async (vetId: string) => {
-    if (window.confirm('Are you sure you want to deactivate this veterinarian? They will no longer appear in active listings but can be reactivated later.')) {
+  };  const handleDeactivate = async (staffId: string) => {
+    if (window.confirm('Are you sure you want to deactivate this staff member? They will no longer appear in active listings but can be reactivated later.')) {
       try {
-        await veterinarianService.deactivateVeterinarian(vetId);
-        await loadVeterinarians(); // Reload the list
+        await staffService.deactivateStaff(staffId);
+        await loadStaff(); // Reload the list
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to deactivate veterinarian');
-        console.error('Error deactivating veterinarian:', err);
+        setError(err instanceof Error ? err.message : 'Failed to deactivate staff member');
+        console.error('Error deactivating staff member:', err);
       }
     }
   };
 
-  const handleActivate = async (vetId: string) => {
+  const handleActivate = async (staffId: string) => {
     try {
-      await veterinarianService.activateVeterinarian(vetId);
-      await loadVeterinarians(); // Reload the list
+      await staffService.activateStaff(staffId);
+      await loadStaff(); // Reload the list
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to activate veterinarian');
-      console.error('Error activating veterinarian:', err);
+      setError(err instanceof Error ? err.message : 'Failed to activate staff member');
+      console.error('Error activating staff member:', err);
     }
   };
 
@@ -406,8 +408,7 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
           <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
         </div>
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-32 w-32 border-b-2 border-[#664147]"></div>
-          <p className="mt-4 text-lg text-gray-600">Loading veterinarians...</p>
+          <div className="inline-block animate-spin rounded-full h-32 w-32 border-b-2 border-[#664147]"></div>          <p className="mt-4 text-lg text-gray-600">Loading staff...</p>
         </div>
       </div>
     );
@@ -419,7 +420,7 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
       </div>
       
-      <h1 className="text-3xl font-bold text-[#664147] mb-6 text-center">Edit Veterinarian Details</h1>
+      <h1 className="text-3xl font-bold text-[#664147] mb-6 text-center">Manage Staff</h1>
       
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -431,7 +432,9 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
             ×
           </button>
         </div>
-      )}      {/* Add Veterinarian Button and Filter */}
+      )}
+
+      {/* Add Staff Button and Filter */}
       <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <button
           onClick={() => {
@@ -440,7 +443,7 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
           }}
           className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
         >
-          Add New Veterinarian
+          Add New Staff Member
         </button>
         
         <div className="flex items-center gap-4">
@@ -451,16 +454,14 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
               onChange={(e) => setShowInactive(e.target.checked)}
               className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
-            Show inactive veterinarians
+            Show inactive staff members
           </label>
         </div>
-      </div>
-
-      {/* Add/Edit Form */}
+      </div>      {/* Add/Edit Form */}
       {showAddForm && (
         <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-lg">
           <h2 className="text-2xl font-semibold text-[#664147] mb-4">
-            {editingVet ? 'Edit Veterinarian' : 'Add New Veterinarian'}
+            {editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}
           </h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -525,6 +526,25 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
             </div>
 
             <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Role:
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value={StaffRole.VETERINARIAN}>Veterinarian</option>
+                <option value={StaffRole.VETERINARY_ASSISTANT}>Veterinary Assistant</option>
+                <option value={StaffRole.RECEPTIONIST}>Receptionist</option>
+                <option value={StaffRole.CLINIC_DIRECTOR}>Clinic Director</option>
+              </select>
+            </div>
+
+            <div>
               <label htmlFor="specialization" className="block text-sm font-medium text-gray-700">
                 Specialization:
               </label>
@@ -534,7 +554,6 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
                 name="specialization"
                 value={formData.specialization}
                 onChange={handleInputChange}
-                required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
@@ -549,7 +568,6 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
                 name="licenseNumber"
                 value={formData.licenseNumber}
                 onChange={handleInputChange}
-                required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
@@ -581,9 +599,10 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
                 onChange={handleInputChange}
                 rows={3}
                 maxLength={500}
-                placeholder="Brief description of the veterinarian's expertise and background..."
+                placeholder="Brief description of the staff member's expertise and background..."
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />              <p className="mt-1 text-sm text-gray-500">
+              />
+              <p className="mt-1 text-sm text-gray-500">
                 {formData.description.length}/500 characters
               </p>
             </div>
@@ -685,7 +704,7 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
                 ))}
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                Select the days and set the working hours for this veterinarian. Times are in 24-hour format (HH:MM).
+                Select the days and set the working hours for this staff member. Times are in 24-hour format (HH:MM).
               </p>
             </div>
 
@@ -701,52 +720,51 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
                 type="submit"
                 className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
               >
-                {editingVet ? 'Update' : 'Add'} Veterinarian
+                {editingStaff ? 'Update' : 'Add'} Staff Member
               </button>
             </div>
           </form>
         </div>
-      )}
-
-      {/* Veterinarians Grid */}
+      )}{/* Staff Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {(() => {
-          const filteredVets = veterinarians.filter(vet => showInactive || vet.isActive);
+          const filteredStaff = staff.filter(staffMember => showInactive || staffMember.isActive);
           
-          if (veterinarians.length === 0) {
+          if (staff.length === 0) {
             return (
               <div className="col-span-full text-center py-8">
-                <p className="text-gray-500 text-lg">No veterinarians found. Add one to get started!</p>
+                <p className="text-gray-500 text-lg">No staff members found. Add one to get started!</p>
               </div>
             );
           }
           
-          if (filteredVets.length === 0) {
+          if (filteredStaff.length === 0) {
             return (
               <div className="col-span-full text-center py-8">
-                <p className="text-gray-500 text-lg">No active veterinarians found.</p>
-                <p className="text-gray-400 text-sm mt-2">Check "Show inactive veterinarians" to see all veterinarians.</p>
+                <p className="text-gray-500 text-lg">No active staff members found.</p>
+                <p className="text-gray-400 text-sm mt-2">Check "Show inactive staff members" to see all staff members.</p>
               </div>
             );
           }
           
-          return filteredVets.map((vet) => (
+          return filteredStaff.map((staffMember) => (
             <div 
-              key={vet._id} 
-              className={`bg-white p-6 rounded-lg shadow-md ${!vet.isActive ? 'opacity-60 border-2 border-red-200' : ''}`}
+              key={staffMember._id} 
+              className={`bg-white p-6 rounded-lg shadow-md ${!staffMember.isActive ? 'opacity-60 border-2 border-red-200' : ''}`}
             >
-              {!vet.isActive && (
+              {!staffMember.isActive && (
                 <div className="mb-2 text-sm text-red-600 font-semibold">INACTIVE</div>
-              )}              <h2 className="text-xl font-semibold text-[#664147] mb-2">
-                Dr. {vet.firstName} {vet.lastName}
+              )}
+              <h2 className="text-xl font-semibold text-[#664147] mb-2">
+                {staffMember.role === StaffRole.VETERINARIAN ? 'Dr. ' : ''}{staffMember.firstName} {staffMember.lastName}
               </h2>
               
-              {/* Veterinarian Profile Image */}
-              {vet.imageUrl && (
+              {/* Staff Member Profile Image */}
+              {staffMember.imageUrl && (
                 <div className="mb-4 flex justify-center">
                   <img
-                    src={`http://localhost:3000${vet.imageUrl}`}
-                    alt={`Dr. ${vet.firstName} ${vet.lastName}`}
+                    src={`http://localhost:3000${staffMember.imageUrl}`}
+                    alt={`${staffMember.firstName} ${staffMember.lastName}`}
                     className="w-24 h-24 object-cover rounded-full border-2 border-gray-300 shadow-sm"
                     onError={(e) => {
                       // Hide image if it fails to load
@@ -756,24 +774,29 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
                 </div>
               )}
               
-              <p className="text-gray-700 mb-1"><strong>Email:</strong> {vet.email}</p>
-              <p className="text-gray-700 mb-1"><strong>Phone:</strong> {vet.phone}</p>
-              <p className="text-gray-700 mb-1"><strong>Specialization:</strong> {vet.specialization}</p>
-              <p className="text-gray-700 mb-1"><strong>License:</strong> {vet.licenseNumber}</p>
-              <p className="text-gray-700 mb-1"><strong>Experience:</strong> {vet.yearsOfExperience} years</p>
+              <p className="text-gray-700 mb-1"><strong>Role:</strong> {staffMember.role.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}</p>
+              <p className="text-gray-700 mb-1"><strong>Email:</strong> {staffMember.email}</p>
+              <p className="text-gray-700 mb-1"><strong>Phone:</strong> {staffMember.phone}</p>
+              {staffMember.specialization && (
+                <p className="text-gray-700 mb-1"><strong>Specialization:</strong> {staffMember.specialization}</p>
+              )}
+              {staffMember.licenseNumber && (
+                <p className="text-gray-700 mb-1"><strong>License:</strong> {staffMember.licenseNumber}</p>
+              )}
+              <p className="text-gray-700 mb-1"><strong>Experience:</strong> {staffMember.yearsOfExperience} years</p>
               
-              {vet.description && (
+              {staffMember.description && (
                 <div className="mt-2">
                   <p className="text-gray-700 mb-1"><strong>Description:</strong></p>
-                  <p className="text-gray-600 text-sm italic bg-gray-50 p-2 rounded">{vet.description}</p>
+                  <p className="text-gray-600 text-sm italic bg-gray-50 p-2 rounded">{staffMember.description}</p>
                 </div>
               )}
               
-              {vet.availableSlots.length > 0 && (
+              {staffMember.availableSlots.length > 0 && (
                 <div className="mt-2">
                   <h3 className="text-md font-semibold text-gray-600">Available Slots:</h3>
                   <ul className="list-disc list-inside ml-4 text-sm text-gray-600">
-                    {vet.availableSlots.map((slot, index) => (
+                    {staffMember.availableSlots.map((slot, index) => (
                       <li key={index}>{slot}</li>
                     ))}
                   </ul>
@@ -782,20 +805,21 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
               
               <div className="mt-4 flex justify-end space-x-2">
                 <button 
-                  onClick={() => handleEdit(vet)}
+                  onClick={() => handleEdit(staffMember)}
                   className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm transition-colors"
                 >
                   Edit
                 </button>
-                  {vet.isActive ? (
+                {staffMember.isActive ? (
                   <button 
-                    onClick={() => handleDeactivate(vet._id)}
+                    onClick={() => handleDeactivate(staffMember._id)}
                     className="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm transition-colors"
                   >
                     Deactivate
-                  </button>                ) : (
+                  </button>
+                ) : (
                   <button 
-                    onClick={() => handleActivate(vet._id)}
+                    onClick={() => handleActivate(staffMember._id)}
                     className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm transition-colors"
                   >
                     Activate
@@ -805,212 +829,8 @@ const EditVeterinariansView: React.FC<EditVeterinariansViewProps> = ({ onBack })
             </div>
           ));
         })()}
-      </div>      {/* Add/Edit Form */}
-      {showAddForm && (
-        <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold text-[#664147] mb-4">
-            {editingVet ? 'Edit Veterinarian' : 'Add New Veterinarian'}
-          </h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  First Name:
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Last Name:
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email:
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                  Phone:
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="specialization" className="block text-sm font-medium text-gray-700">
-                  Specialization:
-                </label>
-                <input
-                  type="text"
-                  id="specialization"
-                  name="specialization"
-                  value={formData.specialization}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700">
-                  License Number:
-                </label>
-                <input
-                  type="text"
-                  id="licenseNumber"
-                  name="licenseNumber"
-                  value={formData.licenseNumber}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>              <div>
-                <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">
-                  Years of Experience:
-                </label>
-                <input
-                  type="number"
-                  id="yearsOfExperience"
-                  name="yearsOfExperience"
-                  value={formData.yearsOfExperience}
-                  onChange={handleInputChange}
-                  min="0"
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                  Description:
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={3}
-                  maxLength={500}
-                  placeholder="Brief description of the veterinarian's expertise and background..."
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  {formData.description.length}/500 characters
-                </p>
-              </div><div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Available Days & Times:
-                </label>
-                <div className="space-y-3 max-h-64 overflow-y-auto p-3 border border-gray-300 rounded-md">
-                  {DAYS_OF_WEEK.map((day) => (
-                    <div key={day} className="flex items-center space-x-4 p-2 bg-gray-50 rounded">
-                      <label className="flex items-center space-x-2 min-w-[100px]">
-                        <input
-                          type="checkbox"
-                          checked={availability[day].selected}
-                          onChange={(e) => handleDaySelectionChange(day, e.target.checked)}
-                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="text-sm font-medium text-gray-700">{day}</span>
-                      </label>                      {availability[day].selected && (
-                        <div className="flex items-center space-x-2">
-                          <label className="text-xs text-gray-600">From:</label>                          <input
-                            type="time"
-                            value={availability[day].startTime}
-                            onChange={(e) => handleTimeChange(day, 'startTime', e.target.value)}
-                            onFocus={handleTimeInputFocus}
-                            onBlur={(e) => handleTimeInputBlur(e, day, 'startTime')}
-                            min="06:00"
-                            max="23:59"
-                            step="900"
-                            pattern="[0-2][0-9]:[0-5][0-9]"
-                            title="Please enter time in 24-hour format (HH:MM)"
-                            placeholder="09:00"
-                            data-format="24"
-                            lang="en-GB"
-                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
-                          />
-                          <label className="text-xs text-gray-600">To:</label>                          <input
-                            type="time"
-                            value={availability[day].endTime}
-                            onChange={(e) => handleTimeChange(day, 'endTime', e.target.value)}
-                            onFocus={handleTimeInputFocus}
-                            onBlur={(e) => handleTimeInputBlur(e, day, 'endTime')}
-                            min="06:00"
-                            max="23:59"
-                            step="900"
-                            pattern="[0-2][0-9]:[0-5][0-9]"
-                            title="Please enter time in 24-hour format (HH:MM)"
-                            placeholder="17:00"
-                            data-format="24"
-                            lang="en-GB"
-                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}                </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  Select the days and set the working hours for this veterinarian. Times are in 24-hour format (HH:MM).
-                </p>
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-4">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                >
-                  {editingVet ? 'Update' : 'Add'} Veterinarian
-                </button>
-              </div>            </form>
-        </div>
-      )}
-    </div>
+      </div>    </div>
   );
 };
 
-export default EditVeterinariansView;
+export default EditStaffView;

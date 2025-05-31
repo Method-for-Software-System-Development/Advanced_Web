@@ -3,10 +3,10 @@ import Navbar from '../components/Navbar';
 import SecretaryWelcome from '../components/secretary/SecretaryWelcome';
 import AppointmentView from '../components/secretary/AppointmentView';
 import ManagePatientsView from '../components/secretary/ManagePatientsView';
-import EditVeterinariansView from '../components/secretary/EditVeterinariansView'; // Import EditVeterinariansView
+import EditStaffView from '../components/secretary/EditStaffView'; // Updated import
 import FooterSection from '../components/FooterSection';
 
-export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editVeterinarians'; // Add 'editVeterinarians'
+export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editStaff'; // Updated view name
 
 const SecretaryPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<SecretaryView>('welcome');
@@ -18,12 +18,11 @@ const SecretaryPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F9F3F0] to-[#EAE0D9] text-[#4A3F35]">
       <Navbar />
-      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">
-        {currentView === 'welcome' && (
+      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">        {currentView === 'welcome' && (
           <SecretaryWelcome 
             onNavigateToAppointments={() => navigateTo('appointments')} 
             onNavigateToManagePatients={() => navigateTo('managePatients')}
-            onNavigateToEditVeterinarians={() => navigateTo('editVeterinarians')} // Pass navigation function for edit veterinarians
+            onNavigateToEditStaff={() => navigateTo('editStaff')} // Updated function name
           />
         )}
         {currentView === 'appointments' && (
@@ -32,8 +31,8 @@ const SecretaryPage: React.FC = () => {
         {currentView === 'managePatients' && (
           <ManagePatientsView onBack={() => navigateTo('welcome')}/>
         )}
-        {currentView === 'editVeterinarians' && ( // Add block for EditVeterinariansView
-          <EditVeterinariansView onBack={() => navigateTo('welcome')} />
+        {currentView === 'editStaff' && ( // Updated view name
+          <EditStaffView onBack={() => navigateTo('welcome')} />
         )}
       </main>
       <FooterSection />
