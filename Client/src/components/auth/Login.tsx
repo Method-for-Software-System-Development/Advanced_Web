@@ -64,9 +64,12 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
       localStorage.setItem("client", JSON.stringify(response.data.user));
       //  to save the JWT token you got from the server
       localStorage.setItem("token", response.data.token);
+      // Save the user's role for navbar/dashboard logic
+      localStorage.setItem("role", response.data.user.role || "user");
+
       setTimeout(() =>{
         onClose();
-        navigate("/client"); // Redirect to client page
+        navigate("/");
       }, 1000);
     } catch (err: any) {
       // Axios errors may be in err.response.data or just err.message

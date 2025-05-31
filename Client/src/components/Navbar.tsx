@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from '../assets/logo.png';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import LogoutButton from "./auth/LogoutButton";
@@ -13,9 +13,39 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  // Track whether the user is logged in by checking for a JWT token in localStorage
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+   // Dummy state to force a re-render when localStorage changes
+  const [refresh, setRefresh] = useState(0);
 
+  /**
+   * Listen for 'storage' events (localStorage changes in any tab)
+   * This ensures that the Navbar always reflects the latest login/logout status,
+   * even if authentication status changes in another tab or after login/logout in this tab.
+   */
+  useEffect(() => {
+    const onStorage = () => setRefresh(r => r + 1);
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+  // Track whether the user is logged in by checking for a JWT token in localStorage
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  // Get the user's role from localStorage
+  const role = localStorage.getItem("role");
+  // useNavigate hook for programmatic navigation
+  const navigate = useNavigate();
+
+  /**
+   * Handle navigation to the user's dashboard based on role.
+   * If the user is a secretary, navigate to /secretary.
+   * Otherwise, navigate to /client.
+   */
+  const handleDashboardClick = () => {
+    if (role === "secretary") {
+      navigate("/secretary");
+    } else {
+      navigate("/client");
+    }
+  };
   return (
     <nav className="bg-gradient-to-r from-[#F7C9D3] to-[#EF92A6] shadow-md fixed top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -34,8 +64,16 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
           <a href="/#about" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">About Us</a>
           <a href="/#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Our Team</a>
           <a href="/#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Contact Us</a>
-          <Link to="/secretary" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E]">Secretary</Link>
-        {isLoggedIn ? (<LogoutButton onLogout={() => setIsLoggedIn(false)} />) : (
+          {/* Dashboard button: appears only if user is logged in */}
+        {isLoggedIn && (
+          <button
+            onClick={handleDashboardClick}
+            className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transition duration-200 hover:scale-110 cursor-pointer"
+          >
+            Dashboard
+          </button>
+        )}
+        {isLoggedIn ? (<LogoutButton onLogout={() => setRefresh(r => r + 1)} />) : (
               onLoginClick && (
                 <button
                   onClick={onLoginClick}
@@ -69,9 +107,17 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
             <a href="/#about" className="w-full text-center transition hover:text-[#58383E]" onClick={() => setMenuOpen(false)}>About Us</a>
             <a href="/#team" className="w-full text-center transition hover:text-[#58383E]" onClick={() => setMenuOpen(false)}>Our Team</a>
             <a href="/#contact" className="w-full text-center transition hover:text-[#58383E]" onClick={() => setMenuOpen(false)}>Contact Us</a>
-            <Link to="/secretary" className="w-full text-center transition hover:text-[#58383E]" onClick={() => setMenuOpen(false)}>Secretary</Link>
+            {/* Dashboard button: appears only if user is logged in */}
+        {isLoggedIn && (
+          <button
+            onClick={handleDashboardClick}
+            className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transition duration-200 hover:scale-110 cursor-pointer"
+          >
+            Dashboard
+          </button>
+        )}
            {isLoggedIn ? (
-            <LogoutButton onLogout={() => setIsLoggedIn(false)} />) : (
+            <LogoutButton onLogout={() => setRefresh(r => r + 1)} />) : (
             onLoginClick && (
               <button
                 onClick={() => { setMenuOpen(false); onLoginClick(); }}
