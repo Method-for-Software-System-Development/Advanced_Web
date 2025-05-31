@@ -60,8 +60,10 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         password,
       });
 
-      setLoginMessage("Login successful! Redirecting…");
+      setLoginMessage("Login successful!");
       localStorage.setItem("client", JSON.stringify(response.data.user));
+      //  to save the JWT token you got from the server
+      localStorage.setItem("token", response.data.token);
       setTimeout(() =>{
         onClose();
         navigate("/client"); // Redirect to client page
