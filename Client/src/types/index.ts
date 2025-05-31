@@ -28,3 +28,20 @@ export interface Patient {
   phone?: string; // New field for phone number
   pets: Pet[];
 }
+
+export interface Veterinarian {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  specialization: string;
+  licenseNumber: string;
+  yearsOfExperience: number;
+  description: string;
+  availableSlots: string[];
+  imageUrl?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

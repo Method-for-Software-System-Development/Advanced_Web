@@ -8,6 +8,7 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import path from 'path';
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,6 +17,7 @@ import usersRouter from './routes/users.route';
 import petRouter from './routes/pet.route';
 import treatmentRouter from './routes/treatment.route';
 import prescriptionRouter from './routes/prescription.route';
+import vetRouter from './routes/vet.route';
 
 const app: Application = express();
 const PORT = 3000;
@@ -37,6 +39,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
+/** Serve static files from uploads directory */
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 /** User routes API */
 app.use("/api/users", usersRouter);
 
@@ -45,6 +50,12 @@ app.use("/api/pets", petRouter);
 
 /** Prescriptions routes API */
 app.use("/api/prescriptions", prescriptionRouter);
+
+/** Veterinarian routes API */
+app.use("/api/vets", vetRouter);
+
+/** Treatment routes API */
+app.use("/api/treatments", treatmentRouter);
 
 /** Simple health check route */
 app.get("/", (req: Request, res: Response) => {
