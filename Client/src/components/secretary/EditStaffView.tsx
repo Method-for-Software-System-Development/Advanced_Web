@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import DashboardButton from './DashboardButton';
 import { Staff, StaffRole } from '../../types';
 import { staffService } from '../../services/staffService';
+import StaffForm from './staff/StaffForm';
+import AvailabilityScheduler from './staff/AvailabilityScheduler';
+import ImageUpload from './staff/ImageUpload';
+import StaffGrid from './staff/StaffGrid';
 
 interface EditStaffViewProps {
   onBack: () => void;

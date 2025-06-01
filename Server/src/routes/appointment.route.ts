@@ -368,6 +368,10 @@ appointmentRouter.get("/:id", async (req: Request, res: Response) => {
  */
 appointmentRouter.post("/", async (req: Request, res: Response) => {
   try {
+    console.log("=== CREATE APPOINTMENT REQUEST ===");
+    console.log("Request body:", req.body);
+    console.log("Request headers:", req.headers);
+    
     const {
       userId,
       petId,
@@ -381,22 +385,42 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
       cost
     } = req.body;
 
+    console.log("Extracted fields:");
+    console.log("- userId:", userId);
+    console.log("- petId:", petId);
+    console.log("- staffId:", staffId);
+    console.log("- date:", date);
+    console.log("- time:", time);
+    console.log("- type:", type);
+    console.log("- description:", description);
+
     // Validate required fields
     if (!userId || !petId || !staffId || !date || !time || !type || !description) {
+      console.log("Validation failed - missing required fields");
       return res.status(400).json({ 
         error: "Missing required fields: userId, petId, staffId, date, time, type, description" 
       });
-    }
-
-    // Validate ObjectIds
+    }    // Validate ObjectIds
+    console.log("Validating ObjectIds...");
     if (!mongoose.Types.ObjectId.isValid(userId) || 
         !mongoose.Types.ObjectId.isValid(petId) || 
         !mongoose.Types.ObjectId.isValid(staffId)) {
+      console.log("ObjectId validation failed");
+      console.log("- userId valid:", mongoose.Types.ObjectId.isValid(userId));
+      console.log("- petId valid:", mongoose.Types.ObjectId.isValid(petId));
+      console.log("- staffId valid:", mongoose.Types.ObjectId.isValid(staffId));
       return res.status(400).json({ error: "Invalid ID format" });
-    }    // Validate appointment type
+    }
+    console.log("ObjectIds validated successfully");
+
+    // Validate appointment type
+    console.log("Validating appointment type:", type);
+    console.log("Available types:", Object.values(AppointmentType));
     if (!Object.values(AppointmentType).includes(type)) {
+      console.log("Appointment type validation failed");
       return res.status(400).json({ error: "Invalid appointment type" });
     }
+    console.log("Appointment type validated successfully");
 
     // Validate date is not in the past
     const appointmentDate = new Date(date);
@@ -442,9 +466,8 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
           error: `Time slot conflicts with existing appointment from ${existing.time} (${existing.duration} minutes)` 
         });
       }
-    }
-
-    const newAppointment = new Appointment({
+    }    console.log("Creating appointment with data:");
+    const appointmentData = {
       userId,
       petId,
       staffId,
@@ -456,29 +479,50 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
       notes,
       cost,
       status: AppointmentStatus.SCHEDULED
-    });
+    };
+    console.log(appointmentData);
 
+    const newAppointment = new Appointment(appointmentData);
+    console.log("Saving appointment to database...");
     const savedAppointment = await newAppointment.save();
+    console.log("Appointment saved successfully:", savedAppointment._id);
     
     // Populate the response
+    console.log("Populating appointment data...");
     const populatedAppointment = await Appointment.findById(savedAppointment._id)
       .populate('userId', 'firstName lastName email phone')
       .populate('petId', 'name type breed')
       .populate('staffId', 'firstName lastName role specialization');
 
+    console.log("Appointment created successfully, sending response");
     res.status(201).json({
       message: "Appointment created successfully",
       appointment: populatedAppointment
-    });
-  } catch (error: any) {
-    console.error("Error creating appointment:", error);
+    });  } catch (error: any) {
+    console.error("=== APPOINTMENT CREATION ERROR ===");
+    console.error("Error type:", typeof error);
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Error stack:", error.stack);
+    console.error("Full error object:", error);
     
     if (error.code === 11000) {
+      console.log("Duplicate key error detected");
       return res.status(409).json({ 
         error: "This time slot is already booked for the selected staff member" 
       });
     }
     
+    // Check for validation errors
+    if (error.name === 'ValidationError') {
+      console.log("Mongoose validation error detected");
+      console.log("Validation errors:", error.errors);
+      return res.status(400).json({ 
+        error: "Validation failed: " + Object.values(error.errors).map((e: any) => e.message).join(', ')
+      });
+    }
+    
+    console.log("Sending generic error response");
     res.status(500).json({ error: "Failed to create appointment" });
   }
 });

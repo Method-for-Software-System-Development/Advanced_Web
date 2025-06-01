@@ -96,6 +96,8 @@ export const appointmentService = {
     cost?: number;
   }): Promise<{ message: string; appointment: Appointment }> {
     try {
+      console.log('appointmentService.createAppointment called with:', appointmentData);
+      
       const response = await fetch(`${API_BASE_URL}/appointments`, {
         method: 'POST',
         headers: {
@@ -104,14 +106,20 @@ export const appointmentService = {
         body: JSON.stringify(appointmentData),
       });
 
+      console.log('HTTP Response status:', response.status);
+      console.log('HTTP Response ok:', response.ok);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('HTTP Error Response:', errorData);
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('HTTP Success Response:', result);
+      return result;
     } catch (error) {
-      console.error('Error creating appointment:', error);
+      console.error('Error in appointmentService.createAppointment:', error);
       throw error;
     }
   },

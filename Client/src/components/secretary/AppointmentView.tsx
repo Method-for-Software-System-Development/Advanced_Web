@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Calendar from 'react-calendar';
 import '../../styles/react-calendar.css';
 import DashboardButton from './DashboardButton'; 
-import AddAppointmentForm from './AddAppointmentForm';
+import RefactoredAddAppointmentForm from './RefactoredAddAppointmentForm';
 import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
 
@@ -324,8 +324,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             >
               Cancel
             </button>
-          </div>
-          <AddAppointmentForm
+          </div>          <RefactoredAddAppointmentForm
             onClose={() => setShowAddForm(false)}
             onAppointmentAdded={handleAppointmentAdded}
             selectedDate={selectedDate}

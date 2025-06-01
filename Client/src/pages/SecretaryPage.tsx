@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import EnhancedSecretaryWelcome from '../components/secretary/EnhancedSecretaryWelcome';
 import AppointmentView from '../components/secretary/AppointmentView';
 import ManagePatientsView from '../components/secretary/ManagePatientsView';
-import EditStaffView from '../components/secretary/EditStaffView'; // Updated import
+import RefactoredEditStaffView from '../components/secretary/RefactoredEditStaffView'; // Updated import
 import FooterSection from '../components/FooterSection';
 
 export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editStaff'; // Updated view name
@@ -14,11 +14,10 @@ const SecretaryPage: React.FC = () => {
   const navigateTo = (view: SecretaryView) => {
     setCurrentView(view);
   };
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F9F3F0] to-[#EAE0D9] text-[#4A3F35]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F9F3F0] to-[#EAE0D9] dark:from-[#121212] dark:to-[#1a1a1a] text-[#4A3F35] dark:text-[#FDF6F0]">
       <Navbar />
-      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">        {currentView === 'welcome' && (
+      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">{currentView === 'welcome' && (
           <EnhancedSecretaryWelcome 
             onNavigateToAppointments={() => navigateTo('appointments')} 
             onNavigateToManagePatients={() => navigateTo('managePatients')}
@@ -30,9 +29,8 @@ const SecretaryPage: React.FC = () => {
         )}
         {currentView === 'managePatients' && (
           <ManagePatientsView onBack={() => navigateTo('welcome')}/>
-        )}
-        {currentView === 'editStaff' && ( // Updated view name
-          <EditStaffView onBack={() => navigateTo('welcome')} />
+        )}        {currentView === 'editStaff' && ( // Updated view name
+          <RefactoredEditStaffView onBack={() => navigateTo('welcome')} />
         )}
       </main>
       <FooterSection />

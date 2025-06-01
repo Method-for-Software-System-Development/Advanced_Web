@@ -115,16 +115,15 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        
-        {/* Navigation Cards */}
+          {/* Navigation Cards */}
         <div className="lg:col-span-2">
-          <h2 className="text-2xl font-semibold text-[#4A3F35] mb-6">Quick Actions</h2>
+          <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-6">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Appointments Card */}
             <button
               onClick={onNavigateToAppointments}
-              className="block p-6 bg-gradient-to-br from-[#EF92A6] to-[#E87A90] text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-[#F9F3F0] focus:ring-opacity-50"
+              className="block p-6 bg-gradient-to-br from-[#EF92A6] to-[#E87A90] dark:from-[#664147] dark:to-[#58383E] text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-[#F9F3F0] dark:focus:ring-[#F7C9D3] focus:ring-opacity-50"
             >
               <h3 className="text-xl font-semibold mb-2">&#128197; View Appointments</h3>
               <p className="text-sm opacity-90">Access calendar, view schedules, and export reports</p>              {statistics && (
@@ -134,12 +133,10 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
                   </span>
                 </div>
               )}
-            </button>
-
-            {/* Manage Patients Card */}
+            </button>            {/* Manage Patients Card */}
             <button
               onClick={onNavigateToManagePatients}
-              className="block p-6 bg-gradient-to-br from-sky-400 to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-sky-200 focus:ring-opacity-50"
+              className="block p-6 bg-gradient-to-br from-sky-400 to-blue-500 dark:from-[#91C0EC] dark:to-[#C7DFF5] text-white dark:text-[#3B3B3B] rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-sky-200 dark:focus:ring-[#91C0EC] focus:ring-opacity-50"
             >
               <h3 className="text-xl font-semibold mb-2">&#128062; Manage Patients</h3>
               <p className="text-sm opacity-90">Update patient records and contact information</p>
@@ -149,12 +146,10 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
                   </span>
                 </div>
               )}
-            </button>
-
-            {/* Manage Staff Card */}
+            </button>            {/* Manage Staff Card */}
             <button
               onClick={onNavigateToEditStaff}
-              className="block p-6 bg-gradient-to-br from-purple-400 to-purple-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-opacity-50"
+              className="block p-6 bg-gradient-to-br from-purple-400 to-purple-500 dark:from-[#F7C9D3] dark:to-[#EF92A6] text-white dark:text-[#3B3B3B] rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-200 dark:focus:ring-[#F7C9D3] focus:ring-opacity-50"
             >
               <h3 className="text-xl font-semibold mb-2">&#128101; Manage Staff</h3>
               <p className="text-sm opacity-90">Update profiles, roles, and availability</p>
@@ -292,12 +287,10 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
             </div>
           </div>
         </div>
-      )}
-
-      {/* Refresh Button */}
+      )}      {/* Refresh Button */}
       <div className="text-center mt-8">        <button
           onClick={loadStatistics}
-          className="px-6 py-2 bg-[#664147] text-white rounded-lg hover:bg-[#58383E] transition-colors duration-200"
+          className="px-6 py-2 bg-[#664147] hover:bg-[#58383E] text-white rounded-lg shadow-md font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-[#F7C9D3] dark:hover:bg-[#EF92A6] dark:text-[#3B3B3B]"
           disabled={loading}
         >
           {loading ? 'Refreshing...' : '⟲ Refresh Dashboard'}
