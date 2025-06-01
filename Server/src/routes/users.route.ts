@@ -10,6 +10,33 @@ import bcrypt from "bcryptjs";
 const usersRouter = Router();
 
 /**
+ * GET /api/Users
+ * Get all users
+ * Query params: 
+ */
+usersRouter.get("/", async (req: Request, res: Response) => {
+    try {    
+        const users = await User.find().sort({ firstName: 1, lastName: 1 }).populate('pets');
+        // Map DB fields to frontend Patient interface
+        const mappedUsers = users.map((user: any) => ({
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+          city: user.city,
+          country: user.country,
+          postalCode: user.postalCode,
+          contact: user.email,
+          pets: user.pets || [],
+        }));
+        res.send(mappedUsers);
+      } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+      }
+    });
+
+/**
  * POST /api/users/login
  * Authenticates a user by email and password.
  * POST /api/users/register
@@ -99,6 +126,44 @@ usersRouter.put("/:id", async (req: Request, res: Response) => {
             return res.status(404).send({ error: "User not found" });
         }
         res.status(200).send({ message: "User updated successfully", user: updatedUser });
+    } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+});
+
+/**
+ * GET /api/users
+ * Retrieves all users.
+ */
+usersRouter.get("/", async (req: Request, res: Response) => {
+    try {
+        const users = await User.find().populate('pets'); // Populate pets if needed
+        res.status(200).send(users);
+    } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+});
+
+/**
+ * GET /api/users/search
+ * Searches for users by name or email.
+ */
+usersRouter.get("/search", async (req: Request, res: Response) => {
+    try {
+        const query = req.query.q as string; // Changed from req.query.query
+        if (!query) {
+            return res.status(400).send({ error: "Search query is required" });
+        }
+
+        const users = await User.find({
+            $or: [
+                { firstName: { $regex: query, $options: "i" } },
+                { lastName: { $regex: query, $options: "i" } },
+                { email: { $regex: query, $options: "i" } },
+            ],
+        }).populate('pets'); // Populate pets if needed
+
+        res.status(200).send(users);
     } catch (error) {
         res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
     }

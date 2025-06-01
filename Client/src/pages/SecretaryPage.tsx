@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
-import SecretaryWelcome from '../components/secretary/SecretaryWelcome';
+import EnhancedSecretaryWelcome from '../components/secretary/EnhancedSecretaryWelcome';
 import AppointmentView from '../components/secretary/AppointmentView';
 import ManagePatientsView from '../components/secretary/ManagePatientsView';
-import EditVeterinariansView from '../components/secretary/EditVeterinariansView'; // Import EditVeterinariansView
+import StaffManagement from '../components/secretary/StaffManagement'; // Updated import
 import FooterSection from '../components/FooterSection';
 
-export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editVeterinarians'; // Add 'editVeterinarians'
+export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editStaff'; // Updated view name
 
 const SecretaryPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<SecretaryView>('welcome');
 
   const navigateTo = (view: SecretaryView) => {
     setCurrentView(view);
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F9F3F0] to-[#EAE0D9] text-[#4A3F35]">
+  };  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F9F3F0] to-[#EAE0D9] dark:from-[#121212] dark:to-[#1a1a1a] text-[#4A3F35] dark:text-[#FDF6F0]">
       <Navbar />
-      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">
-        {currentView === 'welcome' && (
-          <SecretaryWelcome 
+      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">{currentView === 'welcome' && (
+          <EnhancedSecretaryWelcome 
             onNavigateToAppointments={() => navigateTo('appointments')} 
             onNavigateToManagePatients={() => navigateTo('managePatients')}
-            onNavigateToEditVeterinarians={() => navigateTo('editVeterinarians')} // Pass navigation function for edit veterinarians
+            onNavigateToEditStaff={() => navigateTo('editStaff')} // Updated function name
           />
         )}
         {currentView === 'appointments' && (
@@ -31,9 +28,8 @@ const SecretaryPage: React.FC = () => {
         )}
         {currentView === 'managePatients' && (
           <ManagePatientsView onBack={() => navigateTo('welcome')}/>
-        )}
-        {currentView === 'editVeterinarians' && ( // Add block for EditVeterinariansView
-          <EditVeterinariansView onBack={() => navigateTo('welcome')} />
+        )}        {currentView === 'editStaff' && ( // Updated view name
+          <StaffManagement onBack={() => navigateTo('welcome')} />
         )}
       </main>
       <FooterSection />

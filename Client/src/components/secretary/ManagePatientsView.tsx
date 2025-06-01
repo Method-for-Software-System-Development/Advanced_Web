@@ -1,57 +1,56 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo,useEffect } from 'react';
 import PatientList from './PatientList';
 import AddPatientForm from './AddPatientForm';
 import AddPetForm from './AddPetForm';
 import DashboardButton from './DashboardButton';
 import { Patient, Pet } from '../../types'; // Import Patient and Pet from types
+import { patientService } from '../../services/patientService';
 
 interface ManagePatientsViewProps { // Renamed from EditManagePatientsViewProps for clarity
   onBack: () => void;
 }
 
-// Mock data - replace with actual API call in a real application
-const mockPatients: Patient[] = [
-  {
-    id: 'p1',
-    ownerName: 'John Doe',
-    contact: 'john.doe@example.com',
-    phone: '123-456-7890', // Added phone
-    pets: [
-      { id: 'pet1', name: 'Buddy', species: 'Dog', breed: 'Golden Retriever', age: 5 },
-      { id: 'pet2', name: 'Whiskers', species: 'Cat', breed: 'Siamese', age: 3 },
-    ],
-  },
-  {
-    id: 'p2',
-    ownerName: 'Jane Smith',
-    contact: 'jane.smith@example.com',
-    phone: '098-765-4321', // Added phone
-    pets: [{ id: 'pet3', name: 'Charlie', species: 'Dog', breed: 'Labrador', age: 2 }],
-  },
-  {
-    id: 'p3',
-    ownerName: 'Alice Wonderland',
-    contact: 'alice.wonder@example.com',
-    phone: '111-222-3333', // Added phone
-    pets: [{ id: 'pet4', name: 'Dinah', species: 'Cat', breed: 'Cheshire', age: 1 }],
-  },
-];
-
 const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
-  const [patients, setPatients] = useState<Patient[]>(mockPatients);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
   const [showAddPetForm, setShowAddPetForm] = useState(false);
   const [selectedPatientIdForPet, setSelectedPatientIdForPet] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null); // For editing
+  const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  const loadPatients = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await patientService.getAllPatients();
+      setPatients(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch patients');
+      console.error('Error loading veterinarians:', err);
+      setPatients([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSaveNewPatient = (patientData: Omit<Patient, 'id' | 'pets'>) => {
     const newPatient: Patient = {
       id: `p${patients.length + 1}-${Date.now()}`, // Consider a more robust ID strategy for production
-      ownerName: patientData.ownerName,
-      contact: patientData.contact,
+      firstName: patientData.firstName,
+      lastName: patientData.lastName,
+      email: patientData.email,
       phone: patientData.phone,
-      pets: [],
+      city: patientData.city,
+      country: patientData.country,
+      pets: [], // Initialize with an empty array
+      postalCode: patientData.postalCode, // Optional field
     };
     setPatients(currentPatients => [...currentPatients, newPatient]);
     setShowAddPatientForm(false);
@@ -66,14 +65,19 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     alert('Patient details updated successfully!');
   };
 
-  const handleAddNewPet = (patientId: string, petName: string, petSpecies: string) => {
+  const handleAddNewPet = (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number) => {
     setPatients(currentPatients =>
       currentPatients.map(p => {
         if (p.id === patientId) {
           const newPet: Pet = {
-            id: `pet${p.pets.length + Date.now()}`, // More unique ID
+            _id: `pet${p.pets.length + Date.now()}`, // More unique ID
             name: petName,
-            species: petSpecies,
+            type: petType,
+            breed: petBreed,
+            birthYear: petBirthYear,
+            weight: petWeight,
+            prescriptions: [], // Initialize with empty arrays
+            treatments: []     // Initialize with empty arrays
           };
           return { ...p, pets: [...p.pets, newPet] };
         }
@@ -85,19 +89,10 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     alert('New pet added successfully!');
   };
   
-  // Ensure a patient is selected by default if the list is not empty when opening add pet form
-  const openAddPetForm = () => {
-    if (patients.length > 0 && !selectedPatientIdForPet) {
-      setSelectedPatientIdForPet(patients[0].id);
-    }
-    setShowAddPetForm(true);
-    setShowAddPatientForm(false);
-    setEditingPatient(null); // Close edit form if open
-  };
-
   const openAddPatientForm = () => {
     setShowAddPatientForm(true);
-    setShowAddPetForm(false);
+    setOpenAddPetForId(null); // Close any open Add New Pet form
+    setShowAddPetForm(false); // (if you still use this state elsewhere)
     setEditingPatient(null); // Close edit form if open
   }
 
@@ -113,28 +108,34 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       return patients;
     }
     return patients.filter(patient =>
-      patient.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.postalCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.pets.some(pet => pet.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [patients, searchTerm]);
+  if (loading) return <div className="dark:text-gray-300">Loading patients...</div>;
+  if (error) return <div className="text-red-600 dark:text-red-400">Error: {error}</div>;
 
   return (
     <>
     <div className="mb-8 text-center">
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
         </div>
-        
-    <div className="max-w-6xl mx-auto p-4 md:p-8 bg-white rounded-xl shadow-2xl">
+          <div className="max-w-6xl mx-auto p-4 md:p-8 bg-white dark:bg-[#664147] rounded-xl shadow-2xl">
         
       <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-[#4A3F35] mb-3">Manage Patients</h1>
-        <p className="text-lg text-gray-600">View, add, or update patient and pet information.</p>
+        <h1 className="text-3xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-3">Manage Patients</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300">View, add, or update patient and pet information.</p>
       </header>
 
       {/* Search Input */}
       <div className="mb-8 px-2">
-        <label htmlFor="searchPatients" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="searchPatients" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Search Patients (by Owner, Contact, or Pet Name)
         </label>
         <input
@@ -143,24 +144,15 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
           placeholder="Enter search term..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
         />
-      </div>
-
-      {/* Action Buttons */}
+      </div>      {/* Action Buttons */}
       <div className="mb-8 flex flex-col sm:flex-row justify-center gap-4">
         <button
-          onClick={openAddPatientForm} // Use new handler
-          className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200"
+          onClick={openAddPatientForm}
+          className="px-6 py-3 bg-green-500 dark:bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
         >
           Add New Patient
-        </button>
-        <button
-          onClick={openAddPetForm}
-          disabled={patients.length === 0}
-          className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Add Pet to Existing Patient
         </button>
       </div>
 
@@ -181,7 +173,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
 
       {showAddPetForm && (
         <AddPetForm
-          patients={patients} // Pass all patients to AddPetForm for the dropdown
+          patients={patients}
           selectedPatientId={selectedPatientIdForPet}
           onAddPet={handleAddNewPet}
           onCancel={() => { setShowAddPetForm(false); setSelectedPatientIdForPet(null); }}
@@ -189,7 +181,37 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
         />
       )}
 
-      <PatientList patients={filteredPatients} onEditPatient={openEditPatientForm} />
+      <PatientList
+        patients={filteredPatients}
+        onEditPatient={openEditPatientForm}
+        onAddPet={(patientId, petName, petType, petBreed, petBirthYear, petWeight) => {
+          setPatients(currentPatients =>
+            currentPatients.map(p => {
+              if (p.id === patientId) {
+                const newPet: Pet = {
+                  _id: `pet${p.pets.length + Date.now()}`,
+                  name: petName,
+                  type: petType,
+                  breed: petBreed,
+                  birthYear: petBirthYear,
+                  weight: petWeight,
+                  prescriptions: [], // Initialize with empty arrays
+                  treatments: []     // Initialize with empty arrays
+                };
+                return { ...p, pets: [...p.pets, newPet] };
+              }
+              return p;
+            })
+          );
+          setOpenAddPetForId(null);
+          alert('New pet added successfully!');
+        }}
+        openAddPetForId={openAddPetForId}
+        setOpenAddPetForId={(id) => {
+          setOpenAddPetForId(id);
+          setShowAddPatientForm(false); // Always close add-client form when opening or closing add-pet
+        }}
+      />
 
     </div>
     </>
