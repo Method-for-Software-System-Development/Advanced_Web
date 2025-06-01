@@ -1,42 +1,50 @@
 import React, { useState } from "react";
 import { Pet } from "../../types";
-import PrescriptionList from "./Prescription";
+import PrescriptionList from "./UnfulfilledPrescriptions";
+import PetLastTreatment from "./PetLastTreatment";
 
 const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
   const [showPrescriptions, setShowPrescriptions] = useState(false);
+  const [showLastTreatment, setShowLastTreatment] = useState(false);
 
   return (
-    <li className="w-full mb-2 p-3 bg-white rounded-lg shadow flex flex-col min-h-[120px] relative text-base">
-      <div className="mb-1 flex items-center justify-between">
+    <li className="w-full mb-2 p-4 bg-white rounded-xl shadow flex flex-col min-h-[120px] relative text-base">
+      <div className="mb-3 flex items-center justify-between">
         <div>
-          <span className="font-bold text-xl">{pet.name}</span>
-          <span className="text-gray-500 text-base ml-2">({pet.type})</span>
+          <h2 className="text-2xl sm:text-xl font-bold text-gray-800">
+            {pet.name} <span className="text-gray-500 text-base">({pet.type})</span>
+          </h2>
         </div>
       </div>
       <div className="mb-2 flex items-center justify-between gap-6">
-        <span className="text-lg font-semibold">
-          Breed: <span className="font-normal text-xl">{pet.breed}</span>
-        </span>
+        <p className="text-base text-gray-700">
+          <span className="font-semibold">Breed:</span>{" "}
+          <span>{pet.breed}</span>
+        </p>
         <button
-          className="w-44 bg-[#664147] text-white px-6 py-2 rounded hover:bg-[#4d3034] text-base font-semibold transition-colors duration-150"
+          className="w-56 bg-[#664147] text-white px-4 py-2 rounded hover:bg-[#4d3034] text-base font-semibold transition-colors duration-150 whitespace-nowrap"
           onClick={() => setShowPrescriptions((v) => !v)}
         >
-          Prescriptions
+          Unfulfilled Prescriptions
         </button>
       </div>
       <div className="mb-2 flex items-center justify-between gap-6">
-        <span className="text-lg font-semibold">
-          Birth Year: <span className="font-normal text-xl">{pet.birthYear}</span>
-        </span>
+        <p className="text-base text-gray-700">
+          <span className="font-semibold">Birth Year:</span>{" "}
+          <span>{pet.birthYear}</span>
+        </p>
         <button
-          className="w-44 bg-[#664147] text-white px-6 py-2 rounded hover:bg-[#4d3034] text-base font-semibold transition-colors duration-150"
-          // TODO: Add onClick to open treatments modal/component
+          className="w-56 bg-[#664147] text-white px-4 py-2 rounded hover:bg-[#4d3034] text-base font-semibold transition-colors duration-150 whitespace-nowrap"
+          onClick={() => setShowLastTreatment((v) => !v)}
         >
-          View Treatments
+          Last Treatment
         </button>
       </div>
       {showPrescriptions && (
         <PrescriptionList prescriptionIds={pet.prescriptions} />
+      )}
+      {showLastTreatment && (
+        <PetLastTreatment petId={pet._id} />
       )}
     </li>
   );

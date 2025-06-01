@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import FooterSection from "../components/FooterSection";
 import ClientProfile from "../components/user/ClientProfile";
+import TreatmentHistory from "../components/user/TreatmentHistory";
 import UserNavButton from "../components/user/UserNavButton";
 
 // Define all 6 views
@@ -10,8 +11,7 @@ export type ClientView =
   | "makeAppointment"
   | "showAppointments"
   | "prescriptions"
-  | "history"
-  | "review";
+  | "history";
 
 const allViews: ClientView[] = [
   "profile",
@@ -19,7 +19,6 @@ const allViews: ClientView[] = [
   "showAppointments",
   "prescriptions",
   "history",
-  "review",
 ];
 
 const viewLabels: Record<ClientView, string> = {
@@ -28,14 +27,13 @@ const viewLabels: Record<ClientView, string> = {
   showAppointments: "Show Appointments",
   prescriptions: "Show Prescriptions",
   history: "Treatment History",
-  review: "Review the Clinic",
 };
 
 const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
 
   // Show 5 views excluding the current one
-  const visibleViews = allViews.filter((v) => v !== currentView).slice(0, 5);
+  const visibleViews = allViews.filter((v) => v !== currentView).slice(0, 4);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F9F3F0] text-[#4A3F35]">
@@ -66,12 +64,7 @@ const ClientPage: React.FC = () => {
         {currentView === "prescriptions" && (
           <div>Prescription List Placeholder</div>
         )}
-        {currentView === "history" && (
-          <div>Treatment History Component Placeholder</div>
-        )}
-        {currentView === "review" && (
-          <div>Submit Clinic Review Form Placeholder</div>
-        )}
+        {currentView === "history" && <TreatmentHistory />}
       </main>
 
       <FooterSection />

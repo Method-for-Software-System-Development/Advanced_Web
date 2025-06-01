@@ -109,3 +109,16 @@ export interface Appointment {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Treatment {
+  _id: string;
+  visitDate: string;
+  visitTime: string;
+  vetId: string;
+  treatmentType: string;
+  cost: number;
+  visitationType: string;
+  visitationCategory: string;
+  notes: string;
+  petId: string;
+}

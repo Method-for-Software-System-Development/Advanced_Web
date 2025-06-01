@@ -1,45 +1,33 @@
-/**
- * Treatment Schema
- * This file defines the routes for managing treatments in the application.
- */
-
 import { Router, Request, Response } from "express";
+import mongoose from "mongoose";
 import Treatment from "../models/treatmentSchema";
 
 const treatmentRouter = Router();
 
 /**
- * GET /api/treatments/:id
- * Get a single treatment by its ID
+ * GET /api/treatments/pet/:petId/sorted
+ * Get all treatments for a specific pet, sorted by visitDate and visitTime descending
  */
-treatmentRouter.get("/:id", async (req: Request, res: Response) => {
+treatmentRouter.get("/pet/:petId/sorted", async (req: Request, res: Response) => {
   try {
-    const treatment = await Treatment.findById(req.params.id);
-    if (!treatment) {
-      return res.status(404).send({ error: "Treatment not found" });
+    const { petId } = req.params;
+    let query: any = {};
+    if (mongoose.Types.ObjectId.isValid(petId)) {
+      query.petId = { $in: [petId, new mongoose.Types.ObjectId(petId)] };
+    } else {
+      query.petId = petId;
     }
-    res.send(treatment);
-  } catch (error) {
-    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
-  }
-});
-
-/**
- * GET /api/treatments/pet/:petId
- * Get all treatments for a specific pet
- */
-treatmentRouter.get("/pet/:petId", async (req: Request, res: Response) => {
-  try {
-    const treatments = await Treatment.find({ petId: req.params.petId });
+    const treatments = await Treatment.find(query)
+      .sort({ visitDate: -1, visitTime: -1 });
     res.send(treatments);
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
-});
+})
 
 /**
  * POST /api/treatments
- * Create a new treatment
+ * Create and save a new treatment
  */
 treatmentRouter.post("/", async (req: Request, res: Response) => {
   try {
@@ -52,34 +40,44 @@ treatmentRouter.post("/", async (req: Request, res: Response) => {
 });
 
 /**
- * PUT /api/treatments/:id
- * Update a treatment
+ * POST /api/treatments/byPetIds
+ * Get all treatments for a list of pet IDs
  */
-treatmentRouter.put("/:id", async (req: Request, res: Response) => {
+treatmentRouter.post("/byPetIds", async (req: Request, res: Response) => {
   try {
-    const updated = await Treatment.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) {
-      return res.status(404).send({ error: "Treatment not found" });
+    const { petIds } = req.body;
+    if (!Array.isArray(petIds) || petIds.length === 0) {
+      return res.status(400).send({ error: "petIds must be a non-empty array" });
     }
-    res.send(updated);
+    // Support both string and ObjectId types
+    const ids = petIds.map((id: string) =>
+      mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id
+    );
+    const treatments = await Treatment.find({ petId: { $in: ids } });
+    res.send(treatments);
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
 });
 
 /**
- * DELETE /api/treatments/:id
- * Remove a treatment
+ * POST /api/treatments/vetName
+ * Get the full name (first + last) of a vet by vetId
  */
-treatmentRouter.delete("/:id", async (req: Request, res: Response) => {
+treatmentRouter.post("/vetName", async (req: Request, res: Response) => {
   try {
-    const deleted = await Treatment.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).send({ error: "Treatment not found" });
+    const { vetId } = req.body;
+    if (!vetId) {
+      return res.status(400).json({ error: "vetId is required" });
     }
-    res.send({ message: "Treatment deleted" });
+    const Staff = require("../models/staffSchema").default;
+    const vet = await Staff.findById(vetId);
+    if (!vet) {
+      return res.status(404).json({ error: "Vet not found" });
+    }
+    return res.status(200).json({ fullName: `${vet.firstName} ${vet.lastName}` });
   } catch (error) {
-    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+    return res.status(500).json({ error: "Failed to fetch vet name" });
   }
 });
 

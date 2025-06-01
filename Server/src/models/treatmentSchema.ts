@@ -29,4 +29,4 @@ const TreatmentSchema: Schema = new Schema({
   petId:             { type: mongoose.Schema.Types.ObjectId, ref: "Pet", required: true }
 });
 
-export default mongoose.model<ITreatment>("Treatment", TreatmentSchema);
+export default mongoose.model<ITreatment>("Treatment", TreatmentSchema, "Treatments");
