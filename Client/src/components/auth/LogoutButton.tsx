@@ -5,20 +5,21 @@
  */
 
 import React from 'react';
-
+import { useNavigate } from 'react-router-dom';
 interface LogoutButtonProps {
   onLogout?: () => void;
 }
 
 const LogoutButton: React.FC<LogoutButtonProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
   const handleLogout = () => {
     // Remove token and client info from localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("client");
-    // Optional callback to parent (e.g., to update state in NavBar)
+    
     if (onLogout) onLogout();
-    // Reload the page (optional, but resets all states and redirects user)
-    window.location.reload();
+       // Navigate to the homepage ("/")
+      navigate("/");
   };
 
   return (
