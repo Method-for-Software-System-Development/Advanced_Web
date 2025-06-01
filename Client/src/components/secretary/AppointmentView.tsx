@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import * as XLSX from 'xlsx';
 import Calendar from 'react-calendar';
 import '../../styles/react-calendar.css';
 import DashboardButton from './DashboardButton'; 
@@ -166,47 +165,58 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
       setSelectedDate(value[0]);
     }
   };
-
-  const handleExportToExcel = () => {
+  const handleExportToExcel = async () => {
     if (appointments.length === 0) {
       alert("No appointments to export for the selected date.");
       return;
     }
 
-    const sheetData = appointments.map(apt => {
-      const formattedApt = formatAppointmentForDisplay(apt);
-      return {
-        Time: formattedApt.time,
-        'Client Name': formattedApt.clientName,
-        'Pet Name': formattedApt.petName,
-        Service: formattedApt.service,
-        'Staff Member': formattedApt.staffName,
-        Status: formattedApt.status,
-        Duration: `${formattedApt.duration} min`,
-        Cost: formattedApt.cost ? `$${formattedApt.cost}` : 'N/A',
-        Notes: formattedApt.notes || ''
-      };
-    });
+    try {
+      setIsLoading(true);
+      
+      // Format the date for the API call (YYYY-MM-DD)
+      const dateString = selectedDate.toLocaleDateString('en-CA');
+      
+      // Call the server-side Excel export endpoint
+      const response = await fetch(`http://localhost:3000/api/appointments/export-excel?date=${dateString}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const worksheet = XLSX.utils.json_to_sheet(sheetData);
-    const headerCellStyle = { font: { bold: true } };
-    
-    // Style headers
-    Object.keys(sheetData[0] || {}).forEach((_, index) => {
-      const cellRef = XLSX.utils.encode_cell({ c: index, r: 0 });
-      if (worksheet[cellRef]) worksheet[cellRef].s = headerCellStyle;
-    });
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
 
-    const columnWidths = [
-      { wch: 12 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, 
-      { wch: 18 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 30 }
-    ];
-    worksheet['!cols'] = columnWidths;
+      // Get the filename from the response headers
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `Appointments_${dateString}.xlsx`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Appointments");
-    const dateString = selectedDate.toLocaleDateString('en-CA');
-    XLSX.writeFile(workbook, `appointments_${dateString}.xlsx`);
+      // Convert response to blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      alert('Failed to export appointments to Excel. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getStatusColor = (status: AppointmentStatus) => {

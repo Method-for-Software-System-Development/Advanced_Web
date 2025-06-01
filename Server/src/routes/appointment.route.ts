@@ -5,6 +5,7 @@
 import { Router, Request, Response } from "express";
 import Appointment, { AppointmentStatus, AppointmentType } from "../models/appointmentSchema";
 import mongoose from "mongoose";
+import * as ExcelJS from 'exceljs';
 
 const appointmentRouter = Router();
 
@@ -55,6 +56,281 @@ appointmentRouter.get("/", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching appointments:", error);
     res.status(500).json({ error: "Failed to fetch appointments" });
+  }
+});
+
+/**
+ * GET /api/appointments/export-excel
+ * Export appointments to Excel file with professional styling
+ * Query params:
+ * - date: YYYY-MM-DD format to filter by specific date (optional)
+ * - startDate & endDate: Date range filter (optional)
+ */
+appointmentRouter.get('/export-excel', async (req: Request, res: Response) => {
+  try {
+    const { date, startDate, endDate } = req.query;
+    
+    // Build filter object for appointments
+    const filter: any = {};
+    let dateDisplay = 'All';
+    
+    if (date) {
+      const targetDate = new Date(date as string);
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(nextDate.getDate() + 1);
+      filter.date = { $gte: targetDate, $lt: nextDate };
+      dateDisplay = new Date(date as string).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } else if (startDate && endDate) {
+      filter.date = { 
+        $gte: new Date(startDate as string), 
+        $lte: new Date(endDate as string) 
+      };
+      dateDisplay = `${new Date(startDate as string).toLocaleDateString('en-US')} - ${new Date(endDate as string).toLocaleDateString('en-US')}`;
+    }
+
+    // Fetch appointments with populated data
+    const appointments = await Appointment.find(filter)
+      .populate('userId', 'firstName lastName email phone')
+      .populate('petId', 'name type breed age')
+      .populate('staffId', 'firstName lastName role')
+      .sort({ date: 1, time: 1 });    // Create workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Appointments', {
+      pageSetup: {
+        paperSize: 9, // A4
+        orientation: 'landscape',
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+        margins: { 
+          left: 0.5, 
+          right: 0.5, 
+          top: 0.75, 
+          bottom: 0.75,
+          header: 0.3,
+          footer: 0.3
+        }
+      }
+    });
+
+    // Set metadata
+    workbook.creator = 'Veterinary Clinic Management System';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+
+    let currentRow = 1;
+
+    // Title section
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
+    const titleCell = worksheet.getCell(`A${currentRow}`);
+    titleCell.value = '🏥 VETERINARY CLINIC - APPOINTMENTS REPORT';
+    titleCell.style = {
+      font: { bold: true, size: 16, color: { argb: 'FF1F2937' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE5E7EB' } },
+      alignment: { horizontal: 'center', vertical: 'middle' },
+      border: {
+        top: { style: 'double', color: { argb: 'FF374151' } },
+        bottom: { style: 'double', color: { argb: 'FF374151' } },
+        left: { style: 'double', color: { argb: 'FF374151' } },
+        right: { style: 'double', color: { argb: 'FF374151' } }
+      }
+    };
+    currentRow += 2;
+
+    // Date range info
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
+    const dateCell = worksheet.getCell(`A${currentRow}`);
+    dateCell.value = `📅 Report Date Range: ${dateDisplay}`;
+    dateCell.style = {
+      font: { bold: true, size: 11, color: { argb: 'FF374151' } },
+      alignment: { horizontal: 'center', vertical: 'middle' }
+    };
+    currentRow += 2;
+
+    // Summary statistics
+    const totalAppointments = appointments.length;
+    const scheduledCount = appointments.filter(apt => apt.status === AppointmentStatus.SCHEDULED).length;
+    const completedCount = appointments.filter(apt => apt.status === AppointmentStatus.COMPLETED).length;
+    const cancelledCount = appointments.filter(apt => apt.status === AppointmentStatus.CANCELLED).length;
+    const totalRevenue = appointments
+      .filter(apt => apt.status === AppointmentStatus.COMPLETED)
+      .reduce((sum, apt) => sum + (apt.cost || 0), 0);
+
+    // Summary header
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
+    const summaryHeaderCell = worksheet.getCell(`A${currentRow}`);
+    summaryHeaderCell.value = '📊 SUMMARY STATISTICS';
+    summaryHeaderCell.style = {
+      font: { bold: true, size: 12, color: { argb: 'FF1F2937' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE5E7EB' } },
+      alignment: { horizontal: 'left', vertical: 'middle' },
+      border: {
+        top: { style: 'double', color: { argb: 'FF6B7280' } },
+        bottom: { style: 'medium', color: { argb: 'FF9CA3AF' } },
+        left: { style: 'medium', color: { argb: 'FF9CA3AF' } },
+        right: { style: 'medium', color: { argb: 'FF9CA3AF' } }
+      }
+    };
+    currentRow++;
+
+    // Summary data
+    const summaryData = [
+      ['Total Appointments:', totalAppointments],
+      ['Scheduled:', scheduledCount],
+      ['Completed:', completedCount],
+      ['Cancelled:', cancelledCount],
+      ['Total Revenue:', `$${totalRevenue.toFixed(2)}`]
+    ];
+
+    summaryData.forEach(([label, value]) => {
+      const labelCell = worksheet.getCell(`A${currentRow}`);
+      const valueCell = worksheet.getCell(`B${currentRow}`);
+      
+      labelCell.value = label;
+      valueCell.value = value;
+      
+      // Style summary cells
+      labelCell.style = {
+        font: { bold: true, color: { argb: 'FF374151' } },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+        border: {
+          top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          left: { style: 'medium', color: { argb: 'FF9CA3AF' } },
+          right: { style: 'hair', color: { argb: 'FFE5E7EB' } }
+        }
+      };
+      
+      valueCell.style = {
+        font: { color: { argb: 'FF4B5563' } },
+        alignment: { horizontal: 'left', vertical: 'middle' },
+        border: {
+          top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          left: { style: 'hair', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'medium', color: { argb: 'FF9CA3AF' } }
+        }
+      };
+      
+      currentRow++;
+    });
+
+    // Add detailed appointments section
+    currentRow += 2;
+    worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
+    const sectionCell = worksheet.getCell(`A${currentRow}`);
+    sectionCell.value = '📋 DETAILED APPOINTMENTS';
+    sectionCell.style = {
+      font: { bold: true, size: 12, color: { argb: 'FF1F2937' } },
+      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } },
+      alignment: { horizontal: 'left', vertical: 'middle' },
+      border: {
+        top: { style: 'double', color: { argb: 'FF6B7280' } },
+        bottom: { style: 'medium', color: { argb: 'FF9CA3AF' } },
+        left: { style: 'medium', color: { argb: 'FF9CA3AF' } },
+        right: { style: 'medium', color: { argb: 'FF9CA3AF' } }
+      }
+    };
+    currentRow++;
+
+    // Table headers
+    const headers = [
+      'Date', 'Time', 'Client', 'Pet', 'Service Type', 
+      'Veterinarian', 'Duration', 'Cost', 'Status'
+    ];
+    
+    const columnWidths = [12, 10, 18, 15, 20, 18, 10, 10, 12];
+    
+    headers.forEach((header, index) => {
+      const cell = worksheet.getCell(currentRow, index + 1);
+      cell.value = header;
+      cell.style = {
+        font: { bold: true, color: { argb: 'FFFFFFFF' } },
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } },
+        alignment: { horizontal: 'center', vertical: 'middle' },
+        border: {
+          top: { style: 'medium', color: { argb: 'FF065F46' } },
+          bottom: { style: 'medium', color: { argb: 'FF065F46' } },
+          left: { style: 'thin', color: { argb: 'FF10B981' } },
+          right: { style: 'thin', color: { argb: 'FF10B981' } }
+        }
+      };
+    });
+    currentRow++;
+
+    // Add appointment data
+    appointments.forEach((appointment, index) => {
+      const rowData = [
+        new Date(appointment.date).toLocaleDateString('en-US'),
+        appointment.time,
+        `${(appointment.userId as any)?.firstName || ''} ${(appointment.userId as any)?.lastName || ''}`.trim() || 'N/A',
+        (appointment.petId as any)?.name || 'N/A',
+        appointment.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+        `${(appointment.staffId as any)?.firstName || ''} ${(appointment.staffId as any)?.lastName || ''}`.trim() || 'N/A',
+        `${appointment.duration} min`,
+        `$${(appointment.cost || 0).toFixed(2)}`,
+        appointment.status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+      ];
+
+      rowData.forEach((data, colIndex) => {
+        const cell = worksheet.getCell(currentRow, colIndex + 1);
+        cell.value = data;
+        
+        // Alternate row colors
+        const fillColor = index % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
+        
+        cell.style = {
+          alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
+          border: {
+            top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+            bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+            left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+            right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+          },
+          fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } }
+        };
+        
+        // Status-specific styling
+        if (colIndex === 8) { // Status column
+          let statusColor = 'FF374151'; // Default
+          if (appointment.status === AppointmentStatus.COMPLETED) statusColor = 'FF059669';
+          else if (appointment.status === AppointmentStatus.CANCELLED) statusColor = 'FFDC2626';
+          else if (appointment.status === AppointmentStatus.SCHEDULED) statusColor = 'FF2563EB';
+          
+          cell.style.font = { bold: true, color: { argb: statusColor } };
+        }
+      });
+      currentRow++;
+    });
+
+    // Set column widths
+    columnWidths.forEach((width, index) => {
+      worksheet.getColumn(index + 1).width = width;
+    });
+
+    // Set row heights
+    worksheet.getRow(1).height = 40; // Title row
+    for (let i = currentRow - appointments.length; i < currentRow; i++) {
+      worksheet.getRow(i).height = 25;
+    }    // Generate Excel file buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+    
+    // Set response headers for file download
+    const fileName = `Appointments_${date || 'All'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', Buffer.byteLength(buffer).toString());
+
+    // Send the buffer
+    res.end(buffer);
+
+  } catch (error) {
+    console.error("Error exporting appointments to Excel:", error);
+    res.status(500).json({ error: "Failed to export appointments to Excel" });
   }
 });
 

@@ -8,8 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
-  },
-  "dependencies": {
+  },  "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
     "axios": "^1.9.0",
     "lucide-react": "^0.509.0",
@@ -17,8 +16,7 @@
     "react-calendar": "^5.1.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.6.0",
-    "tailwindcss": "^4.1.4",
-    "xlsx": "^0.18.5"
+    "tailwindcss": "^4.1.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
