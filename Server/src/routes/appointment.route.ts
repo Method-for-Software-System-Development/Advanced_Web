@@ -117,9 +117,7 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
         !mongoose.Types.ObjectId.isValid(petId) || 
         !mongoose.Types.ObjectId.isValid(staffId)) {
       return res.status(400).json({ error: "Invalid ID format" });
-    }
-
-    // Validate appointment type
+    }    // Validate appointment type
     if (!Object.values(AppointmentType).includes(type)) {
       return res.status(400).json({ error: "Invalid appointment type" });
     }
@@ -131,20 +129,43 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
     
     if (appointmentDate < today) {
       return res.status(400).json({ error: "Cannot schedule appointments in the past" });
-    }
+    }    // Helper function to convert time string to minutes since midnight
+    const timeToMinutes = (timeStr: string): number => {
+      const [time, period] = timeStr.split(' ');
+      const [hours, minutes] = time.split(':').map(Number);
+      let totalMinutes = hours * 60 + minutes;
+      
+      if (period === 'PM' && hours !== 12) {
+        totalMinutes += 12 * 60;
+      } else if (period === 'AM' && hours === 12) {
+        totalMinutes = minutes; // 12:xx AM is 00:xx in 24-hour format
+      }
+      
+      return totalMinutes;
+    };
 
-    // Check for conflicts (same staff, same date/time)
-    const conflictingAppointment = await Appointment.findOne({
+    // Check for time overlaps with existing appointments
+    const existingAppointments = await Appointment.find({
       staffId,
       date: appointmentDate,
-      time,
       status: { $nin: [AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW] }
     });
 
-    if (conflictingAppointment) {
-      return res.status(409).json({ 
-        error: "Staff member already has an appointment at this time" 
-      });
+    const newStartMinutes = timeToMinutes(time);
+    const newEndMinutes = newStartMinutes + (duration || 30);    for (const existing of existingAppointments) {
+      const existingStartMinutes = timeToMinutes(existing.time);
+      const existingEndMinutes = existingStartMinutes + existing.duration;
+
+      // Check if appointments overlap - appointments overlap if they share any time
+      const isOverlapping = (
+        newStartMinutes < existingEndMinutes && newEndMinutes > existingStartMinutes
+      );
+
+      if (isOverlapping) {
+        return res.status(409).json({ 
+          error: `Time slot conflicts with existing appointment from ${existing.time} (${existing.duration} minutes)` 
+        });
+      }
     }
 
     const newAppointment = new Appointment({

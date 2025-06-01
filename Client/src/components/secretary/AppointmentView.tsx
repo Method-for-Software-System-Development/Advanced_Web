@@ -90,26 +90,43 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
       }
     };
     loadMonthlyAppointments();
-  }, [currentCalendarMonthView]);
-
-
-  const handleCancelAppointment = async (appointmentId: string) => {
+  }, [currentCalendarMonthView]);  const handleCancelAppointment = async (appointmentId: string) => {
     try {
       await appointmentService.cancelAppointment(appointmentId);
+      // Update the appointment status to CANCELLED instead of removing it
       setAppointments(prevAppointments => 
-        prevAppointments.filter(apt => apt._id !== appointmentId)
+        prevAppointments.map(apt => 
+          apt._id === appointmentId 
+            ? { ...apt, status: AppointmentStatus.CANCELLED }
+            : apt
+        )
+      );
+      // Also update monthly appointments to refresh calendar dots
+      setMonthlyAppointments(prevMonthlyAppointments => 
+        prevMonthlyAppointments.map(apt => 
+          apt._id === appointmentId 
+            ? { ...apt, status: AppointmentStatus.CANCELLED }
+            : apt
+        )
       );
       alert('Appointment cancelled successfully.');
     } catch (err) {
       console.error('Error cancelling appointment:', err);
       alert('Failed to cancel appointment. Please try again.');
     }
-  };
-  const handleUpdateStatus = async (appointmentId: string, newStatus: AppointmentStatus) => {
+  };const handleUpdateStatus = async (appointmentId: string, newStatus: AppointmentStatus) => {
     try {
       await appointmentService.updateAppointmentStatus(appointmentId, newStatus);
       setAppointments(prevAppointments => 
         prevAppointments.map(apt => 
+          apt._id === appointmentId 
+            ? { ...apt, status: newStatus }
+            : apt
+        )
+      );
+      // Also update monthly appointments to refresh calendar dots
+      setMonthlyAppointments(prevMonthlyAppointments => 
+        prevMonthlyAppointments.map(apt => 
           apt._id === appointmentId 
             ? { ...apt, status: newStatus }
             : apt
@@ -225,12 +242,14 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
       return timeA.localeCompare(timeB);
     });
   }, [appointments]);
-
-  // Function to render a dot if there are appointments on a date
+  // Function to render a dot if there are appointments on a date (excluding cancelled ones)
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view === 'month') {
-      const hasAppointment = monthlyAppointments.some((appointment) => {
+      const hasActiveAppointment = monthlyAppointments.some((appointment) => {
         const appointmentDate = new Date(appointment.date); // appointment.date is typically a UTC timestamp string from server
+
+        // Only show dot for appointments that are NOT cancelled
+        const isActiveAppointment = appointment.status !== AppointmentStatus.CANCELLED;
 
         // Compare local year, month, and day of the appointment
         // with the local year, month, and day of the calendar tile.
@@ -238,12 +257,13 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
         // 'appointmentDate' (from new Date(appointment.date_from_server_UTC))
         // will give its local parts when getFullYear/Month/Date are called.
         return (
+          isActiveAppointment &&
           appointmentDate.getFullYear() === date.getFullYear() &&
           appointmentDate.getMonth() === date.getMonth() &&
           appointmentDate.getDate() === date.getDate()
         );
       });
-      if (hasAppointment) {
+      if (hasActiveAppointment) {
         return <div className="appointment-dot"></div>;
       }
     }
@@ -251,31 +271,10 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   };
 
   return (
-    <>
-      <div className="mb-8 text-center">
+    <>      <div className="mb-8 text-center">
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
       </div>
 
-      {/* Add Appointment Form Section */}
-      {showAddForm && (
-        <section className="mb-8 p-6 bg-white rounded-lg shadow-xl max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-[#4A3F35]">Add New Appointment</h2>
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-          <AddAppointmentForm
-            onClose={() => setShowAddForm(false)}
-            onAppointmentAdded={handleAppointmentAdded}
-            selectedDate={selectedDate}
-          />
-        </section>
-      )}
-      
       {/* Calendar and Export Section */}
       <section className="mb-8 p-6 bg-white rounded-lg shadow-xl max-w-3xl mx-auto">
         <h2 className="text-2xl font-semibold text-[#4A3F35] mb-4">Select Date to View Appointments</h2>
@@ -302,9 +301,27 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             >
               Add New Appointment
             </button>
-          </div>
-        </div>
+          </div>        </div>
       </section>
+
+      {/* Add Appointment Form Section */}
+      {showAddForm && (
+        <section className="mb-8 p-6 bg-white rounded-lg shadow-xl max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-4">
+            <button
+              onClick={() => setShowAddForm(false)}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors ml-auto"
+            >
+              Cancel
+            </button>
+          </div>
+          <AddAppointmentForm
+            onClose={() => setShowAddForm(false)}
+            onAppointmentAdded={handleAppointmentAdded}
+            selectedDate={selectedDate}
+          />
+        </section>
+      )}
 
       {/* Appointments List Section */}
       <section className="p-6 bg-white rounded-lg shadow-xl max-w-4xl mx-auto">
@@ -327,11 +344,9 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             {sortedAppointments.map((apt) => {
               const formattedApt = formatAppointmentForDisplay(apt);
               return (
-                <li key={apt._id} className="p-6 border border-gray-200 rounded-lg shadow-md bg-gray-50 hover:shadow-lg transition-shadow duration-200 ease-in-out">
-                  <div className="flex justify-between items-start mb-4">
+                <li key={apt._id} className="p-6 border border-gray-200 rounded-lg shadow-md bg-gray-50 hover:shadow-lg transition-shadow duration-200 ease-in-out">                  <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <p className="font-bold text-xl text-[#664147]">{formattedApt.time}</p>
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(formattedApt.status)}`}>
                           {formattedApt.status.toUpperCase()}
                         </span>
@@ -362,6 +377,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                       </button>
                     </div>
                   </div>
+                  
+                  <p className="mt-2 text-sm text-gray-800"><strong className="font-medium text-gray-600">Time:</strong> {formattedApt.time}</p>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>

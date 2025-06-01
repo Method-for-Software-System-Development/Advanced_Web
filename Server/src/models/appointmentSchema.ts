@@ -13,14 +13,18 @@ export enum AppointmentStatus {
 }
 
 export enum AppointmentType {
-  CONSULTATION = "consultation",
-  CHECKUP = "checkup",
+  WELLNESS_EXAM = "wellness_exam",
   VACCINATION = "vaccination",
+  SPAY_NEUTER = "spay_neuter",
+  DENTAL_CLEANING = "dental_cleaning",
+  EMERGENCY_CARE = "emergency_care",
   SURGERY = "surgery",
-  EMERGENCY = "emergency",
+  DIAGNOSTIC_IMAGING = "diagnostic_imaging",
+  BLOOD_WORK = "blood_work",
   FOLLOW_UP = "follow_up",
-  DENTAL = "dental",
-  GROOMING = "grooming"
+  GROOMING = "grooming",
+  BEHAVIORAL_CONSULTATION = "behavioral_consultation",
+  MICROCHIPPING = "microchipping"
 }
 
 export interface IAppointment extends Document {
