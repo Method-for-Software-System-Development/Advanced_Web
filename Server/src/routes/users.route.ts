@@ -42,8 +42,7 @@ usersRouter.get("/", async (req: Request, res: Response) => {
  * POST /api/users/register
  * Registers a new user. Expects JSON body with user data.
  */
-usersRouter.post("/register", async (req: Request, res: Response) => {
-    console.log("REQ BODY:", req.body);  
+usersRouter.post("/register", async (req: Request, res: Response) => { 
     try {
         const { firstName, lastName, email, phone, password,street, city, postalCode } = req.body;
         const user = new User({
