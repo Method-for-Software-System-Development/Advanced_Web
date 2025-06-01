@@ -24,8 +24,8 @@ usersRouter.get("/", async (req: Request, res: Response) => {
           lastName: user.lastName,
           email: user.email,
           phone: user.phone,
+          street: user.street,
           city: user.city,
-          country: user.country,
           postalCode: user.postalCode,
           contact: user.email,
           pets: user.pets || [],
@@ -43,16 +43,17 @@ usersRouter.get("/", async (req: Request, res: Response) => {
  * Registers a new user. Expects JSON body with user data.
  */
 usersRouter.post("/register", async (req: Request, res: Response) => {
+    console.log("REQ BODY:", req.body);  
     try {
-        const { firstName, lastName, email, phone, password, city, country, postalCode } = req.body;
+        const { firstName, lastName, email, phone, password,street, city, postalCode } = req.body;
         const user = new User({
             firstName,
             lastName,
             email,
             phone,
             password,
+            street,
             city,
-            country,
             postalCode,
             pets: [] 
         });

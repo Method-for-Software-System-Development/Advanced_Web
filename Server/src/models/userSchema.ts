@@ -11,8 +11,8 @@ export interface IUser extends Document {
     email: string;
     phone: string;
     password: string;
+    street: string;
     city: string;
-    country: string;
     postalCode?: string; // optional
     pets: mongoose.Types.ObjectId[];
     role?: "user" | "secretary"; // User role, default is "user"
@@ -25,8 +25,8 @@ const UserSchema: Schema = new Schema({
     email:     { type: String, unique: true, required: true },
     phone:     { type: String, required: true },
     password:  { type: String, required: true },
+    street:    { type: String, required: true },
     city:      { type: String, required: true },
-    country:   { type: String, required: true },
     postalCode:{ type: String }, // optional
     pets:      [{ type: mongoose.Schema.Types.ObjectId, ref: "Pet", default: [] }],
     role: { type: String, enum: ["user", "secretary"], default: "user" }

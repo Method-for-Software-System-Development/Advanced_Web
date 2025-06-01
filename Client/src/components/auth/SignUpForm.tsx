@@ -6,14 +6,7 @@ interface SignUpFormProps {
   onCancel?: () => void;
 }
 
-type Country =
-  | "Israel"
-  | "United States"
-  | "United Kingdom"
-  | "Canada"
-  | "Germany"
-  | "France"
-  | "Australia";
+
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
   /* form state */
@@ -23,20 +16,12 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPwd, setRepeatPwd] = useState("");
+  const [street, setStreet] = useState("");  
   const [city, setCity] = useState("");
-  const [country, setCountry] = useState<Country>("Israel");
   const [postalCode, setPostalCode] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
 
-  const countries: Country[] = [
-    "Israel",
-    "United States",
-    "United Kingdom",
-    "Canada",
-    "Germany",
-    "France",
-    "Australia",
-  ];
+  
 
   /* helpers */
   const isEmail = (v: string) => /[^@]+@[^.]+\..+/.test(v);
@@ -49,6 +34,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
   if (!firstName || !lastName) return setMsg("Name is required");
   if (!isEmail(email)) return setMsg("Invalid email");
   if (!isPhone(phone)) return setMsg("Invalid phone");
+  if (!street) return setMsg("Street is required"); 
   if (!city) return setMsg("City is required");
   if (password.length < 6) return setMsg("Password ≥ 6 chars");
   if (password !== repeatPwd) return setMsg("Passwords mismatch");
@@ -62,7 +48,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
      * or { error } on failure.
      */
     const response = await axios.post("http://localhost:3000/api/users/register", {
-      firstName, lastName, email, phone, password, city, country, postalCode
+      firstName, lastName, email, phone, password,street, city, postalCode
     });
 
     // In Axios, response.data contains the returned JSON object
@@ -129,19 +115,18 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
           <p className="mt-1 text-xs text-gray-500">Must match the password exactly.</p>
         </div>
 
+        {/* Street */}
+        <div>
+          <label className="text-sm font-medium text-[#4A3F35]">Street *</label>
+          <input value={street} onChange={e=>setStreet(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-200" required />
+        </div>
+        
         {/* City */}
         <div>
           <label className="text-sm font-medium text-[#4A3F35]">City *</label>
           <input value={city} onChange={e=>setCity(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-200" required />
         </div>
 
-        {/* Country */}
-        <div>
-          <label className="text-sm font-medium text-[#4A3F35]">Country *</label>
-          <select value={country} onChange={e=>setCountry(e.target.value as Country)} className="w-full px-3 py-2 border rounded-lg">
-            {countries.map(c=> <option key={c}>{c}</option>)}
-          </select>
-        </div>
 
         {/* Postal Code */}
         <div>
