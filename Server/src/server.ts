@@ -19,6 +19,7 @@ import treatmentRouter from './routes/treatment.route';
 import prescriptionRouter from './routes/prescription.route';
 import staffRouter from './routes/staff.route';
 import appointmentRouter from './routes/appointment.route';
+import statisticsRouter from './routes/statistics.route';
 
 const app: Application = express();
 const PORT = 3000;
@@ -58,6 +59,9 @@ app.use("/api/staff", staffRouter);
 
 /** Appointment routes API */
 app.use("/api/appointments", appointmentRouter);
+
+/** Statistics routes API */
+app.use("/api/statistics", statisticsRouter);
 
 /** Treatment routes API */
 app.use("/api/treatments", treatmentRouter);
