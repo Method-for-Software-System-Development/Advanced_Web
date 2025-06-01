@@ -39,7 +39,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({ onClose, onAppo
   const [searchedClients, setSearchedClients] = useState<User[]>([]);
   const [selectedClient, setSelectedClient] = useState<User | null>(null);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
-  const [isLoadingClients, setIsLoadingClients] = useState(false);  const [clientPets, setClientPets] = useState<Pet[]>([]);  // Get available durations based on appointment type
+  const [isLoadingClients, setIsLoadingClients] = useState(false);  const [clientPets, setClientPets] = useState<Pet[]>([]);  // Get available durations (with labels)
   const getAvailableDurations = (appointmentType: AppointmentType) => {
     const durations = getTypeSpecificDurations(appointmentType);
     return durations.map(duration => ({
@@ -104,34 +104,37 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({ onClose, onAppo
     } finally {
       setLoadingStaff(false);
     }
-  };  // Get type-specific duration options
+  };  // Get standardized duration options
   const getTypeSpecificDurations = (appointmentType: AppointmentType): number[] => {
     switch (appointmentType) {
       case AppointmentType.WELLNESS_EXAM:
-      case AppointmentType.FOLLOW_UP:
+        return [30, 60];
       case AppointmentType.VACCINATION:
-      case AppointmentType.MICROCHIPPING:
-        return [30]; // 30 minutes only
-      
-      case AppointmentType.GROOMING:
-      case AppointmentType.BEHAVIORAL_CONSULTATION:
-      case AppointmentType.BLOOD_WORK:
-      case AppointmentType.DENTAL_CLEANING:
-        return [30, 60]; // 30 minutes or 1 hour
-      
-      case AppointmentType.EMERGENCY_CARE:
-      case AppointmentType.DIAGNOSTIC_IMAGING:
-        return [30, 60, 120]; // 30 minutes, 1 hour, or 2 hours
-      
+        return [30];
       case AppointmentType.SPAY_NEUTER:
+        return [90, 120];
+      case AppointmentType.DENTAL_CLEANING:
+        return [60, 90];
+      case AppointmentType.EMERGENCY_CARE:
+        return [30, 60, 90];
       case AppointmentType.SURGERY:
-        return [60, 120]; // 1 hour or 2 hours
-      
+        return [120];
+      case AppointmentType.DIAGNOSTIC_IMAGING:
+        return [60, 90];
+      case AppointmentType.BLOOD_WORK:
+        return [30];
+      case AppointmentType.FOLLOW_UP:
+        return [30, 60];
+      case AppointmentType.GROOMING:
+        return [60, 90, 120];
+      case AppointmentType.BEHAVIORAL_CONSULTATION:
+        return [60, 90];
+      case AppointmentType.MICROCHIPPING:
+        return [30];
       default:
-        return [30, 60, 120]; // Default options
+        return [30, 60, 90, 120]; // Default for unknown types
     }
-  };
-  // Get default duration for appointment type
+  };// Get default duration for appointment type
   const getDefaultDuration = (appointmentType: AppointmentType): number => {
     const availableDurations = getTypeSpecificDurations(appointmentType);
     return availableDurations[0]; // Return the first (shortest) duration as default
@@ -483,8 +486,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({ onClose, onAppo
                   value={formData.type}
                   onChange={(e) => {
                     const newType = e.target.value as AppointmentType;
-                    handleInputChange('type', newType);
-                    // Auto-update duration to the default for this type
+                    handleInputChange('type', newType);                    // Auto-update duration to the default for this type
                     const defaultDuration = getDefaultDuration(newType);
                     handleInputChange('duration', defaultDuration);
                     // Auto-update cost for this service type
@@ -514,9 +516,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({ onClose, onAppo
                 </label>
                 <select
                   value={formData.duration}
-                  onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"                >
-                  {getAvailableDurations(formData.type || AppointmentType.WELLNESS_EXAM).map(option => (
+                  onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"                >                  {getAvailableDurations(formData.type || AppointmentType.WELLNESS_EXAM).map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>

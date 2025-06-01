@@ -31,23 +31,36 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
   loadingStaff,
   staffAppointments,
   loadingAppointments
-}) => {
-  const getAvailableDurations = (appointmentType: AppointmentType) => {
-    const durationMap = {
-      [AppointmentType.WELLNESS_EXAM]: [30, 45],
-      [AppointmentType.VACCINATION]: [15, 30],
-      [AppointmentType.SPAY_NEUTER]: [120, 180],
-      [AppointmentType.DENTAL_CLEANING]: [60, 90],
-      [AppointmentType.EMERGENCY_CARE]: [30, 60, 90],
-      [AppointmentType.SURGERY]: [60, 120, 180, 240],
-      [AppointmentType.DIAGNOSTIC_IMAGING]: [30, 45],
-      [AppointmentType.BLOOD_WORK]: [15, 30],
-      [AppointmentType.FOLLOW_UP]: [15, 30],
-      [AppointmentType.GROOMING]: [60, 90, 120],
-      [AppointmentType.BEHAVIORAL_CONSULTATION]: [45, 60],
-      [AppointmentType.MICROCHIPPING]: [15, 30]
-    };
-    return durationMap[appointmentType] || [30];
+}) => {  const getAvailableDurations = (appointmentType: AppointmentType) => {
+    // Define durations based on appointment type
+    switch (appointmentType) {
+      case AppointmentType.WELLNESS_EXAM:
+        return [30, 60];
+      case AppointmentType.VACCINATION:
+        return [30];
+      case AppointmentType.SPAY_NEUTER:
+        return [90, 120];
+      case AppointmentType.DENTAL_CLEANING:
+        return [60, 90];
+      case AppointmentType.EMERGENCY_CARE:
+        return [30, 60, 90];
+      case AppointmentType.SURGERY:
+        return [120];
+      case AppointmentType.DIAGNOSTIC_IMAGING:
+        return [60, 90];
+      case AppointmentType.BLOOD_WORK:
+        return [30];
+      case AppointmentType.FOLLOW_UP:
+        return [30, 60];
+      case AppointmentType.GROOMING:
+        return [60, 90, 120];
+      case AppointmentType.BEHAVIORAL_CONSULTATION:
+        return [60, 90];
+      case AppointmentType.MICROCHIPPING:
+        return [30];
+      default:
+        return [30, 60, 90, 120]; // Default for unknown types
+    }
   };
 
   const getTypeCosts = (appointmentType: AppointmentType) => {
@@ -73,9 +86,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
     
     // Update cost based on type
     const newCost = getTypeCosts(newType);
-    onInputChange('cost', newCost);
-    
-    // Update duration to first available option for this type
+    onInputChange('cost', newCost);    // Update duration to first available option for this type
     const availableDurations = getAvailableDurations(newType);
     if (availableDurations.length > 0 && !availableDurations.includes(formData.duration)) {
       onInputChange('duration', availableDurations[0]);
@@ -158,9 +169,8 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           </label>
           <select
             value={formData.duration}
-            onChange={(e) => onInputChange('duration', parseInt(e.target.value))}
+            onChange={(e) => onInputChange('duration', parseInt(e.target.value, 10))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
-            required
           >
             {getAvailableDurations(formData.type).map(duration => (
               <option key={duration} value={duration}>
