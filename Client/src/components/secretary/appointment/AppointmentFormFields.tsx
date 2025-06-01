@@ -95,32 +95,31 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
     // Clear selected time since duration may have changed
     onInputChange('time', '');
   };
-
   return (
-    <div className="border-b pb-4">
-      <h3 className="text-lg font-semibold text-gray-700 mb-3">Appointment Details</h3>
+    <div className="border-b pb-4 dark:border-gray-600">
+      <h3 className="text-lg font-semibold text-gray-700 mb-3 dark:text-[#FDF6F0]">Appointment Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date *
-          </label>
+          <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
           <input
             type="date"
-            value={formData.date}
-            onChange={(e) => onInputChange('date', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+            id="appointmentDate"
+            name="date" // Changed from appointmentDate
+            value={formData.date} // Changed from formData.appointmentDate
+            onChange={(e) => onInputChange('date', e.target.value)} // Changed from handleChange
             required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Staff Member *
           </label>
           <select
             value={formData.staffId}
             onChange={(e) => onStaffChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             required
             disabled={loadingStaff}
           >
@@ -144,15 +143,14 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           staffAppointments={staffAppointments}
           isLoading={loadingAppointments}
         />
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Appointment Type *
           </label>
           <select
             value={formData.type}
             onChange={(e) => handleTypeChange(e.target.value as AppointmentType)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             required
           >
             {Object.values(AppointmentType).map(type => (
@@ -164,13 +162,14 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Duration (minutes) *
-          </label>
+          <label htmlFor="appointmentTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
           <select
-            value={formData.duration}
-            onChange={(e) => onInputChange('duration', parseInt(e.target.value, 10))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+            id="appointmentTime"
+            name="time" // Changed from appointmentTime
+            value={formData.time} // Changed from formData.appointmentTime
+            onChange={(e) => onInputChange('time', e.target.value)} // Changed from handleChange
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           >
             {getAvailableDurations(formData.type).map(duration => (
               <option key={duration} value={duration}>
@@ -181,45 +180,63 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="durationMinutes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (minutes)</label>
+          <select
+            id="durationMinutes"
+            name="duration" // Changed from durationMinutes
+            value={formData.duration} // Changed from formData.durationMinutes
+            onChange={(e) => onInputChange('duration', parseInt(e.target.value))} // Changed from handleChange, added parseInt
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+          >
+            {getAvailableDurations(formData.type).map(duration => (
+              <option key={duration} value={duration}>
+                {duration >= 60 ? `${duration / 60} hour${duration > 60 ? 's' : ''}` : `${duration} minutes`}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Cost ($) *
           </label>
           <input
             type="number"
             value={formData.cost}
             onChange={(e) => onInputChange('cost', parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             min="0"
             step="0.01"
             required
           />
         </div>
       </div>
-      
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Reason for Visit *
-        </label>
+        <div className="mt-4">
+        <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Reason for Visit</label>
         <textarea
-          value={formData.description}
-          onChange={(e) => onInputChange('description', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+          id="reason"
+          name="description" // Changed from reason
+          value={formData.description} // Changed from formData.reason
+          onChange={(e) => onInputChange('description', e.target.value)} // Changed from handleChange
           rows={3}
-          placeholder="Describe the reason for the appointment..."
-          required
+          maxLength={300}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+          placeholder="e.g., Annual check-up, vaccination, injury assessment..."
         />
       </div>
 
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Internal Notes (Optional)
-        </label>
+        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Additional Notes (Optional)</label>
         <textarea
-          value={formData.notes}
-          onChange={(e) => onInputChange('notes', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+          id="notes"
+          name="notes"
+          value={formData.notes || ''}
+          onChange={(e) => onInputChange('notes', e.target.value)} // Changed from handleChange
           rows={2}
-          placeholder="Add any internal notes for the staff..."
+          maxLength={200}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+          placeholder="Any other relevant information..."
         />
       </div>
     </div>

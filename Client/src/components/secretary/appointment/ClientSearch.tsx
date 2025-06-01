@@ -37,43 +37,51 @@ const ClientSearch: React.FC<ClientSearchProps> = ({ onClientSelect, selectedCli
   };
 
   return (
-    <div className="border-b pb-4">
-      <h3 className="text-lg font-semibold text-gray-700 mb-3">Client Information</h3>
+    <div className="border-b pb-4 dark:border-gray-600">
+      <h3 className="text-lg font-semibold text-gray-700 mb-3 dark:text-[#FDF6F0]">Client Information</h3>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Search Client (Name, Email, Phone)
         </label>
         <input
           type="text"
+          placeholder="Search by name, email, or phone..."
           value={searchQuery}
           onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Start typing to search..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
         />
-        {isLoading && <p className="text-sm text-gray-500 mt-1">Searching...</p>}
+        {isLoading && <p className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Loading...</p>}
         
         {searchResults.length > 0 && (
-          <ul className="border border-gray-300 rounded-md mt-1 max-h-40 overflow-y-auto bg-white shadow-lg z-10">
-            {searchResults.map(client => (
+          <ul className="mt-2 border border-gray-300 rounded-md shadow-lg bg-white max-h-60 overflow-y-auto dark:border-gray-600 dark:bg-gray-700">
+            {searchResults.map((client) => (
               <li
                 key={client._id}
                 onClick={() => handleSelectClient(client)}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-2 hover:bg-indigo-50 cursor-pointer border-b border-gray-200 last:border-b-0 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-gray-200"
               >
                 {client.firstName} {client.lastName} ({client.email})
               </li>
             ))}
           </ul>
         )}
+        {!isLoading && searchQuery && searchResults.length === 0 && (
+          <p className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">No clients found matching your search.</p>
+        )}
       </div>
 
       {selectedClient && (
-        <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
-          <h4 className="text-md font-semibold text-gray-700">Selected Client:</h4>
-          <p className="text-sm text-gray-600"><strong>Name:</strong> {selectedClient.firstName} {selectedClient.lastName}</p>
-          <p className="text-sm text-gray-600"><strong>Email:</strong> {selectedClient.email}</p>
-          <p className="text-sm text-gray-600"><strong>Phone:</strong> {selectedClient.phone}</p>
+        <div className="mt-4 p-4 border border-gray-300 rounded-md bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-[#FDF6F0]">{selectedClient.firstName} {selectedClient.lastName}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{selectedClient.email}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{selectedClient.phone}</p>
+          <button
+            onClick={() => { setSearchQuery(''); setSearchResults([]); onClientSelect(null as any); }}
+            className="mt-2 text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+          >
+            Clear Selection
+          </button>
         </div>
       )}
     </div>

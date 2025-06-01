@@ -33,16 +33,15 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
       setLoading(false);
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'scheduled': return 'text-blue-600 bg-blue-100';
-      case 'confirmed': return 'text-green-600 bg-green-100';
-      case 'in_progress': return 'text-yellow-600 bg-yellow-100';
-      case 'completed': return 'text-green-700 bg-green-200';
-      case 'cancelled': return 'text-red-600 bg-red-100';
-      case 'no_show': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'scheduled': return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900';
+      case 'confirmed': return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900';
+      case 'in_progress': return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900';
+      case 'completed': return 'text-green-700 dark:text-green-400 bg-green-200 dark:bg-green-900';
+      case 'cancelled': return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900';
+      case 'no_show': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700';
+      default: return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700';
     }
   };
 
@@ -52,26 +51,23 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
       currency: 'USD'
     }).format(amount);
   };
-
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto p-8">
         <div className="flex justify-center items-center h-64">
-          <div className="text-lg text-gray-500">Loading dashboard...</div>
+          <div className="text-lg text-gray-500 dark:text-gray-400">Loading dashboard...</div>
         </div>
       </div>
     );
-  }
-
-  if (error) {
+  }  if (error) {
     return (
       <div className="max-w-7xl mx-auto p-8">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
           Error: {error}
         </div>
         <button 
           onClick={loadStatistics}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors"
         >
           Retry
         </button>
@@ -80,11 +76,10 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-8">
-      {/* Header */}
+    <div className="max-w-7xl mx-auto p-8">      {/* Header */}
       <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-[#4A3F35] mb-3">Secretary Dashboard</h1>
-        <p className="text-lg text-gray-600">Comprehensive clinic management overview</p>
+        <h1 className="text-4xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-3">Secretary Dashboard</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300">Comprehensive clinic management overview</p>
       </header>
 
       {/* Quick Statistics Overview */}
@@ -115,20 +110,19 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Navigation Cards */}
-        <div className="lg:col-span-2">
+          {/* Navigation Cards */}        <div className="lg:col-span-2">
           <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-6">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Appointments Card */}
             <button
               onClick={onNavigateToAppointments}
-              className="block p-6 bg-gradient-to-br from-[#EF92A6] to-[#E87A90] dark:from-[#664147] dark:to-[#58383E] text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-[#F9F3F0] dark:focus:ring-[#F7C9D3] focus:ring-opacity-50"
+              className="block p-6 bg-gradient-to-br from-[#EF92A6] to-[#E87A90] text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-[#F9F3F0] focus:ring-opacity-50"
             >
               <h3 className="text-xl font-semibold mb-2">&#128197; View Appointments</h3>
               <p className="text-sm opacity-90">Access calendar, view schedules, and export reports</p>              {statistics && (
                 <div className="mt-3 text-sm">
-                  <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-gray-800">
+                  <span className="bg-white bg-opacity-20 dark:bg-black dark:bg-opacity-20 px-2 py-1 rounded text-gray-600 dark:text-gray-300">
                     {statistics.todayStats.total} today
                   </span>
                 </div>
@@ -136,12 +130,11 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
             </button>            {/* Manage Patients Card */}
             <button
               onClick={onNavigateToManagePatients}
-              className="block p-6 bg-gradient-to-br from-sky-400 to-blue-500 dark:from-[#91C0EC] dark:to-[#C7DFF5] text-white dark:text-[#3B3B3B] rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-sky-200 dark:focus:ring-[#91C0EC] focus:ring-opacity-50"
+              className="block p-6 bg-gradient-to-br from-sky-400 to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-sky-200 focus:ring-opacity-50"
             >
               <h3 className="text-xl font-semibold mb-2">&#128062; Manage Patients</h3>
-              <p className="text-sm opacity-90">Update patient records and contact information</p>
-              {statistics && (                <div className="mt-3 text-sm">
-                  <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-gray-800">
+              <p className="text-sm opacity-90">Update patient records and contact information</p>              {statistics && (                <div className="mt-3 text-sm">
+                  <span className="bg-white bg-opacity-20 dark:bg-black dark:bg-opacity-20 px-2 py-1 rounded text-gray-600 dark:text-gray-300">
                     {statistics.overview.totalPatients} total
                   </span>
                 </div>
@@ -149,54 +142,48 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
             </button>            {/* Manage Staff Card */}
             <button
               onClick={onNavigateToEditStaff}
-              className="block p-6 bg-gradient-to-br from-purple-400 to-purple-500 dark:from-[#F7C9D3] dark:to-[#EF92A6] text-white dark:text-[#3B3B3B] rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-200 dark:focus:ring-[#F7C9D3] focus:ring-opacity-50"
+              className="block p-6 bg-gradient-to-br from-purple-400 to-purple-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-opacity-50"
             >
               <h3 className="text-xl font-semibold mb-2">&#128101; Manage Staff</h3>
-              <p className="text-sm opacity-90">Update profiles, roles, and availability</p>
-              {statistics && (                <div className="mt-3 text-sm">
-                  <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-gray-800">
+              <p className="text-sm opacity-90">Update profiles, roles, and availability</p>              {statistics && (                <div className="mt-3 text-sm">
+                  <span className="bg-white bg-opacity-20 dark:bg-black dark:bg-opacity-20 px-2 py-1 rounded text-gray-600 dark:text-gray-300">
                     {statistics.overview.totalStaff} active
                   </span>
                 </div>
               )}
             </button>            {/* Settings Card */}
-            <div className="block p-6 bg-gray-100 text-gray-700 rounded-lg shadow-lg cursor-not-allowed opacity-60">
+            <div className="block p-6 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg shadow-lg cursor-not-allowed opacity-60">
               <h3 className="text-xl font-semibold mb-2">&#9881; Settings</h3>
               <p className="text-sm opacity-90">Configure application preferences</p>
               <div className="mt-3 text-sm">
-                <span className="bg-gray-300 px-2 py-1 rounded text-xs">Coming Soon</span>
+                <span className="bg-gray-300 dark:bg-gray-600 px-2 py-1 rounded text-xs">Coming Soon</span>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Today's Appointments Summary */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-semibold text-[#4A3F35] mb-4">&#128203; Today's Schedule</h3>
+        </div>        {/* Today's Appointments Summary */}
+        <div className="bg-white dark:bg-[#664147] rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">&#128203; Today's Schedule</h3>
           {statistics && statistics.todayAppointments.length > 0 ? (
-            <div className="space-y-3 max-h-80 overflow-y-auto">
-              {statistics.todayAppointments.slice(0, 8).map((apt) => (
-                <div key={apt.id} className="border-l-4 border-[#EF92A6] pl-3 py-2 bg-gray-50 rounded-r">
+            <div className="space-y-3 max-h-80 overflow-y-auto">              {statistics.todayAppointments.slice(0, 8).map((apt) => (
+                <div key={apt.id} className="border-l-4 border-[#EF92A6] pl-3 py-2 bg-gray-50 dark:bg-gray-600 rounded-r">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="font-medium text-sm">{apt.time}</span>
+                    <span className="font-medium text-sm dark:text-gray-200">{apt.time}</span>
                     <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(apt.status)}`}>
                       {apt.status.replace('_', ' ')}
                     </span>
-                  </div>
-                  <p className="text-sm text-gray-700">
+                  </div>                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     <strong>{apt.clientName}</strong> with <strong>{apt.petName}</strong>
                   </p>
-                  <p className="text-xs text-gray-600">{apt.service} &bull; {apt.staffName}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{apt.service} &bull; {apt.staffName}</p>
                 </div>
-              ))}
-              {statistics.todayAppointments.length > 8 && (
-                <p className="text-sm text-gray-500 text-center">
+              ))}              {statistics.todayAppointments.length > 8 && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                   +{statistics.todayAppointments.length - 8} more appointments
                 </p>
               )}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">No appointments scheduled for today</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8">No appointments scheduled for today</p>
           )}
         </div>
       </div>
@@ -204,40 +191,35 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
       {/* Bottom Stats Grid */}
       {statistics && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Upcoming Appointments */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-[#4A3F35] mb-4">&#128197; Upcoming This Week</h3>
+            {/* Upcoming Appointments */}
+          <div className="bg-white dark:bg-[#664147] rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">&#128197; Upcoming This Week</h3>
             {statistics.upcomingAppointments.length > 0 ? (
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {statistics.upcomingAppointments.map((apt) => (
-                  <div key={apt.id} className="border-l-4 border-blue-400 pl-3 py-2 bg-blue-50 rounded-r">
+              <div className="space-y-3 max-h-64 overflow-y-auto">                {statistics.upcomingAppointments.map((apt) => (
+                  <div key={apt.id} className="border-l-4 border-blue-400 pl-3 py-2 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded-r">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium text-sm">
+                      <span className="font-medium text-sm dark:text-gray-200">
                         {new Date(apt.date).toLocaleDateString()} {apt.time}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
                       <strong>{apt.clientName}</strong> - {apt.petName}
                     </p>
-                    <p className="text-xs text-gray-600">{apt.service}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{apt.service}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">No upcoming appointments</p>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-8">No upcoming appointments</p>
             )}
-          </div>
-
-          {/* Popular Services */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-[#4A3F35] mb-4">&#128202; Popular Services</h3>            {statistics.popularServices.length > 0 ? (
-              <div className="space-y-3">
-                {statistics.popularServices.map((service) => (
+          </div>          {/* Popular Services */}
+          <div className="bg-white dark:bg-[#664147] rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">&#128202; Popular Services</h3>{statistics.popularServices.length > 0 ? (
+              <div className="space-y-3">                {statistics.popularServices.map((service) => (
                   <div key={service.service} className="flex justify-between items-center">
-                    <span className="text-sm text-gray-700">{service.service}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{service.service}</span>
                     <div className="flex items-center">
-                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                      <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2 mr-2">
                         <div 
                           className="bg-[#EF92A6] h-2 rounded-full" 
                           style={{ 
@@ -245,41 +227,39 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
                           }}
                         ></div>
                       </div>
-                      <span className="text-sm font-medium">{service.count}</span>
+                      <span className="text-sm font-medium dark:text-gray-200">{service.count}</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">No service data available</p>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-8">No service data available</p>
             )}
-          </div>
-
-          {/* Weekly Summary */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-[#4A3F35] mb-4">&#128200; This Week's Summary</h3>
+          </div>          {/* Weekly Summary */}
+          <div className="bg-white dark:bg-[#664147] rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">&#128200; This Week's Summary</h3>
             <div className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-gray-600">Total Appointments</span>
-                <span className="font-semibold">{statistics.weekStats.total}</span>
+                <span className="text-gray-600 dark:text-gray-300">Total Appointments</span>
+                <span className="font-semibold dark:text-gray-200">{statistics.weekStats.total}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Completed</span>
-                <span className="font-semibold text-green-600">{statistics.weekStats.completed}</span>
+                <span className="text-gray-600 dark:text-gray-300">Completed</span>
+                <span className="font-semibold text-green-600 dark:text-green-400">{statistics.weekStats.completed}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Cancelled</span>
-                <span className="font-semibold text-red-600">{statistics.weekStats.cancelled}</span>
+                <span className="text-gray-600 dark:text-gray-300">Cancelled</span>
+                <span className="font-semibold text-red-600 dark:text-red-400">{statistics.weekStats.cancelled}</span>
               </div>
-              <div className="border-t pt-3">
+              <div className="border-t dark:border-gray-500 pt-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Revenue</span>
-                  <span className="font-bold text-green-700">{formatCurrency(statistics.weekStats.revenue)}</span>
+                  <span className="text-gray-600 dark:text-gray-300">Revenue</span>
+                  <span className="font-bold text-green-700 dark:text-green-400">{formatCurrency(statistics.weekStats.revenue)}</span>
                 </div>
               </div>
-              <div className="bg-gray-100 p-3 rounded">
-                <div className="text-sm text-gray-600 mb-1">Completion Rate</div>
-                <div className="text-lg font-bold text-green-600">
+              <div className="bg-gray-100 dark:bg-gray-600 p-3 rounded">
+                <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Completion Rate</div>
+                <div className="text-lg font-bold text-green-600 dark:text-green-400">
                   {statistics.weekStats.total > 0 ? 
                     Math.round((statistics.weekStats.completed / statistics.weekStats.total) * 100) : 0}%
                 </div>
@@ -290,7 +270,7 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
       )}      {/* Refresh Button */}
       <div className="text-center mt-8">        <button
           onClick={loadStatistics}
-          className="px-6 py-2 bg-[#664147] hover:bg-[#58383E] text-white rounded-lg shadow-md font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-[#F7C9D3] dark:hover:bg-[#EF92A6] dark:text-[#3B3B3B]"
+          className="px-6 py-2 bg-[#664147] hover:bg-[#58383E] text-white rounded-lg shadow-md font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading}
         >
           {loading ? 'Refreshing...' : '⟲ Refresh Dashboard'}

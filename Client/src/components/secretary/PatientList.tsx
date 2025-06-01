@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PatientCard from './PatientCard';
 import { Patient } from '../../types';
 
@@ -11,9 +11,8 @@ interface PatientListProps {
 }
 
 const PatientList: React.FC<PatientListProps> = ({ patients, onEditPatient, onAddPet, openAddPetForId, setOpenAddPetForId }) => {
-  return (
-    <section className="mt-10">
-      <h2 className="text-2xl font-semibold text-[#4A3F35] mb-6">Current Patients</h2>
+  return (    <section className="mt-10">
+      <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-6">Current Patients</h2>
       {patients.length > 0 ? (
         <div className="space-y-6">
           {patients.map((patient) => (
@@ -28,7 +27,7 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onEditPatient, onAd
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500">No patients found. Click "Add New Patient" to get started.</p>
+        <p className="text-center text-gray-500 dark:text-gray-400">No patients found. Click "Add New Patient" to get started.</p>
       )}
     </section>
   );

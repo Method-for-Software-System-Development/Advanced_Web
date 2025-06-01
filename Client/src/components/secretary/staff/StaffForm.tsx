@@ -22,6 +22,8 @@ interface StaffFormProps {
   onCancel: () => void;
   editingStaff: Staff | null;
   isSubmitting?: boolean;
+  imageUploadSection?: React.ReactNode;
+  availabilitySection?: React.ReactNode;
 }
 
 const StaffForm: React.FC<StaffFormProps> = ({
@@ -30,11 +32,14 @@ const StaffForm: React.FC<StaffFormProps> = ({
   onSubmit,
   onCancel,
   editingStaff,
-  isSubmitting = false
+  isSubmitting = false,
+  imageUploadSection,
+  availabilitySection
 }) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">        {/* First Name */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* First Name */}
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             First Name:
@@ -46,7 +51,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
             value={formData.firstName}
             onChange={onInputChange}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
 
@@ -62,7 +67,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
             value={formData.lastName}
             onChange={onInputChange}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
 
@@ -78,7 +83,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
             value={formData.email}
             onChange={onInputChange}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
 
@@ -94,9 +99,11 @@ const StaffForm: React.FC<StaffFormProps> = ({
             value={formData.phone}
             onChange={onInputChange}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
-        </div>        {/* Role */}
+        </div>
+
+        {/* Role */}
         <div>
           <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Role:
@@ -107,7 +114,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
             value={formData.role}
             onChange={onInputChange}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           >
             <option value={StaffRole.VETERINARIAN}>Veterinarian</option>
             <option value={StaffRole.VETERINARY_ASSISTANT}>Veterinary Assistant</option>
@@ -129,7 +136,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
             onChange={onInputChange}
             min="0"
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
       </div>
@@ -145,9 +152,11 @@ const StaffForm: React.FC<StaffFormProps> = ({
           name="specialization"
           value={formData.specialization}
           onChange={onInputChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
         />
-      </div>      {/* License Number */}
+      </div>
+
+      {/* License Number */}
       <div>
         <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           License Number:
@@ -158,7 +167,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
           name="licenseNumber"
           value={formData.licenseNumber}
           onChange={onInputChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
         />
       </div>
 
@@ -175,12 +184,25 @@ const StaffForm: React.FC<StaffFormProps> = ({
           rows={3}
           maxLength={500}
           placeholder="Brief description of the staff member's expertise and background..."
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-        />
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+        />        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           {formData.description.length}/500 characters
         </p>
       </div>
+
+      {/* Image Upload Section */}
+      {imageUploadSection && (
+        <div className="mt-6">
+          {imageUploadSection}
+        </div>
+      )}
+
+      {/* Availability Section */}
+      {availabilitySection && (
+        <div className="mt-6">
+          {availabilitySection}
+        </div>
+      )}
 
       {/* Form Actions */}
       <div className="flex justify-end space-x-2 pt-4">
@@ -188,14 +210,14 @@ const StaffForm: React.FC<StaffFormProps> = ({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md shadow-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md shadow-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-600 dark:hover:bg-gray-700"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 bg-[#664147] hover:bg-[#58383E] text-white rounded-md shadow-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-[#F7C9D3] dark:hover:bg-[#EF92A6] dark:text-[#3B3B3B]"
+          className="px-4 py-2 bg-[#664147] hover:bg-[#58383E] text-white rounded-md shadow-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-[#58383E] dark:hover:bg-[#4A2F35]"
         >
           {isSubmitting ? 'Saving...' : editingStaff ? 'Update' : 'Add'} Staff Member
         </button>

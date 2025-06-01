@@ -118,26 +118,24 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       patient.pets.some(pet => pet.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [patients, searchTerm]);
-
-  if (loading) return <div>Loading patients...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="dark:text-gray-300">Loading patients...</div>;
+  if (error) return <div className="text-red-600 dark:text-red-400">Error: {error}</div>;
 
   return (
     <>
     <div className="mb-8 text-center">
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
         </div>
-        
-    <div className="max-w-6xl mx-auto p-4 md:p-8 bg-white rounded-xl shadow-2xl">
+          <div className="max-w-6xl mx-auto p-4 md:p-8 bg-white dark:bg-[#664147] rounded-xl shadow-2xl">
         
       <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-[#4A3F35] mb-3">Manage Patients</h1>
-        <p className="text-lg text-gray-600">View, add, or update patient and pet information.</p>
+        <h1 className="text-3xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-3">Manage Patients</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300">View, add, or update patient and pet information.</p>
       </header>
 
       {/* Search Input */}
       <div className="mb-8 px-2">
-        <label htmlFor="searchPatients" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="searchPatients" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Search Patients (by Owner, Contact, or Pet Name)
         </label>
         <input
@@ -146,15 +144,13 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
           placeholder="Enter search term..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
         />
-      </div>
-
-      {/* Action Buttons */}
+      </div>      {/* Action Buttons */}
       <div className="mb-8 flex flex-col sm:flex-row justify-center gap-4">
         <button
           onClick={openAddPatientForm}
-          className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200"
+          className="px-6 py-3 bg-green-500 dark:bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
         >
           Add New Patient
         </button>

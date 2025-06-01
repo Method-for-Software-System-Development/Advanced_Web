@@ -90,16 +90,15 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
   };
 
   const availableSlots = generateTimeSlots();
-
   if (!selectedStaff) {
     return (
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Time *
         </label>
         <select
           disabled
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] disabled:bg-gray-100"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] disabled:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:disabled:bg-gray-800"
         >
           <option>Please select a staff member first</option>
         </select>
@@ -110,12 +109,12 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
   if (isLoading) {
     return (
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Time *
         </label>
         <select
           disabled
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] disabled:bg-gray-100"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] disabled:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:disabled:bg-gray-800"
         >
           <option>Loading available times...</option>
         </select>
@@ -125,13 +124,13 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
         Time *
       </label>
       <select
         value={selectedTime}
         onChange={(e) => onTimeSelect(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6]"
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
         required
       >
         <option value="">
@@ -144,7 +143,7 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
         ))}
       </select>
       {availableSlots.length === 0 && selectedStaff && (
-        <p className="mt-1 text-sm text-red-600">
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
           No available time slots for the selected staff member on this date.
         </p>
       )}

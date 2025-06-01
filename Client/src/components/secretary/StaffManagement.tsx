@@ -48,11 +48,11 @@ const initialAvailability: Availability = {
   sunday: { day: 'Sunday', startTime: '', endTime: '', isAvailable: false },
 };
 
-interface RefactoredEditStaffViewProps {
+interface StaffManagementProps {
   onBack?: () => void;
 }
 
-const RefactoredEditStaffView: React.FC<RefactoredEditStaffViewProps> = ({ onBack }) => {
+const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -297,28 +297,26 @@ const RefactoredEditStaffView: React.FC<RefactoredEditStaffViewProps> = ({ onBac
     return () => {
       document.head.removeChild(style);
     };
-  }, []);
-
-  if (loading && staff.length === 0) return <p>Loading staff...</p>;
-  if (error) return <p>{error}</p>;
+  }, []);  if (loading && staff.length === 0) return <p className="dark:text-gray-300">Loading staff...</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
+  
   const filteredStaff = showInactive ? staff.filter(s => !s.isActive) : staff.filter(s => s.isActive);
+  
   return (
-    <div className="container mx-auto p-6 bg-gradient-to-br from-[#FDF6F0] to-[#F5D2B3] dark:from-[#121212] dark:to-[#1a1a1a] min-h-screen text-[#3B3B3B] dark:text-[#FDF6F0]">
+    <div className="container mx-auto p-6 bg-gradient-to-br from-[#FDF6F0] to-[#F5D2B3] dark:from-[#664147] dark:to-[#3d262a] min-h-screen text-[#3B3B3B] dark:text-[#FDF6F0]">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {onBack && (
             <button
               onClick={onBack}
-              className="px-4 py-2 bg-[#664147] dark:bg-[#58383E] text-white rounded-lg shadow-md hover:bg-[#58383E] dark:hover:bg-[#664147] transition-colors duration-200 flex items-center gap-2"
+              className="px-4 py-2 bg-[#664147] dark:bg-[#58383E] text-white rounded-lg shadow-md hover:bg-[#58383E] dark:hover:bg-[#4A2F33] transition-colors duration-200 flex items-center gap-2"
             >
               ← Back to Dashboard
             </button>
           )}
-          <h1 className="text-3xl font-bold text-[#664147] dark:text-[#F7C9D3]">Manage Staff</h1>
+          <h1 className="text-3xl font-bold text-[#664147] dark:text-[#FDF6F0]">Manage Staff</h1>
         </div>
-      </div>
-
-      <div className="flex flex-wrap gap-4 mb-6">
+      </div>      <div className="flex flex-wrap gap-4 mb-6">
         <button 
           onClick={() => { 
             if (showAddForm || editingStaff) {
@@ -329,8 +327,8 @@ const RefactoredEditStaffView: React.FC<RefactoredEditStaffViewProps> = ({ onBac
           }}
           className={`px-6 py-3 rounded-lg shadow-md font-semibold transition-colors duration-200 ${
             showAddForm || editingStaff 
-              ? 'bg-red-500 hover:bg-red-600 text-white' 
-              : 'bg-green-500 hover:bg-green-600 text-white'
+              ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white' 
+              : 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white'
           }`}
         >
           {showAddForm && !editingStaff ? 'Cancel Add New Staff' : editingStaff ? 'Cancel Edit / View List' : 'Add New Staff Member'}
@@ -338,37 +336,36 @@ const RefactoredEditStaffView: React.FC<RefactoredEditStaffViewProps> = ({ onBac
         
         <button 
           onClick={() => setShowInactive(!showInactive)}
-          className="px-6 py-3 bg-[#91C0EC] hover:bg-[#C7DFF5] text-[#664147] rounded-lg shadow-md font-semibold transition-colors duration-200"
+          className="px-6 py-3 bg-[#91C0EC] hover:bg-[#C7DFF5] dark:bg-[#5A8BB8] dark:hover:bg-[#7BA5CC] text-[#664147] dark:text-[#FDF6F0] rounded-lg shadow-md font-semibold transition-colors duration-200"
         >
           {showInactive ? 'Show Active Staff' : 'Show Inactive Staff'}
         </button>
       </div>      {showAddForm || editingStaff ? (
-        <div className="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-xl p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-2xl font-semibold text-[#664147] dark:text-[#F7C9D3] mb-6">
+        <div className="bg-white dark:bg-[#4A2F33] rounded-lg shadow-xl p-6 border border-gray-200 dark:border-gray-600">
+          <h3 className="text-2xl font-semibold text-[#664147] dark:text-[#FDF6F0] mb-6">
             {editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}
-          </h3>
-          <StaffForm
+          </h3>          <StaffForm
             formData={formData}
             onInputChange={handleFormInputChange}
             onSubmit={handleSubmit}
             onCancel={resetForm}
             editingStaff={editingStaff}
             isSubmitting={loading}
+            imageUploadSection={
+              <ImageUpload
+                imagePreview={imagePreview}
+                selectedImage={selectedImage}
+                onImageChange={handleImageFileChange}
+                onRemoveImage={handleRemoveImage}
+              />
+            }
+            availabilitySection={
+              <AvailabilityScheduler
+                availability={availability} 
+                onAvailabilityChange={handleAvailabilityChange}
+              />
+            }
           />
-          <div className="mt-6">
-            <ImageUpload
-              imagePreview={imagePreview}
-              selectedImage={selectedImage}
-              onImageChange={handleImageFileChange}
-              onRemoveImage={handleRemoveImage}
-            />
-          </div>
-          <div className="mt-6">
-            <AvailabilityScheduler
-              availability={availability} 
-              onAvailabilityChange={handleAvailabilityChange}
-            />
-          </div>
         </div>
       ) : (
         <StaffGrid
@@ -383,4 +380,4 @@ const RefactoredEditStaffView: React.FC<RefactoredEditStaffViewProps> = ({ onBac
   );
 };
 
-export default RefactoredEditStaffView;
+export default StaffManagement;
