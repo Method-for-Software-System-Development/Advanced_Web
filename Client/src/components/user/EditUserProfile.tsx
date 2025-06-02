@@ -63,13 +63,14 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
   };
 
   return (
-    <div className="bg-[var(--color-cream)] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)]">
-      <h3 className="text-xl font-bold text-[var(--color-wine)] mb-4">
-        Edit Contact Information
+    <div className="bg-[var(--color-cream)] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)] mobile:w-full">
+      <h3 className="text-xl font-bold text-[var(--color-wine)] mb-4 min-w-[220px] h-12 flex items-center justify-center">
+        <span className="block mobile:hidden">Edit Information</span>
+        <span className="hidden mobile:block">Edit Contact Information</span>
       </h3>
       <div className="space-y-4">
-        <div>
-          <label className="block text-base font-semibold text-[var(--color-wine)]">
+        <div className="flex items-center gap-2">
+          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px]">
             Email:
           </label>
           <input
@@ -82,8 +83,8 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             autoComplete="email"
           />
         </div>
-        <div>
-          <label className="block text-base font-semibold text-[var(--color-wine)]">
+        <div className="flex items-center gap-2">
+          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px]">
             Phone:
           </label>
           <input

@@ -37,32 +37,53 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
       });
   }, [prescriptionIds]);
 
-  if (loading) return <div className="text-gray-500">Loading prescriptions...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-  if (!prescriptions.length) return <div className="text-gray-500">No prescriptions found.</div>;
+  if (loading) return <div className="text-gray-500 text-xs sm:text-base whitespace-nowrap text-left">Loading prescriptions...</div>;
+  if (error) return <div className="text-red-500 text-xs sm:text-base whitespace-nowrap text-left">{error}</div>;
+  if (!prescriptions.length) return <div className="text-gray-500 text-xs sm:text-base whitespace-nowrap text-left">No prescriptions found.</div>;
 
   return (
     <div className="bg-gray-50 rounded-lg shadow p-4 mt-2 w-full">
       <h4 className="font-bold mb-2 text-[#664147] text-lg">Prescriptions</h4>
+      {/* Table Headline Row - only shown if there are unfulfilled prescriptions */}
+      <div className="hidden sm:grid grid-cols-5 gap-x-2 text-xs sm:text-base font-bold text-center text-[var(--color-wine)] mb-1">
+        <span>Medicine</span>
+        <span>Quantity</span>
+        <span>Issued</span>
+        <span>Expires</span>
+        <span>Fulfilled</span>
+      </div>
       <ul className="space-y-2">
         {prescriptions.map((presc) => (
           <li key={presc._id} className="border-b pb-2 last:border-b-0">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0 text-base">
-              <span>
-                <span className="font-semibold">Medicine:</span> {presc.medicineType}
-              </span>
-              <span>
-                <span className="font-semibold">Qty:</span> {presc.quantity}
-              </span>
-              <span>
-                <span className="font-semibold">Issued:</span> {new Date(presc.issueDate).toLocaleDateString()}
-              </span>
-              <span>
-                <span className="font-semibold">Expires:</span> {new Date(presc.expirationDate).toLocaleDateString()}
-              </span>
-              <span>
-                <span className="font-semibold">Fulfilled:</span> {presc.fulfilled ? "Yes" : "No"}
-              </span>
+            {/* Responsive data row: grid on desktop, stacked on mobile */}
+            <div className="sm:grid sm:grid-cols-5 gap-y-1 gap-x-2 text-xs sm:text-base items-center">
+              {/* Mobile stacked view */}
+              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
+                <span className="font-bold text-[var(--color-wine)]">Medicine:</span>
+                <span className="text-right">{presc.medicineType}</span>
+              </div>
+              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
+                <span className="font-bold text-[var(--color-wine)]">Quantity:</span>
+                <span className="text-right">{presc.quantity}</span>
+              </div>
+              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
+                <span className="font-bold text-[var(--color-wine)]">Issued:</span>
+                <span className="text-right">{new Date(presc.issueDate).toLocaleDateString()}</span>
+              </div>
+              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
+                <span className="font-bold text-[var(--color-wine)]">Expires:</span>
+                <span className="text-right">{new Date(presc.expirationDate).toLocaleDateString()}</span>
+              </div>
+              <div className="flex sm:hidden justify-between py-1">
+                <span className="font-bold text-[var(--color-wine)]">Fulfilled:</span>
+                <span className="text-right">{presc.fulfilled ? "Yes" : "No"}</span>
+              </div>
+              {/* Desktop/tablet grid view */}
+              <span className="hidden sm:block whitespace-nowrap text-center">{presc.medicineType}</span>
+              <span className="hidden sm:block text-center">{presc.quantity}</span>
+              <span className="hidden sm:block text-center">{new Date(presc.issueDate).toLocaleDateString()}</span>
+              <span className="hidden sm:block text-center">{new Date(presc.expirationDate).toLocaleDateString()}</span>
+              <span className="hidden sm:block text-center">{presc.fulfilled ? "Yes" : "No"}</span>
             </div>
           </li>
         ))}

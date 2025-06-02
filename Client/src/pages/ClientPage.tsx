@@ -30,8 +30,8 @@ const viewLabels: Record<ClientView, string> = {
 const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
 
-  // Show 4 views excluding the current one
-  const visibleViews = allViews.filter((v) => v !== currentView).slice(0, 4);
+  // Show navigation buttons for all views except the current one
+  const visibleViews = allViews.filter((v) => v !== currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F9F3F0] text-[#4A3F35]">
@@ -40,16 +40,13 @@ const ClientPage: React.FC = () => {
       <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">
         {/* Button Navigation */}
         <div className="flex flex-wrap gap-4 justify-center mb-10">
-          {allViews
-            .filter((view) => view !== currentView) // exclude current view
-            .slice(0, 5) // ensure only 5 are shown
-            .map((view) => (
-              <UserNavButton
-                key={view}
-                label={viewLabels[view]}
-                onClick={() => setCurrentView(view)}
-              />
-            ))}
+          {visibleViews.map((view) => (
+            <UserNavButton
+              key={view}
+              label={viewLabels[view]}
+              onClick={() => setCurrentView(view)}
+            />
+          ))}
         </div>
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}
