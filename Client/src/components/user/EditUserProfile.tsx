@@ -63,14 +63,13 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
   };
 
   return (
-    <div className="bg-[var(--color-cream)] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)] mobile:w-full">
-      <h3 className="text-xl font-bold text-[var(--color-wine)] mb-4 min-w-[220px] h-12 flex items-center justify-center">
-        <span className="block mobile:hidden">Edit Information</span>
-        <span className="hidden mobile:block">Edit Contact Information</span>
+    <div className="bg-[var(--color-cream)] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)] w-full mobile:rounded-lg mobile:shadow-sm mobile:text-sm mobile:max-w-none mobile:px-4 mobile:w-[95vw]">
+      <h3 className="text-xl font-bold text-[var(--color-wine)] mb-4 min-w-[220px] h-12 flex items-center text-left justify-start sm:justify-center">
+        <span className="block mobile:hidden w-full mobile:text-xl mobile:text-left">Edit Information</span>
       </h3>
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px]">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px] sm:min-w-[120px] mb-1 sm:mb-0">
             Email:
           </label>
           <input
@@ -79,12 +78,14 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             onChange={(e) => setEmail(e.target.value)}
             className={`mt-1 w-full px-3 py-2 border ${
               emailValid ? "border-gray-300" : "border-red-500"
-            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white`}
+            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white text-ellipsis overflow-x-auto sm:text-clip mobile:text-xs mobile:py-1 mobile:px-2`}
             autoComplete="email"
+            style={{ fontSize: '16px', fontFamily: 'monospace', letterSpacing: '0.01em' }}
+            inputMode="email"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px]">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px] sm:min-w-[120px] mb-1 sm:mb-0">
             Phone:
           </label>
           <input
@@ -93,23 +94,25 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             onChange={(e) => setPhone(e.target.value)}
             className={`mt-1 w-full px-3 py-2 border ${
               phoneValid ? "border-gray-300" : "border-red-500"
-            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white`}
+            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white mobile:text-xs mobile:py-1 mobile:px-2`}
             autoComplete="tel"
+            style={{ fontSize: '16px', fontFamily: 'monospace', letterSpacing: '0.01em' }}
+            inputMode="tel"
           />
         </div>
         {errorMessage && (
-          <div className="text-red-600 text-sm pt-1">{errorMessage}</div>
+          <div className="text-red-600 text-sm pt-1 mobile-error-text">{errorMessage}</div>
         )}
         <div className="flex flex-row justify-end gap-3 pt-4 w-full">
           <button
             onClick={handleSubmit}
-            className="w-36 px-4 py-2 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] font-semibold text-base transition-colors duration-150"
+            className="w-24 px-2 py-1 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] font-semibold text-base transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs"
           >
             Save
           </button>
           <button
             onClick={onCancel}
-            className="w-36 px-4 py-2 bg-[var(--color-skyDark)] text-[var(--color-wine)] rounded-lg hover:bg-[var(--color-sky)] text-base font-semibold transition-colors duration-150"
+            className="w-24 px-2 py-1 bg-[var(--color-skyDark)] text-[var(--color-wine)] rounded-lg hover:bg-[var(--color-sky)] text-base font-semibold transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs"
           >
             Cancel
           </button>

@@ -24,10 +24,10 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
   const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   return (
-    <div className="bg-[var(--color-sky)] border-2 border-[var(--color-wine)] rounded-2xl shadow-lg p-10 w-full mx-auto sm:p-8 xs:p-4">
+  <div className="bg-[var(--color-sky)] border-2 border-[var(--color-wine)] rounded-2xl shadow-lg w-full mx-auto sm:p-8 p-6 mobile:p-2 mobile:w-screen mobile:rounded-none">
       {/* Name and Edit button layout */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2 sm:gap-0">
-        <h2 className="text-4xl sm:text-3xl font-extrabold text-[var(--color-wine)] font-[Nunito] tracking-tight drop-shadow">
+        <h2 className="text-3xl font-bold text-[var(--color-wine)] font-[Nunito] tracking-tight drop-shadow block sm:text-3xl">
           {capitalize(firstName)} {capitalize(lastName)}
         </h2>
         {/* Edit button for desktop only */}

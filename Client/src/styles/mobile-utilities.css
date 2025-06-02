@@ -20,4 +20,12 @@
     width: 90% !important;
     max-width: 90% !important;
   }
+  .mobile-error-text {
+    font-size: 10px !important;
+    line-height: 0.75;
+  }
+  .mobile-toast-text {
+    font-size: 11px !important;
+    line-height: 2.25;
+  }
 }

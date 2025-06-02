@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./mobile-utilities.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 /* Allows styling elements when the .dark class is present anywhere in the tree */
