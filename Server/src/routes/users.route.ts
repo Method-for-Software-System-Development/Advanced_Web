@@ -2,12 +2,13 @@
  * Users API routes.
  * Defines all REST endpoints related to user management.
  */
-
+import { sendPasswordResetEmail } from "../services/emailService";
 import { Router, Request, Response } from 'express';
 import User, { IUser } from '../models/userSchema';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 const usersRouter = Router();
+console.log("usersRouter loaded");
 
 /**
  * GET /api/Users
@@ -168,5 +169,106 @@ usersRouter.get("/search", async (req: Request, res: Response) => {
         res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
     }
 });
+
+/**
+ * POST /api/users/forgot-password
+ * Handles password reset requests by generating a 6-digit code,
+ * saving it to the user's document, and sending it via email.
+ * Expects: { email }
+ * Returns: { message }
+ */
+usersRouter.post("/forgot-password", async (req: Request, res: Response) => {
+  /**
+   * Handles password reset requests by generating a 6-digit code,
+   * saving it to the user's document, and sending it via email.
+   */
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).send({ error: "Email is required." });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).send({ error: "No user with that email address." });
+
+    // Generate a 6-digit random code (as string)
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Set code and expiry for 15 minutes from now
+    user.resetPasswordCode = code;
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
+    await user.save();
+
+    // Send code via email
+    await sendPasswordResetEmail(email, code);
+
+    res.send({ message: "A verification code has been sent to your email address." });
+  } catch (error) {
+    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+  }
+});
+/**
+ * POST /api/users/verify-reset-code
+ * Verifies the reset code for a user's password reset request.
+ * Expects: { email, code }
+ */
+usersRouter.post("/verify-reset-code", async (req: Request, res: Response) => {
+  /**
+   * Checks if the provided code and email match a valid password reset request.
+   */
+  console.log("POST /verify-reset-code called");
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).send({ error: "Email and code are required." });
+
+    const user = await User.findOne({
+      email,
+      resetPasswordCode: code,
+      resetPasswordExpires: { $gt: new Date() }, // code is still valid
+    });
+
+    if (!user) return res.status(400).send({ error: "Invalid or expired code." });
+
+    res.send({ message: "Code verified successfully." });
+  } catch (error) {
+    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+  }
+});
+
+/**
+ * POST /api/users/reset-password
+ * Resets the user's password after verifying the code and email.
+ * Expects: { email, code, password }
+ * Returns: { message }
+ */
+usersRouter.post("/reset-password", async (req: Request, res: Response) => {
+  /**
+   * Resets the user's password after validating the reset code and expiry.
+   * The code and expiry are then cleared from the user document.
+   */
+  try {
+    const { email, code, password } = req.body;
+    if (!email || !code || !password) {
+      return res.status(400).send({ error: "Email, code, and new password are required." });
+    }
+
+    const user = await User.findOne({
+      email,
+      resetPasswordCode: code,
+      resetPasswordExpires: { $gt: new Date() }, // code is still valid
+    });
+
+    if (!user) return res.status(400).send({ error: "Invalid or expired code." });
+
+    // Update password (will trigger pre-save hook for hashing)
+    user.password = password;
+    user.resetPasswordCode = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.send({ message: "Password has been reset successfully." });
+  } catch (error) {
+    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+  }
+});
+
 
 export default usersRouter;

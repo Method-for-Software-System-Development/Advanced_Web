@@ -22,8 +22,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
   const [captchaQuestion, setCaptchaQuestion] = useState("");
 
   /* ─────────── Forgot-password state ─────────── */
-  const [fpEmail, setFpEmail] = useState("");
-  const [verificationCode] = useState("123456");      // demo code
+  const [fpEmail, setFpEmail] = useState("");    
   const [fpUserCode, setFpUserCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -81,35 +80,115 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     }
 };
 
-  const handleSendCode = () => {
-    if (!fpEmail.includes("@")) {
-      setFpMessage("Please enter a valid email.");
-      return;
-    }
+  /**
+ * Handles sending a password reset code to the user's email address.
+ * 
+ * - Validates that the email address is correctly formatted.
+ * - Sends a POST request to the backend API to initiate the password reset process.
+ * - Updates the UI with the result: either advances to the "verify code" step,
+ *   or shows an appropriate error message.
+ */
+const handleSendCode = async () => {
+  // Validate email format
+  if (!fpEmail.includes("@")) {
+    setFpMessage("Please enter a valid email.");
+    return;
+  }
+
+  // Show loading message while sending the code
+  setFpMessage("Sending verification code…");
+
+  try {
+    /**
+     * Send a POST request to the backend API endpoint for forgot password.
+     * The API is expected to send a verification code to the email and return a success message.
+     * On success, proceed to the code verification step.
+     */
+    await axios.post("http://localhost:3000/api/users/forgot-password", {
+      email: fpEmail,
+    });
+
+    // Success: update UI and proceed to verification step
     setFpMessage(`Verification code sent to ${fpEmail}`);
     setStep("forgot-verify");
-  };
-
-  const handleVerify = () => {
-    if (fpUserCode === verificationCode) {
-      setFpMessage("Code verified. Choose new password.");
-      setStep("forgot-reset");
+  } catch (err: any) {
+    // Axios errors: Show error from response or network error
+    if (err.response && err.response.data && err.response.data.error) {
+      setFpMessage(err.response.data.error);
     } else {
-      setFpMessage("Wrong code, try again.");
+      setFpMessage("Network error. Please try again.");
     }
-  };
+  }
+};
 
-  const handleSavePassword = () => {
-    if (newPassword.length < 6) return setFpMessage("Password must be at least 6 chars.");
-    if (newPassword !== confirmPassword) return setFpMessage("Passwords don't match.");
-    setFpMessage("Password changed! You can now sign-in.");
+
+ /**
+ * Verifies the reset code entered by the user by sending it to the backend API.
+ * If the code is valid, proceeds to the password reset step.
+ * Otherwise, shows an error message.
+ */
+const handleVerify = async () => {
+  // Show loading message while verifying
+  setFpMessage("Verifying code…");
+
+  try {
+    // Send the email and code to the backend for verification
+    await axios.post("http://localhost:3000/api/users/verify-reset-code", {
+      email: fpEmail,
+      code: fpUserCode,
+    });
+
+    // Success: proceed to reset password
+    setFpMessage("Code verified. Choose new password.");
+    setStep("forgot-reset");
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.error) {
+      setFpMessage(err.response.data.error); // Show server error (like "Invalid or expired code")
+    } else {
+      setFpMessage("Network error. Please try again.");
+    }
+  }
+};
+
+
+ /**
+ * Submits the new password to the backend to complete the reset process.
+ * Sends: { email, code, newPassword }
+ * On success: notifies the user and returns to login.
+ * On failure: displays an error.
+ */
+const handleSavePassword = async () => {
+  // Validation checks
+  if (newPassword.length < 6) return setFpMessage("Password must be at least 6 chars.");
+  if (newPassword !== confirmPassword) return setFpMessage("Passwords don't match.");
+  
+  setFpMessage("Saving new password...");
+
+  try {
+    // API request to update password on the server
+    await axios.post("http://localhost:3000/api/users/reset-password", {
+      email: fpEmail,
+      code: fpUserCode,
+      password: newPassword,
+    });
+
+    setFpMessage("Password changed! You can now sign in.");
     setTimeout(() => {
       setStep("login");
       setFpMessage("");
       setNewPassword("");
       setConfirmPassword("");
+      setFpUserCode("");
     }, 1500);
-  };
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.error) {
+      setFpMessage(err.response.data.error);
+    } else {
+      setFpMessage("Network error. Please try again.");
+    }
+  }
+};
+
 
   /* ─────────── UI ─────────── */
   return (

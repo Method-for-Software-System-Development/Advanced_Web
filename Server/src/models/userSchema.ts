@@ -16,6 +16,9 @@ export interface IUser extends Document {
     postalCode?: string; // optional
     pets: mongoose.Types.ObjectId[];
     role?: "user" | "secretary"; // User role, default is "user"
+    resetPasswordCode?: string;
+    resetPasswordExpires?: Date;
+
 
 }
 
@@ -29,7 +32,10 @@ const UserSchema: Schema = new Schema({
     city:      { type: String, required: true },
     postalCode:{ type: String }, // optional
     pets:      [{ type: mongoose.Schema.Types.ObjectId, ref: "Pet", default: [] }],
-    role: { type: String, enum: ["user", "secretary"], default: "user" }
+    role: { type: String, enum: ["user", "secretary"], default: "user" },
+    resetPasswordCode: { type: String }, // resetPasswordCode: stores the 6-digit code sent to the user for password reset
+    resetPasswordExpires: { type: Date } // resetPasswordExpires: indicates when the code expires 
+
 
 }, { collection: "Users", versionKey: false });
 
