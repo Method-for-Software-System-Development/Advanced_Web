@@ -88,7 +88,8 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
  * - Updates the UI with the result: either advances to the "verify code" step,
  *   or shows an appropriate error message.
  */
-  const handleSendCode = async () => {
+  const handleSendCode = async (e: React.FormEvent) => {
+    e.preventDefault()
     // Validate email format
     if (!fpEmail.includes("@")) {
       setFpMessage("Please enter a valid email.");
@@ -127,10 +128,10 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
   * If the code is valid, proceeds to the password reset step.
   * Otherwise, shows an error message.
   */
-  const handleVerify = async () => {
+  const handleVerify = async (e: React.FormEvent) => {
     // Show loading message while verifying
     setFpMessage("Verifying code…");
-
+    e.preventDefault();
     try {
       // Send the email and code to the backend for verification
       await axios.post("http://localhost:3000/api/users/verify-reset-code", {
@@ -157,7 +158,8 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
   * On success: notifies the user and returns to login.
   * On failure: displays an error.
   */
-  const handleSavePassword = async () => {
+  const handleSavePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
     // Validation checks
     if (newPassword.length < 6) return setFpMessage("Password must be at least 6 chars.");
     if (newPassword !== confirmPassword) return setFpMessage("Passwords don't match.");
@@ -278,7 +280,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         {step === "forgot-email" && (
           <>
             <h2 className="mb-6 text-3xl font-bold text-center text-grayText dark:text-white">Reset Your Password</h2>
-            <form className="login-form space-y-4">
+            <form className="login-form space-y-4" onSubmit={handleSendCode}>
               <label>Email</label>
               <input
                 type="email"
@@ -287,12 +289,14 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
                 placeholder="example@gmail.com"
               />
               <button
+                type="submit"
                 onClick={handleSendCode}
                 className="mt-5 w-full py-2 font-bold text-white bg-wine rounded-lg hover:bg-wineDark cursor-pointer"
               >
                 Send Verification Code
               </button>
               <button
+                type="button"
                 onClick={() => setStep("login")}
                 className="block mx-auto text-sm text-grayText dark:text-white hover:underline cursor-pointer"
               >
@@ -309,7 +313,8 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         {step === "forgot-verify" && (
           <>
             <h2 className="mb-6 text-3xl font-bold text-center text-grayText dark:text-white">Verify Code</h2>
-            <form className="login-form space-y-4">
+            <form className="login-form space-y-4"
+              onSubmit={handleVerify}>
               <label>Verification Code</label>
               <input
                 value={fpUserCode}
@@ -317,12 +322,13 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
                 placeholder="Enter 6-digit code (e.g. 123456)"
               />
               <button
-                onClick={handleVerify}
+                type="submit"
                 className="mt-5 w-full py-2 font-bold text-white bg-wine rounded-lg hover:bg-wineDark cursor-pointer"
               >
                 Verify
               </button>
               <button
+                type="button"
                 onClick={() => setStep("login")}
                 className="block mx-auto text-sm text-grayText dark:text-white hover:underline cursor-pointer"
               >
@@ -339,7 +345,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         {step === "forgot-reset" && (
           <>
             <h2 className="mb-6 text-3xl font-bold text-center text-grayText dark:text-white">Set New Password</h2>
-            <form className="login-form space-y-4">
+            <form className="login-form space-y-4" onSubmit={handleSavePassword}>
               <label>New Password</label>
               <input
                 type="password"
@@ -353,7 +359,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <button
-                onClick={handleSavePassword}
+                type="submit"
                 className="mt-5 w-full py-2 font-bold text-white bg-wine rounded-lg hover:bg-wineDark cursor-pointer"
               >
                 Save New Password
