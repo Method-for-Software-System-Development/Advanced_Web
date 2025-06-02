@@ -27,7 +27,7 @@ const TeamSection = () => {
       </div>
 
       <h2 className="text-4xl font-bold text-[#664147] dark:text-white mb-6 text-center font-[Nunito]">Our Team</h2>
-      <div className="flex overflow-x-auto gap-6 custom-scrollbar justify-start justify-center-2172">
+      <div className="flex overflow-x-auto gap-6 team-custom-scrollbar justify-start justify-center-2172">
         <TeamMemberCard
           image={member1}
           name="Dr. Michael Levin"
