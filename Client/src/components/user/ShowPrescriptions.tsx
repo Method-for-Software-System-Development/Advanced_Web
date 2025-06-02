@@ -80,7 +80,7 @@ const ShowPrescriptions: React.FC = () => {
         style={{ width: "80%" }}
       >
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-[var(--color-wine)] text-left mobile:text-[9px] mobile:mb-2" style={{ lineHeight: '1.1', fontSize: undefined }}>Prescription History</h2>
+          <h2 className="text-3xl font-bold text-[var(--color-wine)] text-left mobile:text-[9px] mobile:mb-2 sm:text-3xl sm:leading-tight text-nowrap" style={{ lineHeight: '1.1', fontSize: undefined }}>Prescription History</h2>
           {/* Desktop button */}
           <div className="hidden sm:flex justify-end w-auto">
             <UserNavButton
