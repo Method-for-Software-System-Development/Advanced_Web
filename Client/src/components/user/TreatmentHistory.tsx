@@ -100,7 +100,7 @@ const TreatmentHistory: React.FC = () => {
   return (
     <div className="flex justify-center w-full min-h-[600px]">
       <div
-        className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8"
+        className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8 mobile:w-full"
         style={{ width: "80%" }}
       >
         <h2 className="text-3xl font-bold text-[var(--color-wine)] mb-6">Treatment History</h2>
@@ -116,7 +116,7 @@ const TreatmentHistory: React.FC = () => {
             placeholder="Enter pet name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="mt-1 block w-full px-6 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
+            className="mt-1 block w-full px-6 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-base mobile:text-xs"
           />
         </div>
 

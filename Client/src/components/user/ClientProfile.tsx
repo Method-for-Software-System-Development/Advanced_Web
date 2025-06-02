@@ -96,7 +96,7 @@ const ClientProfile: React.FC = () => {
     <div className="flex justify-center w-full min-h-[600px]">
       <div
         className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8"
-        style={{ width: "80%" }}
+        style={{ width: "100%" }}
       >
         {/* --- User Info Card --- */}
         <UserInformationCard
