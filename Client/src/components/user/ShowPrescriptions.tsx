@@ -82,17 +82,18 @@ const ShowPrescriptions: React.FC = () => {
         <div className="mb-6">
           <h2 className="text-3xl font-bold text-[var(--color-wine)] text-left mobile:text-[9px] mobile:mb-2" style={{ lineHeight: '1.1', fontSize: undefined }}>Prescription History</h2>
           {/* Desktop button */}
-          <div className="flex justify-end w-auto mobile:hidden">
+          <div className="hidden sm:flex justify-end w-auto">
             <UserNavButton
               label={showUnfulfilledOnly ? "Show All" : "Show Unfulfilled Only"}
               onClick={() => setShowUnfulfilledOnly((v) => !v)}
             />
           </div>
           {/* Mobile button below headline */}
-          <div className="hidden mobile:block w-full mobile:text-xs mobile:py-1 mobile:px-2">
+          <div className="block sm:hidden w-full py-1 px-2">
             <UserNavButton
               label={showUnfulfilledOnly ? "Show All" : "Show Unfulfilled Only"}
               onClick={() => setShowUnfulfilledOnly((v) => !v)}
+              className="w-full mx-auto text-[12px]"
             />
           </div>
         </div>

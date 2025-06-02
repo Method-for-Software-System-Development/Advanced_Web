@@ -45,6 +45,7 @@ const ClientPage: React.FC = () => {
               key={view}
               label={viewLabels[view]}
               onClick={() => setCurrentView(view)}
+              className="w-full sm:w-auto"
             />
           ))}
         </div>
