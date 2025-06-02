@@ -25,7 +25,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onLogout }) => {
   return (
     <button
       onClick={handleLogout}
-      className="inline-block bg-[#664147] text-white px-10 py-2 rounded-full hover:bg-[#58383E] transition duration-200"
+      className="inline-block bg-[#664147] text-white w-40 h-11 rounded-full hover:bg-[#58383E] transform transition duration-200 hover:scale-110 cursor-pointer"
     >
       Logout
     </button>
