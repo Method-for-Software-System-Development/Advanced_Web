@@ -20,44 +20,46 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
   isEditing,
   onEdit,
   children,
-}) => (
-  <div className="bg-white rounded-xl shadow-md p-6 w-full mx-auto sm:p-4 xs:p-2">
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2 sm:gap-0">
-      <h2 className="text-2xl sm:text-xl font-bold text-gray-800">
-        {firstName} {lastName}
-      </h2>
-      {!isEditing && (
-        <button
-          onClick={onEdit}
-          className="w-36 sm:w-32 bg-[#664147] text-white px-4 py-1 rounded hover:bg-[#4d3034] font-semibold text-base sm:text-sm"
-        >
-          Edit
-        </button>
-      )}
+}) => {
+  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+  return (
+    <div className="bg-[var(--color-sky)] border-2 border-[var(--color-wine)] rounded-2xl shadow-lg p-10 w-full mx-auto sm:p-8 xs:p-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2 sm:gap-0">
+        <h2 className="text-4xl sm:text-3xl font-extrabold text-[var(--color-wine)] font-[Nunito] tracking-tight drop-shadow">
+          {capitalize(firstName)} {capitalize(lastName)}
+        </h2>
+        {!isEditing && (
+          <button
+            onClick={onEdit}
+            className="w-36 sm:w-32 bg-[var(--color-wine)] text-white px-6 py-2 rounded-full hover:bg-[var(--color-wineDark)] font-bold text-lg sm:text-base transition-colors duration-150 shadow-lg"
+          >
+            Edit
+          </button>
+        )}
+      </div>
+      <div className="text-[var(--color-greyText)] space-y-6 text-lg font-[Poppins]">
+        {isEditing ? (
+          children // This will be your <EditUserProfile /> component
+        ) : (
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center flex-wrap">
+              <span className="font-bold text-[var(--color-wine)] mr-2">Email:</span>
+              <span className="break-all max-w-full whitespace-normal overflow-hidden">{email}</span>
+            </div>
+            <div>
+              <span className="font-bold text-[var(--color-wine)]">Phone Number:</span>{" "}
+              <span>{phone}</span>
+            </div>
+            <div>
+              <span className="font-bold text-[var(--color-wine)]">City:</span>{" "}
+              <span>{city}</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-    <div className="text-gray-700 space-y-4 text-base">
-      {isEditing ? (
-        children // This will be your <EditUserProfile /> component
-      ) : (
-        <>
-          <p>
-            <span className="font-semibold">Email:</span>{" "}
-            <span className="break-all max-w-full block whitespace-normal overflow-hidden">
-              {email}
-            </span>
-          </p>
-          <p>
-            <span className="font-semibold">Phone Number:</span>{" "}
-            <span>{phone}</span>
-          </p>
-          <p>
-            <span className="font-semibold">City:</span>{" "}
-            <span>{city}</span>
-          </p>
-        </>
-      )}
-    </div>
-  </div>
-);
+  );
+};
 
 export default UserInfoCard;

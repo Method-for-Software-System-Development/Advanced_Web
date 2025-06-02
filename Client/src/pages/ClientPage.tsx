@@ -4,27 +4,25 @@ import FooterSection from "../components/FooterSection";
 import ClientProfile from "../components/user/ClientProfile";
 import TreatmentHistory from "../components/user/TreatmentHistory";
 import UserNavButton from "../components/user/UserNavButton";
+import ShowPrescriptions from "../components/user/ShowPrescriptions";
 
-// Define all 6 views
+// Define all 5 views (combine makeAppointment and showAppointments into 'appointments')
 export type ClientView =
   | "profile"
-  | "makeAppointment"
-  | "showAppointments"
+  | "appointments"
   | "prescriptions"
   | "history";
 
 const allViews: ClientView[] = [
   "profile",
-  "makeAppointment",
-  "showAppointments",
+  "appointments",
   "prescriptions",
   "history",
 ];
 
 const viewLabels: Record<ClientView, string> = {
   profile: "Profile",
-  makeAppointment: "Make Appointment",
-  showAppointments: "Show Appointments",
+  appointments: "Appointments",
   prescriptions: "Show Prescriptions",
   history: "Treatment History",
 };
@@ -32,7 +30,7 @@ const viewLabels: Record<ClientView, string> = {
 const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
 
-  // Show 5 views excluding the current one
+  // Show 4 views excluding the current one
   const visibleViews = allViews.filter((v) => v !== currentView).slice(0, 4);
 
   return (
@@ -55,15 +53,10 @@ const ClientPage: React.FC = () => {
         </div>
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}
-        {currentView === "makeAppointment" && (
-          <div>Appointment Scheduler Coming Soon</div>
+        {currentView === "appointments" && (
+          <div>Appointments Section Coming Soon</div>
         )}
-        {currentView === "showAppointments" && (
-          <div>Your Appointments Will Appear Here</div>
-        )}
-        {currentView === "prescriptions" && (
-          <div>Prescription List Placeholder</div>
-        )}
+        {currentView === "prescriptions" && <ShowPrescriptions />}
         {currentView === "history" && <TreatmentHistory />}
       </main>
 

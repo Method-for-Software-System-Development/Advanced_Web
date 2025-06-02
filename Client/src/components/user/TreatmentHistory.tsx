@@ -97,25 +97,6 @@ const TreatmentHistory: React.FC = () => {
     t.petName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Split treatments into upcoming and past
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0, 10); // 'YYYY-MM-DD'
-  const currentTime = now.toTimeString().slice(0, 5); // 'HH:MM'
-
-  const upcoming = filtered.filter(t => {
-    if (!t.visitDate) return false;
-    if (t.visitDate > todayStr) return true;
-    if (t.visitDate === todayStr && t.visitTime && t.visitTime > currentTime) return true;
-    return false;
-  });
-
-  const past = filtered.filter(t => {
-    if (!t.visitDate) return false;
-    if (t.visitDate < todayStr) return true;
-    if (t.visitDate === todayStr && t.visitTime && t.visitTime <= currentTime) return true;
-    return false;
-  });
-
   return (
     <div className="flex justify-center w-full min-h-[600px]">
       <div
@@ -135,42 +116,19 @@ const TreatmentHistory: React.FC = () => {
             placeholder="Enter pet name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-6 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"
           />
         </div>
 
         {/* Render all treatments (filtered) */}
-        <div className="mb-2 text-gray-700 font-medium">
+        <div className="mb-2 text-gray-700 font-medium" style={{ color: 'var(--color-skyDark)' }}>
           Showing {filtered.length} treatment{filtered.length !== 1 ? 's' : ''}
         </div>
-
-        {/* Upcoming treatments */}
-        <h3 className="text-xl font-semibold mt-4" style={{ color: 'var(--color-skyDark)' }}>Upcoming Treatments:</h3>
-        <div className="space-y-6 mb-8">
-          {upcoming.length > 0 ? (
-            upcoming.map((t, index) => (
-              <TreatmentCard
-                key={t._id || `upcoming-${index}`}
-                petName={t.petName}
-                visitDate={t.visitDate}
-                vetName={t.vetName}
-                visitationType={t.visitationType}
-                cost={t.cost}
-                notes={t.notes}
-              />
-            ))
-          ) : (
-            <p className="text-center text-[var(--color-greyText)]">No upcoming treatments.</p>
-          )}
-        </div>
-
-        {/* Past treatments */}
-        <h3 className="text-xl font-semibold mt-4" style={{ color: 'var(--color-skyDark)' }}>Past Treatments:</h3>
         <div className="space-y-6">
-          {past.length > 0 ? (
-            past.map((t, index) => (
+          {filtered.length > 0 ? (
+            filtered.map((t, index) => (
               <TreatmentCard
-                key={t._id || `past-${index}`}
+                key={t._id || index}
                 petName={t.petName}
                 visitDate={t.visitDate}
                 vetName={t.vetName}
@@ -180,7 +138,7 @@ const TreatmentHistory: React.FC = () => {
               />
             ))
           ) : (
-            <p className="text-center text-[var(--color-greyText)]">No past treatments.</p>
+            <p className="text-center text-[var(--color-greyText)]">No treatments found.</p>
           )}
         </div>
       </div>

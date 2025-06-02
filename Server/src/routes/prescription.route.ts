@@ -4,6 +4,7 @@
  */
 
 import { Router, Request, Response } from "express";
+import mongoose from "mongoose";
 import Prescription from "../models/prescriptionSchema";
 
 const prescriptionRouter = Router();
@@ -19,19 +20,6 @@ prescriptionRouter.get("/:id", async (req: Request, res: Response) => {
       return res.status(404).send({ error: "Prescription not found" });
     }
     res.send(prescription);
-  } catch (error) {
-    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
-  }
-});
-
-/**
- * GET /api/prescriptions/appointment/:appointmentId
- * Get all prescriptions for a specific appointment
- */
-prescriptionRouter.get("/appointment/:appointmentId", async (req: Request, res: Response) => {
-  try {
-    const prescriptions = await Prescription.find({ appointmentId: req.params.appointmentId });
-    res.send(prescriptions);
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
@@ -95,6 +83,25 @@ prescriptionRouter.post("/byIds", async (req: Request, res: Response) => {
     }
 
     const prescriptions = await Prescription.find({ _id: { $in: ids } });
+    res.send(prescriptions);
+  } catch (error) {
+    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+  }
+});
+
+/**
+ * POST /api/prescriptions/byPetIds
+ * Fetch prescriptions by an array of pet IDs
+ */
+prescriptionRouter.post("/byPetIds", async (req: Request, res: Response) => {
+  try {
+    const { petIds } = req.body;
+    if (!Array.isArray(petIds) || petIds.length === 0) {
+      return res.status(400).send({ error: "Invalid or empty petIds array" });
+    }
+    // Convert string IDs to ObjectId
+    const objectIds = petIds.map((id: string) => new mongoose.Types.ObjectId(id));
+    const prescriptions = await Prescription.find({ petId: { $in: objectIds } });
     res.send(prescriptions);
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });

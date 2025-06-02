@@ -8,43 +8,48 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
   const [showLastTreatment, setShowLastTreatment] = useState(false);
 
   return (
-    <li className="w-full mb-2 p-4 bg-white rounded-xl shadow flex flex-col min-h-[120px] relative text-base">
-      <div className="mb-3 flex items-center justify-between">
+    <li className="w-full mb-4 bg-[var(--color-cream)] rounded-xl shadow-md p-6 flex flex-col min-h-[120px] relative text-base text-[var(--color-greyText)]">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-[var(--color-wine)]">
+          {pet.name}{" "}
+          <span className="text-base text-[var(--color-greyText)] font-normal">
+            ({pet.type})
+          </span>
+        </h2>
+      </div>
+      <div className="flex flex-wrap gap-8 mb-4">
         <div>
-          <h2 className="text-2xl sm:text-xl font-bold text-gray-800">
-            {pet.name} <span className="text-gray-500 text-base">({pet.type})</span>
-          </h2>
+          <span className="font-semibold">Breed:</span> {pet.breed}
+        </div>
+        <div>
+          <span className="font-semibold">Birth Year:</span> {pet.birthYear}
         </div>
       </div>
-      <div className="mb-2 flex items-center justify-between gap-6">
-        <p className="text-base text-gray-700">
-          <span className="font-semibold">Breed:</span>{" "}
-          <span>{pet.breed}</span>
-        </p>
+      <div className="flex flex-wrap gap-4 mb-2">
         <button
-          className="w-56 bg-[#664147] text-white px-4 py-2 rounded hover:bg-[#4d3034] text-base font-semibold transition-colors duration-150 whitespace-nowrap"
+          className="px-6 py-2 bg-[var(--color-wine)] text-white rounded-lg font-semibold shadow hover:bg-[var(--color-wineDark)] transition-colors duration-150"
           onClick={() => setShowPrescriptions((v) => !v)}
         >
-          Unfulfilled Prescriptions
+          {showPrescriptions
+            ? "Hide Unfulfilled Prescriptions"
+            : "Unfulfilled Prescriptions"}
         </button>
-      </div>
-      <div className="mb-2 flex items-center justify-between gap-6">
-        <p className="text-base text-gray-700">
-          <span className="font-semibold">Birth Year:</span>{" "}
-          <span>{pet.birthYear}</span>
-        </p>
         <button
-          className="w-56 bg-[#664147] text-white px-4 py-2 rounded hover:bg-[#4d3034] text-base font-semibold transition-colors duration-150 whitespace-nowrap"
+          className="px-6 py-2 bg-[var(--color-skyDark)] text-[var(--color-wine)] rounded-lg font-semibold shadow hover:bg-[var(--color-sky)] transition-colors duration-150"
           onClick={() => setShowLastTreatment((v) => !v)}
         >
-          Last Treatment
+          {showLastTreatment ? "Hide Last Treatment" : "Last Treatment"}
         </button>
       </div>
       {showPrescriptions && (
-        <PrescriptionList prescriptionIds={pet.prescriptions} />
+        <div className="mt-4">
+          <PrescriptionList prescriptionIds={pet.prescriptions} />
+        </div>
       )}
       {showLastTreatment && (
-        <PetLastTreatment petId={pet._id} />
+        <div className="mt-4">
+          <PetLastTreatment petId={pet._id} />
+        </div>
       )}
     </li>
   );

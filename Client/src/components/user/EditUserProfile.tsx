@@ -63,13 +63,13 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-lg mb-6">
-      <h3 className="text-xl font-semibold text-[#664147] mb-4">
+    <div className="bg-[var(--color-cream)] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)]">
+      <h3 className="text-xl font-bold text-[var(--color-wine)] mb-4">
         Edit Contact Information
       </h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-base font-medium text-gray-700">
+          <label className="block text-base font-semibold text-[var(--color-wine)]">
             Email:
           </label>
           <input
@@ -78,12 +78,12 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             onChange={(e) => setEmail(e.target.value)}
             className={`mt-1 w-full px-3 py-2 border ${
               emailValid ? "border-gray-300" : "border-red-500"
-            } rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base`}
+            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white`}
             autoComplete="email"
           />
         </div>
         <div>
-          <label className="block text-base font-medium text-gray-700">
+          <label className="block text-base font-semibold text-[var(--color-wine)]">
             Phone:
           </label>
           <input
@@ -92,7 +92,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             onChange={(e) => setPhone(e.target.value)}
             className={`mt-1 w-full px-3 py-2 border ${
               phoneValid ? "border-gray-300" : "border-red-500"
-            } rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base`}
+            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white`}
             autoComplete="tel"
           />
         </div>
@@ -102,13 +102,13 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
         <div className="flex flex-row justify-end gap-3 pt-4 w-full">
           <button
             onClick={handleSubmit}
-            className="w-36 px-4 py-2 bg-[#664147] text-white rounded-md hover:bg-[#4d3034] font-semibold text-base"
+            className="w-36 px-4 py-2 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] font-semibold text-base transition-colors duration-150"
           >
             Save
           </button>
           <button
             onClick={onCancel}
-            className="w-36 px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 text-base"
+            className="w-36 px-4 py-2 bg-[var(--color-skyDark)] text-[var(--color-wine)] rounded-lg hover:bg-[var(--color-sky)] text-base font-semibold transition-colors duration-150"
           >
             Cancel
           </button>
