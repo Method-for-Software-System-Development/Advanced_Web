@@ -316,7 +316,7 @@ const handleSavePassword = async () => {
               value={fpUserCode}
               onChange={(e) => setFpUserCode(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg"
-              placeholder="123456"
+              placeholder="Enter 6-digit code (e.g. 123456)"
             />
             <button
               onClick={handleVerify}
