@@ -54,11 +54,10 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAdd
       </button>
       {showAddPetForm && (
         <AddPetForm
-          patients={[patient]}
-          selectedPatientId={patient.id}
+          selectedPatientId={patient._id}
+          selectedPatientName={`${patient.firstName} ${patient.lastName}`}
           onAddPet={handleAddPet}
           onCancel={onToggleAddPetForm}
-          onSelectPatient={() => {}}
         />
       )}
     </div>

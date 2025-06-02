@@ -5,6 +5,7 @@ import AddPetForm from './AddPetForm';
 import DashboardButton from './DashboardButton';
 import { Patient, Pet } from '../../types'; // Import Patient and Pet from types
 import { patientService } from '../../services/patientService';
+import { petService } from '../../services/petService';
 
 interface ManagePatientsViewProps { // Renamed from EditManagePatientsViewProps for clarity
   onBack: () => void;
@@ -15,8 +16,6 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
-  const [showAddPetForm, setShowAddPetForm] = useState(false);
-  const [selectedPatientIdForPet, setSelectedPatientIdForPet] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null); // For editing
   const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
@@ -40,9 +39,9 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     }
   };
 
-  const handleSaveNewPatient = (patientData: Omit<Patient, 'id' | 'pets'>) => {
+  const handleSaveNewPatient = (patientData: Omit<Patient, '_id' | 'pets'>) => {
     const newPatient: Patient = {
-      id: `p${patients.length + 1}-${Date.now()}`, // Consider a more robust ID strategy for production
+      _id: `p${patients.length + 1}-${Date.now()}`, // Consider a more robust ID strategy for production
       firstName: patientData.firstName,
       lastName: patientData.lastName,
       email: patientData.email,
@@ -59,47 +58,52 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
 
   const handleSaveUpdatedPatient = (updatedPatientData: Patient) => {
     setPatients(currentPatients =>
-      currentPatients.map(p => (p.id === updatedPatientData.id ? updatedPatientData : p))
+      currentPatients.map(p => (p._id === updatedPatientData._id ? updatedPatientData : p))
     );
     setEditingPatient(null);
     alert('Patient details updated successfully!');
   };
 
-  const handleAddNewPet = (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number) => {
-    setPatients(currentPatients =>
-      currentPatients.map(p => {
-        if (p.id === patientId) {
-          const newPet: Pet = {
-            _id: `pet${p.pets.length + Date.now()}`, // More unique ID
-            name: petName,
-            type: petType,
-            breed: petBreed,
-            birthYear: petBirthYear,
-            weight: petWeight,
-            prescriptions: [], // Initialize with empty arrays
-            treatments: []     // Initialize with empty arrays
-          };
-          return { ...p, pets: [...p.pets, newPet] };
-        }
-        return p;
-      })
-    );
-    setShowAddPetForm(false);
-    setSelectedPatientIdForPet(null);
-    alert('New pet added successfully!');
+  const handleAddNewPet = async (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number) => {
+    try {
+      const newPetData = {
+        name: petName,
+        type: petType,
+        breed: petBreed,
+        birthYear: petBirthYear,
+        weight: petWeight,
+        prescriptions: [], // Ensure these are initialized if not provided by form
+        treatments: []
+      };
+  
+      // Call the service to add the new pet
+      const addedPet = await petService.addPetForPatient(patientId, newPetData);
+  
+      setPatients(currentPatients =>
+        currentPatients.map(p => {
+          if (p._id === patientId) { // Using _id here because your patient objects use it
+            return { ...p, pets: [...p.pets, addedPet] };
+          }
+          return p;
+        })
+      );
+      setOpenAddPetForId(null);
+      alert('New pet added successfully!');
+    } catch (error) {
+      console.error("Failed to add new pet:", error);
+      alert("Failed to add new pet. Please try again.");
+    }
   };
   
   const openAddPatientForm = () => {
     setShowAddPatientForm(true);
     setOpenAddPetForId(null); // Close any open Add New Pet form
-    setShowAddPetForm(false); // (if you still use this state elsewhere)
     setEditingPatient(null); // Close edit form if open
   }
 
   const openEditPatientForm = (patient: Patient) => {
     setEditingPatient(patient);
     setShowAddPatientForm(false); // Close add form if open
-    setShowAddPetForm(false); // Close add pet form if open
   };
 
   // Memoized filtered patients list
@@ -165,51 +169,21 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
 
       {editingPatient && (
         <AddPatientForm // Re-using AddPatientForm for editing, could be a separate EditPatientForm
-          onSave={handleSaveUpdatedPatient as (patientData: Patient | Omit<Patient, 'id' | 'pets'>) => void} // Changed from onAddPatient to onSave
+          onSave={handleSaveUpdatedPatient as (patientData: Patient | Omit<Patient, '_id' | 'pets'>) => void} // Changed from onAddPatient to onSave
           onCancel={() => setEditingPatient(null)}
           initialData={editingPatient} // Pass initial data for editing
-        />
-      )}
-
-      {showAddPetForm && (
-        <AddPetForm
-          patients={patients}
-          selectedPatientId={selectedPatientIdForPet}
-          onAddPet={handleAddNewPet}
-          onCancel={() => { setShowAddPetForm(false); setSelectedPatientIdForPet(null); }}
-          onSelectPatient={(patientId) => setSelectedPatientIdForPet(patientId)}
         />
       )}
 
       <PatientList
         patients={filteredPatients}
         onEditPatient={openEditPatientForm}
-        onAddPet={(patientId, petName, petType, petBreed, petBirthYear, petWeight) => {
-          setPatients(currentPatients =>
-            currentPatients.map(p => {
-              if (p.id === patientId) {
-                const newPet: Pet = {
-                  _id: `pet${p.pets.length + Date.now()}`,
-                  name: petName,
-                  type: petType,
-                  breed: petBreed,
-                  birthYear: petBirthYear,
-                  weight: petWeight,
-                  prescriptions: [], // Initialize with empty arrays
-                  treatments: []     // Initialize with empty arrays
-                };
-                return { ...p, pets: [...p.pets, newPet] };
-              }
-              return p;
-            })
-          );
-          setOpenAddPetForId(null);
-          alert('New pet added successfully!');
-        }}
+        onAddPet= {handleAddNewPet}
         openAddPetForId={openAddPetForId}
         setOpenAddPetForId={(id) => {
           setOpenAddPetForId(id);
           setShowAddPatientForm(false); // Always close add-client form when opening or closing add-pet
+          setEditingPatient(null); // Also close edit patient form
         }}
       />
 

@@ -87,4 +87,19 @@ export const patientService = {
       throw error;
     }
   },
+
+    // Search patients by name or email
+    async searchPatients(query: string): Promise<Patient[]> {
+      try {
+        const response = await fetch(`${API_BASE_URL}/users/search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error('Error searching patients:', error);
+        throw error;
+      }
+    },
 };

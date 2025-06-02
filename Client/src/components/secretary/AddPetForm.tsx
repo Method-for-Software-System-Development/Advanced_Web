@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 // Assuming Patient interface is defined elsewhere or passed
 interface Patient {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -13,19 +13,17 @@ interface Patient {
 }
 
 interface AddPetFormProps {
-  patients: Patient[];
-  selectedPatientId: string | null;
+  selectedPatientName: string;
+  selectedPatientId: string;
   onAddPet: (patientId: string, petName: string, petType: string, petBreed: string, petBirthYear: number, petWeight: number) => void;
   onCancel: () => void;
-  onSelectPatient: (patientId: string) => void;
 }
 
 const AddPetForm: React.FC<AddPetFormProps> = ({ 
-  patients, 
+  selectedPatientName, 
   selectedPatientId,
   onAddPet, 
   onCancel,
-  onSelectPatient
 }) => {
   const [petName, setPetName] = useState('');
   const [petType, setPetType] = useState('');
@@ -42,8 +40,9 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
     setPetWeight('');
   }, [selectedPatientId]);
 
-  const handleSubmit = () => {
-    if (!selectedPatientId || !petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim()) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim()) {
       alert('Please fill in all fields.');
       return;
     }
@@ -58,24 +57,15 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client:</label>
             <div className="mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200">
-              {patients.find(p => p.id === selectedPatientId)?.firstName} {patients.find(p => p.id === selectedPatientId)?.lastName}
+              {selectedPatientName}
             </div>
           </div>
         ) : (
           <div>
-            <label htmlFor="selectPatient" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Patient:</label>
-            <select 
-              id="selectPatient" 
-              value={selectedPatientId || ''} // Ensure value is not null for select
-              onChange={(e) => onSelectPatient(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-              disabled={patients.length === 0}
-            >
-              <option value="" disabled={selectedPatientId !== null}>-- Select a Patient --</option>
-              {patients.map(p =>
-                <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
-              )}
-            </select>
+            <label htmlFor='selectedPatient' className="block text-sm font-medium text-gray-700 dark:text-gray-300">Selected Patient:</label>
+            <label className="mt-1 block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200">
+              {selectedPatientName}
+            </label>
           </div>
         )}
         <div>
@@ -86,7 +76,6 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             value={petName}
             onChange={(e) => setPetName(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-            disabled={!selectedPatientId}
           />
         </div>
         <div>
@@ -97,8 +86,8 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             value={petType}
             onChange={(e) => setPetType(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-            disabled={!selectedPatientId}
-          />        </div>
+          />        
+        </div>
         <div>
           <label htmlFor="petBreed" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Pet Breed:</label>
           <input 
@@ -107,7 +96,6 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             value={petBreed}
             onChange={(e) => setPetBreed(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-            disabled={!selectedPatientId}
           />
         </div>
         <div>
@@ -118,7 +106,6 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             value={petBirthYear}
             onChange={(e) => setPetBirthYear(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-            disabled={!selectedPatientId}
           />
         </div>
         <div>
@@ -129,11 +116,10 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             value={petWeight}
             onChange={(e) => setPetWeight(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-            disabled={!selectedPatientId}
           />
         </div>
         <div className="flex justify-end gap-3">
-            <button onClick={handleSubmit} disabled={!selectedPatientId} className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50">Add Pet</button>
+            <button onClick={handleSubmit} className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50">Add Pet</button>
             <button onClick={onCancel} className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-400 dark:hover:bg-gray-700">Cancel</button>
         </div>
       </div>

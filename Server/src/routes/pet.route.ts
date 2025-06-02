@@ -5,6 +5,7 @@
 
 import { Router, Request, Response } from "express";
 import Pet from "../models/petSchema";
+import User from "../models/userSchema"; 
 import mongoose from "mongoose";
 
 const petRouter = Router();
@@ -66,6 +67,12 @@ petRouter.post("/", async (req: Request, res: Response) => {
     const { name, type, breed, birthYear, weight, prescriptions, treatments, owner } = req.body;
     const pet = new Pet({ name, type, breed, birthYear, weight, prescriptions, treatments, owner });
     await pet.save();
+
+    // Add the pet's _id to the user's pets array
+    if (owner) {
+      await User.findByIdAndUpdate(owner, { $push: { pets: pet._id } });
+    }
+
     res.status(201).send(pet);
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });

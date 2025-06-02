@@ -20,7 +20,7 @@ usersRouter.get("/", async (req: Request, res: Response) => {
         const users = await User.find().sort({ firstName: 1, lastName: 1 }).populate('pets');
         // Map DB fields to frontend Patient interface
         const mappedUsers = users.map((user: any) => ({
-          id: user._id,
+          _id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,

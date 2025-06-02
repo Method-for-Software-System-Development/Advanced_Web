@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Appointment, AppointmentStatus, AppointmentType, Staff, User, Pet } from '../../types';
+import { Appointment, AppointmentStatus, AppointmentType, Staff, Patient, Pet } from '../../types';
 import appointmentService from '../../services/appointmentService';
 import staffService from '../../services/staffService';
 import ClientSearch from './appointment/ClientSearch';
@@ -45,7 +45,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   
   // Client and pet state
-  const [selectedClient, setSelectedClient] = useState<User | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Patient | null>(null);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [clientPets, setClientPets] = useState<Pet[]>([]);
 
@@ -120,7 +120,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleClientSelect = (client: User) => {
+  const handleClientSelect = (client: Patient) => {
     setSelectedClient(client);
     setSelectedPetId(null);
   };

@@ -17,12 +17,12 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onEditPatient, onAd
         <div className="space-y-6">
           {patients.map((patient) => (
             <PatientCard
-              key={patient.id}
+              key={patient._id}
               patient={patient}
               onEditPatient={onEditPatient}
               onAddPet={onAddPet}
-              showAddPetForm={openAddPetForId === patient.id}
-              onToggleAddPetForm={() => setOpenAddPetForId(openAddPetForId === patient.id ? null : patient.id)}
+              showAddPetForm={openAddPetForId === patient._id}
+              onToggleAddPetForm={() => setOpenAddPetForId(openAddPetForId === patient._id ? null : patient._id)}
             />
           ))}
         </div>

@@ -3,7 +3,7 @@ import DashboardButton from './DashboardButton';
 import { Patient } from '../../types'; // Import Patient type
 
 interface AddPatientFormProps {
-  onSave: (patientData: Omit<Patient, 'id' | 'pets'> | Patient) => void; // Adjusted to handle both add and update
+  onSave: (patientData: Omit<Patient, '_id' | 'pets'> | Patient) => void; // Adjusted to handle both add and update
   onCancel: () => void;
   initialData?: Patient | null; // Optional initial data for editing
 }

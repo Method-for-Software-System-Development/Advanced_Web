@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { User } from '../../../types';
-import userService from '../../../services/userService';
+import { Patient } from '../../../types';
+import { patientService } from '../../../services/patientService';  
 
 interface ClientSearchProps {
-  onClientSelect: (client: User) => void;
-  selectedClient: User | null;
+  onClientSelect: (client: Patient) => void;
+  selectedClient: Patient | null;
 }
 
 const ClientSearch: React.FC<ClientSearchProps> = ({ onClientSelect, selectedClient }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [searchResults, setSearchResults] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (query: string) => {
@@ -17,7 +17,7 @@ const ClientSearch: React.FC<ClientSearchProps> = ({ onClientSelect, selectedCli
     if (query.length > 1) {
       setIsLoading(true);
       try {
-        const results = await userService.searchUsers(query);
+        const results = await patientService.searchPatients(query);
         setSearchResults(results);
       } catch (err) {
         console.error('Error searching clients:', err);
@@ -30,7 +30,7 @@ const ClientSearch: React.FC<ClientSearchProps> = ({ onClientSelect, selectedCli
     }
   };
 
-  const handleSelectClient = (client: User) => {
+  const handleSelectClient = (client: Patient) => {
     onClientSelect(client);
     setSearchQuery('');
     setSearchResults([]);
