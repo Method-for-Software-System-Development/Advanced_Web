@@ -65,7 +65,7 @@ staffRouter.get("/", async (req: Request, res: Response) => {
       filter.role = roleFilter;
     }
 
-    const staff = await Staff.find(filter).sort({ createdAt: -1 });
+    const staff = await Staff.find(filter).sort({ createdAt: 1 });
     res.status(200).json(staff);
   } catch (error) {
     console.error("Error fetching staff:", error);
