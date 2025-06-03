@@ -5,9 +5,12 @@
  *   onClose  – callback when the user clicks ✕
  *
  * State:
- *   messages – array of { id, role, text }
- *              simple echo bot for now.
+ *   messages    – array of { id, role, text }
+ *   input       – current user input
+ *   menuOptions – array of quick reply options for the current step
+ *   isTyping    – whether "Kayo is typing..." is shown
  */
+
 import React, { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import MessageBubble, { MessageBubbleProps } from "./MessageBubble";
@@ -16,74 +19,83 @@ export interface ChatWindowProps {
   open: boolean;
   onClose: () => void;
 }
+
+// Helper: Send a chat message to the backend API (can add extra data later)
 async function sendChatMessage(message: string) {
   const res = await fetch('http://localhost:3000/api/chatbot', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message }),
   });
-  return await res.json(); // {reply, menu}
+  return await res.json(); // { reply, menu }
 }
 
-
 const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
+  // Chat state
   const [messages, setMessages] = useState<MessageBubbleProps[]>([
     { role: "bot", text: "Hi! How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
+  const [menuOptions, setMenuOptions] = useState<string[]>([
+    "Book appointment",
+    "Cancel appointment",
+    "Show history",
+    "Show clinic hours",
+    "Show contact details",
+    "Emergency"
+  ]);
+  const [isTyping, setIsTyping] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  /** Scroll to bottom whenever messages change */
+  /** Always scroll to bottom when messages update */
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-/**
- * Handles sending a message from the user to the chatbot API.
- * Adds the user's message to the chat history, clears the input,
- * waits for the bot's reply from the server, and adds the bot's reply to the history.
- * If there is a network or server error, displays an error message from the bot.
- */
-const handleSend = async () => {
-  if (!input.trim()) return;
+  /**
+   * Handles sending a message (either from input or from a quick-reply).
+   * Adds the user message, shows "Kayo is typing...", waits for server,
+   * then shows the bot's reply and updates quick-replies.
+   */
+  const handleSend = async (msg?: string) => {
+    const text = msg ?? input;
+    if (!text.trim()) return;
 
-  // Add the user's message to the history
-  const userMsg: MessageBubbleProps = { role: "user", text: input };
-  setMessages((prev) => [...prev, userMsg]);
-  setInput("");
+    setMessages((prev) => [...prev, { role: "user", text }]);
+    setInput("");
+    setIsTyping(true);
 
-  try {
-    // Send the message to the server and await the chatbot's reply
-    const resp = await sendChatMessage(input);
-    const botMsg: MessageBubbleProps = { role: "bot", text: resp.reply };
-    setMessages((prev) => [...prev, botMsg]);
-    // In the future: you can also update menu options here if needed (resp.menu)
-  } catch (err) {
-    // If an error occurs, show a generic server error from the bot
-    setMessages((prev) => [
-      ...prev,
-      { role: "bot", text: "Server error!" },
-    ]);
-  }
-};
+    try {
+      const resp = await sendChatMessage(text);
+      setMessages((prev) => [...prev, { role: "bot", text: resp.reply }]);
+      setMenuOptions(resp.menu || []);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: "Server error!" },
+      ]);
+    }
+    setIsTyping(false);
+  };
 
-
-  if (!open) return null; // window hidden
+  // Hide window if not open
+  if (!open) return null;
 
   return (
     <div
-        className="
-          fixed
-          bottom-24 right-6 w-96 h-[500px]
-          bg-white dark:bg-darkMode
-          rounded-xl shadow-xl flex flex-col z-50
-          animate-fade-in dark:border-2 dark:border-white
+      className="
+        fixed
+        bottom-24 right-6 w-96 h-[500px]
+        bg-white dark:bg-darkMode
+        rounded-xl shadow-xl flex flex-col z-50
+        animate-fade-in dark:border-2 dark:border-white
 
-          max-sm:left-1/2 max-sm:-translate-x-1/2   /* Center horizontally on mobile */
-          max-sm:right-auto                         /* Remove right offset on mobile */
-          max-sm:w-[90vw]                           /* 90% width on mobile */
-          max-sm:h-[70vh]                           /* Responsive height on mobile */
-        "
+        max-sm:left-1/2 max-sm:-translate-x-1/2
+        max-sm:right-auto
+        max-sm:w-[90vw]
+        max-sm:h-[70vh]
+      "
     >
       {/* Header */}
       <div className="flex justify-between items-center bg-[#664147] font-[Nunito] text-white px-4 py-2 rounded-t-xl">
@@ -93,12 +105,53 @@ const handleSend = async () => {
         </button>
       </div>
 
-      {/* Messages */}
+      {/* Messages & "Kayo is typing..." */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-2 flex flex-col">
         {messages.map((m, idx) => (
           <MessageBubble key={idx} {...m} />
         ))}
+        {isTyping && (
+          <div className="flex items-center gap-2 text-[#664147] font-semibold animate-pulse mt-2">
+            <span role="img" aria-label="dog">🐶</span>
+            Kayo is typing...
+          </div>
+        )}
       </div>
+
+      {/* Quick Replies */}
+      {menuOptions.length > 0 && (
+      <div className="px-3 pb-3">
+        <div
+          className="
+            flex gap-2
+            overflow-x-auto           /* מאפשר גלילה אופקית */
+            scrollbar-thin
+            scrollbar-thumb-[#664147]/60
+            scrollbar-track-transparent
+          "
+        >
+          {menuOptions.map((option) => (
+            <button
+              key={option}
+              onClick={() => handleSend(option)}
+              disabled={isTyping}
+              className="
+                flex-shrink-0             /* אל תתכווץ */
+                whitespace-nowrap
+                px-4 py-1.5 text-sm font-semibold
+                rounded-full shadow-sm transition
+                border border-[#664147]/20
+                bg-[#8b5c63] text-white
+                hover:bg-[#7b4f56]
+                disabled:opacity-40
+              "
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
 
       {/* Input */}
       <div className="p-3 border-t border-gray-200 dark:border-[#3B3B3B]">
@@ -116,10 +169,12 @@ const handleSend = async () => {
             placeholder="Type a message…"
             className="flex-1 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
                        focus:outline-none dark:text-white"
+            disabled={isTyping}
           />
           <button
             type="submit"
             className="bg-[#664147] hover:bg-[#58383E] cursor-pointer text-white px-6 rounded-r-md"
+            disabled={isTyping}
           >
             Send
           </button>
