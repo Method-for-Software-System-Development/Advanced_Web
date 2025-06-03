@@ -100,7 +100,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
       <h3 className="text-lg font-semibold text-gray-700 mb-3 dark:text-[#FDF6F0]">Appointment Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+          <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date *</label>
           <input
             type="date"
             id="appointmentDate"
@@ -125,7 +125,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           >
             <option value="">{loadingStaff ? 'Loading...' : 'Select Staff Member'}</option>
             {staff
-              .filter(member => member.role && member.role.toLowerCase() === 'veterinarian')
+              .filter(member => member.role && (member.role.toLowerCase() === 'veterinarian' || member.role.toLocaleLowerCase() === 'chief veterinarian & clinic director'))
               .map(member => (
                 <option key={member._id} value={member._id}>
                   {member.firstName} {member.lastName} ({member.role})
@@ -134,15 +134,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           </select>
         </div>
         
-        <TimeSlotSelector
-          selectedStaff={selectedStaff}
-          selectedDate={formData.date}
-          duration={formData.duration}
-          selectedTime={formData.time}
-          onTimeSelect={(time) => onInputChange('time', time)}
-          staffAppointments={staffAppointments}
-          isLoading={loadingAppointments}
-        />
+        
           <div>
           <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Appointment Type *
@@ -158,29 +150,10 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
                 {type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
               </option>
             ))}
-          </select>
-        </div>
+          </select>        </div>
         
         <div>
-          <label htmlFor="appointmentTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
-          <select
-            id="appointmentTime"
-            name="time" // Changed from appointmentTime
-            value={formData.time} // Changed from formData.appointmentTime
-            onChange={(e) => onInputChange('time', e.target.value)} // Changed from handleChange
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-          >
-            {getAvailableDurations(formData.type).map(duration => (
-              <option key={duration} value={duration}>
-                {duration >= 60 ? `${duration / 60} hour${duration > 60 ? 's' : ''}` : `${duration} minutes`}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div>
-          <label htmlFor="durationMinutes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (minutes)</label>
+          <label htmlFor="durationMinutes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (minutes) *</label>
           <select
             id="durationMinutes"
             name="duration" // Changed from durationMinutes
@@ -196,8 +169,15 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
             ))}
           </select>
         </div>
-        
-        <div>
+        <TimeSlotSelector
+          selectedStaff={selectedStaff}
+          selectedDate={formData.date}
+          duration={formData.duration}
+          selectedTime={formData.time}
+          onTimeSelect={(time) => onInputChange('time', time)}
+          staffAppointments={staffAppointments}
+          isLoading={loadingAppointments}
+        />        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Cost ($) *
           </label>
@@ -205,15 +185,16 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
             type="number"
             value={formData.cost}
             onChange={(e) => onInputChange('cost', parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
             min="0"
             step="0.01"
             required
+            disabled
           />
         </div>
       </div>
         <div className="mt-4">
-        <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Reason for Visit</label>
+        <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Reason for Visit *</label>
         <textarea
           id="reason"
           name="description" // Changed from reason
