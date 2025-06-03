@@ -116,6 +116,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#664147] focus:border-[#664147] sm:text-sm bg-white text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           >
+            <option value={StaffRole.CHIEF_VETERINARIAN_AND_CLINIC_DIRECTOR}>Chief Veterinarian & Clinic Director</option>
             <option value={StaffRole.VETERINARIAN}>Veterinarian</option>
             <option value={StaffRole.VETERINARY_ASSISTANT}>Veterinary Assistant</option>
             <option value={StaffRole.RECEPTIONIST}>Receptionist</option>

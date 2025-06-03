@@ -35,6 +35,7 @@ export interface Patient {
 
 
 export enum StaffRole {
+  CHIEF_VETERINARIAN_AND_CLINIC_DIRECTOR = "Chief Veterinarian & Clinic Director",
   VETERINARIAN = "veterinarian",
   VETERINARY_ASSISTANT = "veterinary_assistant",
   RECEPTIONIST = "receptionist",
