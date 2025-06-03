@@ -12,9 +12,9 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel, initi
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState(''); 
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState(''); // Added phone state
+  const [phone, setPhone] = useState(''); 
+  const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
-  const [country, setCountry] = useState(''); 
   const [postalCode, setPostalCode] = useState(''); // Optional field for postal code
 
   useEffect(() => {
@@ -22,9 +22,9 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel, initi
       setFirstName(initialData.firstName);
       setLastName(initialData.lastName);
       setEmail(initialData.email);
-      setPhone(initialData.phone || '');
+      setPhone(initialData.phone);
+      setStreet(initialData.street); // Handle optional street
       setCity(initialData.city);
-      setCountry(initialData.country);
       setPostalCode(initialData.postalCode || ''); // Handle optional postal code
     } else {
       // Reset form if not editing
@@ -32,8 +32,8 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel, initi
       setLastName('');
       setEmail('');
       setPhone('');
+      setStreet('');
       setCity('');
-      setCountry('');
       setPostalCode('');
     }
   }, [initialData]);
@@ -55,12 +55,12 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel, initi
       alert('Please fill in owner phone.');
       return;
     }
-    if (!city.trim()) {
-      alert('Please fill in owner city.');
+    if (!street.trim()) {
+      alert('Please fill in owner street.');
       return;
     }
-    if (!country.trim()) {
-      alert('Please fill in owner country.');
+    if (!city.trim()) {
+      alert('Please fill in owner city.');
       return;
     }
 
@@ -68,9 +68,9 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel, initi
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.trim(),
-      phone: phone.trim(), // Include phone in patient data
+      phone: phone.trim(),
+      street: street.trim(), 
       city: city.trim(),
-      country: country.trim(),
       postalCode: postalCode.trim() || undefined, // Optional field, set to undefined if empty
     };
 
@@ -126,6 +126,15 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel, initi
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
+        <div></div>
+          <label htmlFor="street" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Street:</label>
+          <input 
+            type="text" 
+            id="street" 
+            value={street}
+            onChange={(e) => setStreet(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+          />
         <div>
           <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300">City:</label>
           <input 
@@ -133,16 +142,6 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel, initi
             id="city" 
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-          />
-        </div>
-        <div>
-          <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Country:</label>
-          <input 
-            type="text" 
-            id="country" 
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>

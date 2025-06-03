@@ -28,8 +28,8 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAdd
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Email: {patient.email} </p>
       {patient.phone && <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Phone: {patient.phone}</p>}
+      {patient.street && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Street: {patient.street}</p>}
       {patient.city && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">City: {patient.city}</p>}
-      {patient.country && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Country: {patient.country}</p>}
       {patient.postalCode && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Postal Code: {patient.postalCode}</p>}
       <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Pets:</h4>
       {patient.pets.length > 0 ? (

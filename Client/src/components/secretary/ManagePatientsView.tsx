@@ -46,8 +46,8 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       lastName: patientData.lastName,
       email: patientData.email,
       phone: patientData.phone,
+      street: patientData.street,
       city: patientData.city,
-      country: patientData.country,
       pets: [], // Initialize with an empty array
       postalCode: patientData.postalCode, // Optional field
     };
@@ -114,11 +114,11 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     return patients.filter(patient =>
       patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.postalCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.street.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.postalCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.pets.some(pet => pet.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [patients, searchTerm]);
