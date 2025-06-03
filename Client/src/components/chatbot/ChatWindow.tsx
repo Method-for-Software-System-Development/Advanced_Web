@@ -16,6 +16,15 @@ export interface ChatWindowProps {
   open: boolean;
   onClose: () => void;
 }
+async function sendChatMessage(message: string) {
+  const res = await fetch('http://localhost:3000/api/chatbot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+  });
+  return await res.json(); // {reply, menu}
+}
+
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
   const [messages, setMessages] = useState<MessageBubbleProps[]>([
@@ -29,14 +38,35 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  /** Send message + echo reply */
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const userMsg: MessageBubbleProps = { role: "user", text: input };
-    const botMsg: MessageBubbleProps = { role: "bot", text: `Echo: ${input}` };
-    setMessages((prev) => [...prev, userMsg, botMsg]);
-    setInput("");
-  };
+/**
+ * Handles sending a message from the user to the chatbot API.
+ * Adds the user's message to the chat history, clears the input,
+ * waits for the bot's reply from the server, and adds the bot's reply to the history.
+ * If there is a network or server error, displays an error message from the bot.
+ */
+const handleSend = async () => {
+  if (!input.trim()) return;
+
+  // Add the user's message to the history
+  const userMsg: MessageBubbleProps = { role: "user", text: input };
+  setMessages((prev) => [...prev, userMsg]);
+  setInput("");
+
+  try {
+    // Send the message to the server and await the chatbot's reply
+    const resp = await sendChatMessage(input);
+    const botMsg: MessageBubbleProps = { role: "bot", text: resp.reply };
+    setMessages((prev) => [...prev, botMsg]);
+    // In the future: you can also update menu options here if needed (resp.menu)
+  } catch (err) {
+    // If an error occurs, show a generic server error from the bot
+    setMessages((prev) => [
+      ...prev,
+      { role: "bot", text: "Server error!" },
+    ]);
+  }
+};
+
 
   if (!open) return null; // window hidden
 

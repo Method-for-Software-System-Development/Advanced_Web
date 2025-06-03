@@ -3,14 +3,17 @@
  * Initializes the Express application, connects to MongoDB, applies middleware,
  * and sets up API routes for user management.
  */
-
+import dotenv from "dotenv";
+dotenv.config();
 import express, { Application, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
-import dotenv from "dotenv";
-dotenv.config();
+
+import chatbotRouter from './routes/chatbot.route';
+
+
 
 
 import usersRouter from './routes/users.route';
@@ -65,6 +68,10 @@ app.use("/api/statistics", statisticsRouter);
 
 /** Treatment routes API */
 app.use("/api/treatments", treatmentRouter);
+
+/** Chatbot API Route */
+app.use("/api/chatbot", chatbotRouter);
+console.log(">> Chatbot route registered");
 
 /** Simple health check route */
 app.get("/", (req: Request, res: Response) => {
