@@ -243,6 +243,10 @@ useEffect(() => {
       setError(errorMessage);
     }
   };
+  useEffect(() => {
+    loadStaff();
+  }, []);
+
   return (
     <div className="w-full">      <div className="mb-6">
         <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0]">Add New Appointment</h2>
