@@ -53,6 +53,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
           return;
         }
         // Fetch all appointments for all pets
+        // Only keep future appointments for each pet
         const now = new Date();
         let allAppointments: Appointment[] = [];
         for (const pet of client.pets) {
@@ -80,10 +81,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
       }
     };
 
-    // Only call loadAppointments if not already loading
-    if (!isLoading) {
-      loadAppointments();
-    }
+    loadAppointments();
   }, []);
 
   const sortedAppointments = useMemo(() => {
@@ -100,13 +98,14 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
 
  return (
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
-      <h1 className="text-2xl font-bold mb-6 text-[#4A3F35] dark:text-[#FDF6F0]">My Upcoming Appointments</h1>
-
       {/* Only show the Add New Appointment button if the add form is not open */}
+      {!showAddForm && (
+        <h1 className="text-2xl font-bold mb-6 text-[#4A3F35] dark:text-[#FDF6F0]">My Upcoming Appointments</h1>
+      )}
       {!showAddForm && (
         <button
           onClick={() => setShowAddForm(true)}
-          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          className="mb-6 px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
         >
           Add New Appointment
         </button>
