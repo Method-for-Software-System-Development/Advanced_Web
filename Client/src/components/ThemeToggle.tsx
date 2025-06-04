@@ -5,22 +5,30 @@ const themeOptions = ["light", "dark", "system"] as const;
 type ThemeMode = (typeof themeOptions)[number];
 
 interface ThemeToggleProps {
-  /* “icon” (navbar) or full-width “button” (mobile drawer) */
+  /** “icon” (navbar) or full-width “button” (mobile drawer) */
   variant?: "icon" | "button";
-  /* Tailwind utility overrides */
+  /** Tailwind utility overrides */
   className?: string;
+}
+
+/**
+ * Utility: Returns initial theme value from localStorage or defaults to "system".
+ */
+function getInitialTheme(): ThemeMode {
+  if (typeof window === "undefined") return "system";
+  return (localStorage.getItem("theme") as ThemeMode) || "system";
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({
   variant = "icon",
   className = "",
 }) => {
-  /* user-chosen theme or “system” */
-  const [theme, setTheme] = useState<ThemeMode>("system");
-  /* real-time OS preference */
+  // State: user-chosen theme or “system”
+  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
+  // State: real-time OS preference
   const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
 
-  /* watch OS setting */
+  // Watch OS setting
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const update = () => setSystemTheme(mq.matches ? "dark" : "light");
@@ -29,7 +37,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  /* apply effective theme + persist user choice */
+  // Apply effective theme + persist user choice
   useEffect(() => {
     const root = document.documentElement;
     const effective = theme === "system" ? systemTheme : theme;
@@ -39,20 +47,25 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
     else localStorage.setItem("theme", theme);
   }, [theme, systemTheme]);
 
-  /* read stored preference on mount */
+  // Sync across browser tabs/windows (optional)
   useEffect(() => {
-    const saved = localStorage.getItem("theme") as ThemeMode | null;
-    if (saved) setTheme(saved);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "theme") {
+        setTheme((e.newValue as ThemeMode) || "system");
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  /* cycle through modes */
+  // Cycle through modes
   const handleClick = () =>
     setTheme((prev) => {
       const i = themeOptions.indexOf(prev);
       return themeOptions[(i + 1) % themeOptions.length];
     });
 
-  /* select icon + tooltip */
+  // Select icon + tooltip
   const { Icon, tooltip }: { Icon: React.ElementType; tooltip: string } =
     theme === "light"
       ? { Icon: Moon, tooltip: "Switch to dark mode" }
@@ -60,7 +73,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       ? { Icon: Monitor, tooltip: "Switch to system mode" }
       : { Icon: Sun, tooltip: "Switch to light mode" };
 
-  /* full-width button (mobile) */
+  // Full-width button (mobile)
   if (variant === "button")
     return (
       <button
@@ -78,7 +91,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       </button>
     );
 
-  /* circular icon (navbar) */
+  // Circular icon (navbar)
   return (
     <button
       onClick={handleClick}
