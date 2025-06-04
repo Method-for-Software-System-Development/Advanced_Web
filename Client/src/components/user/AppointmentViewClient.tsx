@@ -167,7 +167,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
       {isLoading ? (
         <p className="text-gray-500 dark:text-gray-400 text-center">Loading appointments...</p>
       ) : filteredAppointments && filteredAppointments.length > 0 ? (
-        <ul className="space-y-4">
+        <ul className="space-y-6">
           {filteredAppointments
             .filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled')
             .map(apt => {
@@ -177,46 +177,74 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
                 petName = apt.petId.name;
               }
               return (
-                <li key={apt._id} className="p-4 border rounded shadow bg-[#FDF6F0] dark:bg-[#664147] flex flex-col relative">
-                  <UserNavButton
-                    label="Cancel Appointment"
-                    onClick={async () => {
-                      try {
-                        await appointmentService.cancelAppointment(apt._id);
-                        // After cancel, reload appointments using the same logic as initial load
-                        const clientRaw = localStorage.getItem("client");
-                        if (!clientRaw) return;
-                        const client = JSON.parse(clientRaw);
-                        if (!client.pets || client.pets.length === 0) {
-                          setAppointments([]);
-                          return;
-                        }
-                        const now = new Date();
-                        let allAppointments: Appointment[] = [];
-                        for (const pet of client.pets) {
+                <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md bg-gray-50 dark:bg-gray-700 hover:shadow-lg transition-shadow duration-200 ease-in-out">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
+                          Scheduled
+                        </span>
+                      </div>
+                      <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full inline-block">
+                        {formatted.service}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <UserNavButton
+                        label="Cancel Appointment"
+                        onClick={async () => {
                           try {
-                            const petAppointments = await appointmentService.getAppointmentsByPet(pet._id);
-                            const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
-                            allAppointments = allAppointments.concat(futurePetAppointments as Appointment[]);
+                            await appointmentService.cancelAppointment(apt._id);
+                            // After cancel, reload appointments using the same logic as initial load
+                            const clientRaw = localStorage.getItem("client");
+                            if (!clientRaw) return;
+                            const client = JSON.parse(clientRaw);
+                            if (!client.pets || client.pets.length === 0) {
+                              setAppointments([]);
+                              return;
+                            }
+                            const now = new Date();
+                            let allAppointments: Appointment[] = [];
+                            for (const pet of client.pets) {
+                              try {
+                                const petAppointments = await appointmentService.getAppointmentsByPet(pet._id);
+                                const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
+                                allAppointments = allAppointments.concat(futurePetAppointments as Appointment[]);
+                              } catch {}
+                            }
+                            // Deduplicate appointments by _id
+                            const dedupedAppointments = Array.from(new Map(allAppointments.map(appt => [appt._id, appt])).values());
+                            setAppointments(dedupedAppointments);
                           } catch (err) {
-                            // Optionally handle per-pet errors
+                            alert('Failed to cancel appointment.');
                           }
-                        }
-                        // Deduplicate appointments by _id
-                        const dedupedAppointments = Array.from(new Map(allAppointments.map(appt => [appt._id, appt])).values());
-                        setAppointments(dedupedAppointments);
-                      } catch (err) {
-                        alert('Failed to cancel appointment.');
-                      }
-                    }}
-                    className="user-cancel-btn"
-                  />
-                  <div className="mt-2">
-                    <p><strong>Pet:</strong> {petName}</p>
-                    <p><strong>Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
-                    <p><strong>Service:</strong> {formatted.service}</p>
-                    <p><strong>Staff Member:</strong> {formatted.staffName}</p>
-                    {formatted.notes && <p><strong>Notes:</strong> {formatted.notes}</p>}
+                        }}
+                        className="user-cancel-btn px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm mt-2">
+                    <div>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
+                    </div>
+                    <div>
+                      {formatted.cost && (
+                        <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
+                      )}
+                      {formatted.notes && (
+                        <p className="text-gray-600 dark:text-gray-400"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
+                      )}
+                    </div>
                   </div>
                 </li>
               );

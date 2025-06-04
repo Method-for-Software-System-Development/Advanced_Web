@@ -60,6 +60,7 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
       return null;
     }
   );
+  const [showAddForm, setShowAddForm] = useState(false);
 
 useEffect(() => {
   try {
@@ -248,70 +249,79 @@ useEffect(() => {
   }, []);
 
   return (
-    <div className="w-full">      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0]">Add New Appointment</h2>
+    <div className="w-full">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
+        <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
       </div>
 
-          {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-600 dark:text-red-300">
-              {error}
-            </div>
-          )}
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-sm dark:bg-red-900 dark:border-red-600 dark:text-red-300">
+          {error}
+        </div>
+      )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-
-            {/* Pet Selection */}
-            {client && (
-              <PetSelectionClient
-                pets={clientPets}
-                selectedPetId={selectedPetId}
-                onPetSelect={handlePetSelect}
-                clientName={`${client.firstName} ${client.lastName}`}
-                showPetType={false} // Only show pet name in the select
-              />
-            )}            {/* Appointment Form Fields */}
-            <AppointmentFormFieldsClient
-              formData={{
-                date: formData.date || formatDateToYYYYMMDD(selectedDate),
-                staffId: typeof formData.staffId === 'object' ? (formData.staffId as Staff)._id : (formData.staffId || ''),
-                time: formData.time || '',
-                type: formData.type || AppointmentType.WELLNESS_EXAM,
-                duration: formData.duration || 30,
-                description: formData.description || '',
-                notes: formData.notes || '',
-                cost: formData.cost || 0 }}
-              staff={staff}
-              selectedStaff={selectedStaff}
-              onInputChange={handleInputChange}
-              onStaffChange={handleStaffChange}
-              loadingStaff={loadingStaff}
-              staffAppointments={staffAppointments}
-              loadingAppointments={loadingAppointments}
-            />{/* Form Actions */}            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF92A6] dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                Cancel
-              </button>              <button
-                type="submit"
-                disabled={
-                  !formData.time || 
-                  !client || 
-                  !selectedPetId || 
-                  !selectedStaff || 
-                  !formData.description?.trim() ||
-                  loadingStaff
-                }
-                className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C]"
-                title={`Client: ${client ? 'Yes' : 'No'}, Pet: ${selectedPetId ? 'Yes' : 'No'}, Staff: ${selectedStaff ? 'Yes' : 'No'}, Description: ${formData.description?.trim() ? 'Yes' : 'No'}, Loading: ${loadingStaff ? 'Yes' : 'No'}, Time selected: ${formData.time ? 'Yes' : 'No'}`}
-              >
-                Create Appointment
-              </button>
-            </div>
-          </form>
+      <form onSubmit={handleSubmit} className="space-y-8 bg-[#FDF6F0] dark:bg-[#4A3F35] p-6 rounded-xl shadow-md border border-[#EF92A6] dark:border-[#D17C8F]">
+        {/* Pet Selection */}
+        {client && (
+          <div className="mb-4">
+            <PetSelectionClient
+              pets={clientPets}
+              selectedPetId={selectedPetId}
+              onPetSelect={handlePetSelect}
+              clientName={`${client.firstName} ${client.lastName}`}
+              showPetType={false}
+            />
+          </div>
+        )}
+        {/* Appointment Form Fields */}
+        <div className="mb-4">
+          <AppointmentFormFieldsClient
+            formData={{
+              date: formData.date || formatDateToYYYYMMDD(selectedDate),
+              staffId: typeof formData.staffId === 'object' ? (formData.staffId as Staff)._id : (formData.staffId || ''),
+              time: formData.time || '',
+              type: formData.type || AppointmentType.WELLNESS_EXAM,
+              duration: formData.duration || 30,
+              description: formData.description || '',
+              notes: formData.notes || '',
+              cost: formData.cost || 0
+            }}
+            staff={staff}
+            selectedStaff={selectedStaff}
+            onInputChange={handleInputChange}
+            onStaffChange={handleStaffChange}
+            loadingStaff={loadingStaff}
+            staffAppointments={staffAppointments}
+            loadingAppointments={loadingAppointments}
+          />
+        </div>
+        {/* Form Actions */}
+        <div className="flex justify-end space-x-3 pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF92A6] dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors duration-150"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={
+              !formData.time ||
+              !client ||
+              !selectedPetId ||
+              !selectedStaff ||
+              !formData.description?.trim() ||
+              loadingStaff
+            }
+            className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
+            title={`Client: ${client ? 'Yes' : 'No'}, Pet: ${selectedPetId ? 'Yes' : 'No'}, Staff: ${selectedStaff ? 'Yes' : 'No'}, Description: ${formData.description?.trim() ? 'Yes' : 'No'}, Loading: ${loadingStaff ? 'Yes' : 'No'}, Time selected: ${formData.time ? 'Yes' : 'No'}`}
+          >
+            Create Appointment
+          </button>
+        </div>
+      </form>
     </div>  );
 };
 
