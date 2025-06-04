@@ -20,8 +20,8 @@ export const petService = {
   // Add a new pet for a specific patient
   async addPetForPatient(patientId: string, petData: Omit<Pet, '_id'>): Promise<Pet> {
     try {
-      const dataToSend = { ...petData, owner: patientId };
-      const response = await fetch(`${API_BASE_URL}/pets`, {
+        const dataToSend = { ...petData, owner: patientId }; 
+        const response = await fetch(`${API_BASE_URL}/pets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSend),

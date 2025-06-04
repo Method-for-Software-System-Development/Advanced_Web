@@ -15,6 +15,7 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAdd
     onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight);
     onToggleAddPetForm();
   };
+  
   return (
     <div className="p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 mb-4">
       <div className="flex justify-between items-start mb-2">
@@ -32,6 +33,8 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAdd
       {patient.city && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">City: {patient.city}</p>}
       {patient.postalCode && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Postal Code: {patient.postalCode}</p>}
       <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Pets:</h4>
+      
+      
       {patient.pets.length > 0 ? (
         <ul className="list-disc list-inside pl-4 space-y-1 text-sm text-gray-700 dark:text-gray-300">
           {patient.pets.map(pet => (

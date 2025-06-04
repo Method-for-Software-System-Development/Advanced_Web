@@ -1,9 +1,8 @@
 import React, { useState, useMemo,useEffect } from 'react';
 import PatientList from './PatientList';
 import AddPatientForm from './AddPatientForm';
-import AddPetForm from './AddPetForm';
 import DashboardButton from './DashboardButton';
-import { Patient, Pet } from '../../types'; // Import Patient and Pet from types
+import { Patient } from '../../types'; // Import Patient and Pet from types
 import { patientService } from '../../services/patientService';
 import { petService } from '../../services/petService';
 
@@ -39,21 +38,19 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     }
   };
 
-  const handleSaveNewPatient = (patientData: Omit<Patient, '_id' | 'pets'>) => {
-    const newPatient: Patient = {
-      _id: `p${patients.length + 1}-${Date.now()}`, // Consider a more robust ID strategy for production
-      firstName: patientData.firstName,
-      lastName: patientData.lastName,
-      email: patientData.email,
-      phone: patientData.phone,
-      street: patientData.street,
-      city: patientData.city,
-      pets: [], // Initialize with an empty array
-      postalCode: patientData.postalCode, // Optional field
-    };
-    setPatients(currentPatients => [...currentPatients, newPatient]);
-    setShowAddPatientForm(false);
-    alert('New patient added successfully!');
+  const handleSaveNewPatient = async (patientData: Omit<Patient, '_id' | 'pets'>) => {
+    try {
+      // Call the backend API to create the patient
+      const createdPatient = await patientService.createPatient({ ...patientData, pets: [] });
+      setPatients(currentPatients => [...currentPatients, createdPatient]);
+      setShowAddPatientForm(false);
+      alert('New patient added successfully!');
+      return createdPatient; // Return the created patient so the form knows it succeeded
+
+    } catch (error: any) {
+      alert(error.message || 'Failed to add new patient.');
+      console.error('Error adding new patient:', error);
+    }
   };
 
   const handleSaveUpdatedPatient = (updatedPatientData: Patient) => {
@@ -171,7 +168,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
         <AddPatientForm // Re-using AddPatientForm for editing, could be a separate EditPatientForm
           onSave={handleSaveUpdatedPatient as (patientData: Patient | Omit<Patient, '_id' | 'pets'>) => void} // Changed from onAddPatient to onSave
           onCancel={() => setEditingPatient(null)}
-          initialData={editingPatient} // Pass initial data for editing
+          //initialData={editingPatient} // Pass initial data for editing
         />
       )}
 

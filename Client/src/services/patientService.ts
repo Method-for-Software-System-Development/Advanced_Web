@@ -35,7 +35,7 @@ export const patientService = {
   // Create a new patient
   async createPatient(patientData: Omit<Patient, '_id'>): Promise<Patient> {
     try {
-      const response = await fetch(`${API_BASE_URL}/patients`, {
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patientData),
