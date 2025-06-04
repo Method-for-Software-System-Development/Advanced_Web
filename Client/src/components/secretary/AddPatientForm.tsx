@@ -120,7 +120,13 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             type="text" 
             id="firstName" 
             value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            onChange={(e) => {
+              // Only allow letters, spaces, and hyphens
+              const value = e.target.value;
+              if (/^[a-zA-Z\s-]*$/.test(value)) {
+                setFirstName(value);
+              }
+            }}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
@@ -130,17 +136,31 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             type="text" 
             id="lastName" 
             value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            onChange={(e) => {
+              // Only allow letters, spaces, and hyphens
+              const value = e.target.value;
+              if (/^[a-zA-Z\s-]*$/.test(value)) {
+                setLastName(value);
+              }
+            }}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">*Phone:</label>
           <input 
-            type="tel" 
+            type="text" 
             id="phone" 
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => {
+              // Only allow digits
+              const value = e.target.value;
+              if (/^\d*$/.test(value)) {
+                setPhone(value);
+              }
+            }}
+            inputMode="numeric"
+            pattern="[0-9]*"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
@@ -180,7 +200,15 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             type="text" 
             id="postalCode" 
             value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
+            onChange={(e) => {
+              // Only allow digits
+              const value = e.target.value;
+              if (/^\d*$/.test(value)) {
+                setPostalCode(value);
+              }
+            }}
+            inputMode="numeric"
+            pattern="[0-9]*"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>

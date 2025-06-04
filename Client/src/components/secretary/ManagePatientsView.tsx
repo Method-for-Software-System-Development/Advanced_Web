@@ -20,21 +20,36 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
   const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPatients();
-  }, []);
+    // Call loadPatients with isInitialCall = true for the first load
+    loadPatients(true);
+    const intervalId = setInterval(() => loadPatients(false), 10000); // Poll every 10 seconds
 
-  const loadPatients = async () => {
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+  }, []); // Empty dependency array ensures this runs only on mount and unmount
+
+  const loadPatients = async (isInitialCall: boolean = false) => { // Added type for isInitialCall
+    if (isInitialCall) {
+      setLoading(true); // Only set global loading true for initial load
+      setError(null); // Clear previous errors specifically for an initial load attempt
+    }
+
     try {
-      setLoading(true);
-      setError(null);
+      // The list will simply update when new data arrives.
       const data = await patientService.getAllPatients();
       setPatients(data);
+      setError(null); // Clear any previous error on successful fetch (initial or poll)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch patients');
-      console.error('Error loading veterinarians:', err);
-      setPatients([]);
+      console.error('Error loading patients:', err); // Corrected console message
+      if (isInitialCall) {
+        // Only clear patients if the initial load fails.
+        // For polling errors, retain stale data and show error.
+        setPatients([]);
+      }
     } finally {
-      setLoading(false);
+      if (isInitialCall) {
+        setLoading(false); // Turn off global loading state after initial attempt
+      }
     }
   };
 

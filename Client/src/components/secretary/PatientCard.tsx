@@ -35,7 +35,7 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAdd
       <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Pets:</h4>
       
       
-      {patient.pets.length > 0 ? (
+      {patient.pets && patient.pets.length > 0 ? (
         <ul className="list-disc list-inside pl-4 space-y-1 text-sm text-gray-700 dark:text-gray-300">
           {patient.pets.map(pet => (
             <li key={pet._id}>
