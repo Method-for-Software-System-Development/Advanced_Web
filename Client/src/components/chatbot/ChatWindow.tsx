@@ -1,16 +1,3 @@
-/**
- * ChatWindow – floating panel that shows the conversation.
- * Props:
- *   open     – whether the window is visible
- *   onClose  – callback when the user clicks ✕
- *
- * State:
- *   messages    – array of { id, role, text }
- *   input       – current user input
- *   menuOptions – array of quick reply options for the current step
- *   isTyping    – whether "Kayo is typing..." is shown
- */
-
 import React, { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import MessageBubble, { MessageBubbleProps } from "./MessageBubble";
@@ -20,44 +7,57 @@ export interface ChatWindowProps {
   onClose: () => void;
 }
 
-// Helper: Send a chat message to the backend API (can add extra data later)
+// Helper: Send a chat message to the backend API (adds JWT token + userId from localStorage)
 async function sendChatMessage(message: string) {
+  // Get the JWT token and user data from localStorage
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("client") || "{}");
+  const userId = user._id;
+
+  // Send both userId in the body and the token in the Authorization header
   const res = await fetch('http://localhost:3000/api/chatbot', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}), // Adds token if exists
+    },
+    body: JSON.stringify({ message, userId }),
   });
   return await res.json(); // { reply, menu }
 }
 
+
+// Function: Menu text for the bot's initial message
+const getNumberedMenuText = () => (
+  "Hi, welcome to FurEver Friends – Pet Clinic!\n\n" +
+  "Please choose an option by typing the corresponding number:\n" +
+  "1. Book appointment\n" +
+  "2. Cancel appointment\n" +
+  "3. Show history\n" +
+  "4. Show clinic hours\n" +
+  "5. Show contact details\n" +
+  "6. Emergency\n\n" +
+  "To exit, type 'exit'.\n" +
+  "For any other question, just ask."
+);
+
+
 const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
   // Chat state
   const [messages, setMessages] = useState<MessageBubbleProps[]>([
-    { role: "bot", text: "Hi! How can I help you today?" },
+    { role: "bot", text: getNumberedMenuText() },
   ]);
   const [input, setInput] = useState("");
-  const [menuOptions, setMenuOptions] = useState<string[]>([
-    "Book appointment",
-    "Cancel appointment",
-    "Show history",
-    "Show clinic hours",
-    "Show contact details",
-    "Emergency"
-  ]);
   const [isTyping, setIsTyping] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  /** Always scroll to bottom when messages update */
+  // Always scroll to bottom when messages update
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  /**
-   * Handles sending a message (either from input or from a quick-reply).
-   * Adds the user message, shows "Kayo is typing...", waits for server,
-   * then shows the bot's reply and updates quick-replies.
-   */
+  // Handles sending a message (user input only)
   const handleSend = async (msg?: string) => {
     const text = msg ?? input;
     if (!text.trim()) return;
@@ -69,7 +69,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
     try {
       const resp = await sendChatMessage(text);
       setMessages((prev) => [...prev, { role: "bot", text: resp.reply }]);
-      setMenuOptions(resp.menu || []);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -117,41 +116,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
           </div>
         )}
       </div>
-
-      {/* Quick Replies */}
-      {menuOptions.length > 0 && (
-      <div className="px-3 pb-3">
-        <div
-          className="
-            flex gap-2
-            overflow-x-auto           /* מאפשר גלילה אופקית */
-            scrollbar-thin
-            scrollbar-thumb-[#664147]/60
-            scrollbar-track-transparent
-          "
-        >
-          {menuOptions.map((option) => (
-            <button
-              key={option}
-              onClick={() => handleSend(option)}
-              disabled={isTyping}
-              className="
-                flex-shrink-0             /* אל תתכווץ */
-                whitespace-nowrap
-                px-4 py-1.5 text-sm font-semibold
-                rounded-full shadow-sm transition
-                border border-[#664147]/20
-                bg-[#8b5c63] text-white
-                hover:bg-[#7b4f56]
-                disabled:opacity-40
-              "
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      </div>
-    )}
 
       {/* Input */}
       <div className="p-3 border-t border-gray-200 dark:border-[#3B3B3B]">

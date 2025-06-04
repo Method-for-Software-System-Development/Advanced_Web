@@ -17,7 +17,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ role, text }) => {
                     ${isUser ? "mr-2" : "ml-2"}
                     dark:${isUser ? "bg-[#F7C9D3]" : "bg-gray-400"}`}
       >
-        {text}
+        {text.split('\n').map((line, idx) => (
+          <span key={idx}>
+            {line}
+            <br />
+          </span>
+        ))}
       </div>
     </div>
   );

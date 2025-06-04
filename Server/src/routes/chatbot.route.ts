@@ -37,6 +37,14 @@ const MAIN_MENU = [
   "Show contact details",
   "Emergency",
 ];
+const NUMBERED_MENU = [
+  { label: "Book appointment", display: "Book appointment" },
+  { label: "Cancel appointment", display: "Cancel appointment" },
+  { label: "Show history", display: "Show history" },
+  { label: "Show clinic hours", display: "Show clinic hours" },
+  { label: "Show contact details", display: "Show contact details" },
+  { label: "Emergency", display: "Emergency" },
+];
 
 /* ---------------------------------------------------------------------- */
 /* Helper: call Gemini with up-to-3 retries on 503 (“model overloaded”)   */
@@ -45,9 +53,8 @@ async function callGemini(prompt: string, retries = 3): Promise<string> {
   try {
     const { data } = await axios.post(
       `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text: prompt }] }] }
+      { contents: [{ parts: [{ text: prompt + "\n\nPlease answer briefly and clearly, in up to 3 sentences." }] }] }
     );
-
     return (
       data.candidates?.[0]?.content?.parts?.[0]?.text ??
       "Sorry, I didn't understand."
@@ -61,6 +68,15 @@ async function callGemini(prompt: string, retries = 3): Promise<string> {
     throw err;
   }
 }
+function getNumberedMenuText() {
+  return (
+    "Please choose an option by typing the corresponding number:\n" +
+    NUMBERED_MENU.map((opt, i) => `${i + 1}. ${opt.display}`).join("\n") +
+    "\n\nTo exit, type 'exit'.\nFor any other question, just ask."
+  );
+}
+
+
 
 /* ====================================================================== */
 /*  POST /api/chatbot  – single endpoint for all chat requests            */
@@ -75,11 +91,24 @@ router.post("/", async (req, res) => {
     type,
     description,
   } = req.body;
+  let normalizedMessage = message;
+const idx = parseInt(message, 10) - 1;
+if (!isNaN(idx) && idx >= 0 && idx < NUMBERED_MENU.length) {
+  normalizedMessage = NUMBERED_MENU[idx].label;
+}
+
+// Exit command
+if (normalizedMessage.toLowerCase() === "exit") {
+  return res.json({
+    reply: "You have exited the menu. To start over, type 'menu'.",
+    menu: [],
+  });
+}
 
   /* ------------------------------------------------------------------ */
   /* 1.  Book appointment – initial step                                */
   /* ------------------------------------------------------------------ */
-  if (message === "Book appointment") {
+  if (normalizedMessage === "Book appointment") {
     if (!userId) {
       return res.json({
         reply: "Please log in to book an appointment.",
@@ -95,7 +124,7 @@ router.post("/", async (req, res) => {
   }
 
   /* 1b.  Book appointment – final step (all details supplied) */
-  if (message === "Book now" && userId && petId && date && time && type) {
+  if (normalizedMessage=== "Book now" && userId && petId && date && time && type) {
     await createAppointment(
       userId,
       petId,
@@ -114,7 +143,7 @@ router.post("/", async (req, res) => {
   /* ------------------------------------------------------------------ */
   /* 2.  Cancel appointment                                             */
   /* ------------------------------------------------------------------ */
-  if (message === "Cancel appointment" && userId) {
+  if (normalizedMessage === "Cancel appointment" && userId) {
     const appts = await getFutureAppointments(userId);
 
     if (!appts.length) {
@@ -133,8 +162,8 @@ router.post("/", async (req, res) => {
   }
 
   /* 2b.  Cancel by ID */
-  if (message.startsWith("Cancel ") && userId) {
-    const id = message.replace("Cancel ", "");
+  if (normalizedMessage.startsWith("Cancel ") && userId) {
+    const id = normalizedMessage.replace("Cancel ", "");
     const ok = await cancelAppointment(userId, id);
     return res.json({
       reply: ok
@@ -147,7 +176,7 @@ router.post("/", async (req, res) => {
   /* ------------------------------------------------------------------ */
   /* 3.  Show pet history                                               */
   /* ------------------------------------------------------------------ */
-  if (message === "Show history") {
+  if (normalizedMessage === "Show history") {
     if (!petId) {
       return res.json({
         reply: "Please provide your Pet ID.",
@@ -177,7 +206,7 @@ router.post("/", async (req, res) => {
   /* ------------------------------------------------------------------ */
   /* 4.  Static answers (hours / contact / emergency)                   */
   /* ------------------------------------------------------------------ */
-  if (message === "Show clinic hours") {
+  if (normalizedMessage === "Show clinic hours") {
     return res.json({
       reply:
         "Opening hours:\n" +
@@ -188,7 +217,7 @@ router.post("/", async (req, res) => {
     });
   }
 
-  if (message === "Show contact details") {
+  if (normalizedMessage === "Show contact details") {
     return res.json({
       reply:
         "FurEver Friends – 51 Snonit St, Karmiel 🇮🇱\n" +
@@ -198,22 +227,23 @@ router.post("/", async (req, res) => {
     });
   }
 
-  if (message === "Emergency") {
+  if (normalizedMessage === "Emergency") {
     return res.json({
       reply: "🚑  For emergencies call +972 4-123-4567 immediately!",
       menu: MAIN_MENU,
     });
   }
 
-  if (message === "Main menu") {
-    return res.json({ reply: "Please choose an option:", menu: MAIN_MENU });
-  }
+ if (normalizedMessage === "Main menu" || normalizedMessage === "menu") {
+  return res.json({ reply: getNumberedMenuText(), menu: [] });
+}
+
 
   /* ------------------------------------------------------------------ */
   /* 5.  Fallback → Gemini                                              */
   /* ------------------------------------------------------------------ */
   try {
-    const aiReply = await callGemini(message);
+    const aiReply = await callGemini(normalizedMessage);
     res.json({ reply: aiReply, menu: MAIN_MENU });
   } catch (err: any) {
     console.error(
