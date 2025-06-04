@@ -4,6 +4,7 @@ import appointmentService from '../../services/appointmentService';
 import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
+import { petService } from '../../services/petService';
 
 interface AddAppointmentFormToClientProps {
   onClose: () => void;
@@ -43,9 +44,22 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   
   // Client and pet state
-  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [clientPets, setClientPets] = useState<Pet[]>([]);
   const [client, setClient] = useState<Patient | null>(null);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(
+    () => {
+      const clientRaw = localStorage.getItem("client");
+      if (clientRaw) {
+        try {
+          const parsedClient = JSON.parse(clientRaw);
+          if (parsedClient.pets && parsedClient.pets.length > 0) {
+            return parsedClient.pets[0]._id;
+          }
+        } catch {}
+      }
+      return null;
+    }
+  );
 
 useEffect(() => {
   try {
@@ -57,8 +71,39 @@ useEffect(() => {
     const parsedClient = JSON.parse(clientRaw);
     setClient(parsedClient);
     if (parsedClient.pets && parsedClient.pets.length > 0) {
-      setClientPets(parsedClient.pets);
-      setSelectedPetId(parsedClient.pets[0]._id); // Select first pet by default
+      // If pets are strings (IDs), fetch full pet objects
+      if (typeof parsedClient.pets[0] === 'string') {
+        // Only send valid 24-char ObjectID strings
+        const validPetIds = parsedClient.pets.filter((id: string) => typeof id === 'string' && id.length === 24);
+        if (validPetIds.length === 0) {
+          setClientPets([]);
+          setSelectedPetId(null);
+          return;
+        }
+        fetch('http://localhost:3000/api/pets/byIds', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: validPetIds }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setClientPets(Array.isArray(data) ? data : []);
+            if (Array.isArray(data) && data.length > 0) {
+              setSelectedPetId(data[0]._id);
+            } else {
+              setSelectedPetId(null);
+            }
+          })
+          .catch((err) => {
+            setClientPets([]);
+            setSelectedPetId(null);
+            setError('Failed to fetch pets.');
+          });
+      } else {
+        // Already full pet objects
+        setClientPets(parsedClient.pets);
+        setSelectedPetId(parsedClient.pets[0]._id);
+      }
     } else {
       setClientPets([]);
       setSelectedPetId(null);
@@ -219,9 +264,11 @@ useEffect(() => {
                 selectedPetId={selectedPetId}
                 onPetSelect={handlePetSelect}
                 clientName={`${client.firstName} ${client.lastName}`}
+                showPetType={false} // Only show pet name in the select
               />
             )}            {/* Appointment Form Fields */}
-            <AppointmentFormFieldsClient              formData={{
+            <AppointmentFormFieldsClient
+              formData={{
                 date: formData.date || formatDateToYYYYMMDD(selectedDate),
                 staffId: typeof formData.staffId === 'object' ? (formData.staffId as Staff)._id : (formData.staffId || ''),
                 time: formData.time || '',
@@ -229,8 +276,7 @@ useEffect(() => {
                 duration: formData.duration || 30,
                 description: formData.description || '',
                 notes: formData.notes || '',
-                cost: formData.cost || 0
-              }}
+                cost: formData.cost || 0 }}
               staff={staff}
               selectedStaff={selectedStaff}
               onInputChange={handleInputChange}

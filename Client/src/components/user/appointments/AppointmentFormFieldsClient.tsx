@@ -80,9 +80,8 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
             onChange={(e) => onStaffChange(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             required
-            disabled={loadingStaff}
           >
-            <option value="">{loadingStaff ? 'Loading...' : 'Select Staff Member'}</option>
+            <option value="" disabled>{loadingStaff ? 'Loading staff...' : 'Select Staff Member'}</option>
             {staff
               .filter(member => member.role?.toLowerCase() === 'veterinarian' || member.role?.toLowerCase() === 'chief veterinarian & clinic director')
               .map(member => (

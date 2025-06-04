@@ -47,17 +47,25 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
           return;
         }
         const client = JSON.parse(clientRaw);
-        // TEMP: fallback to getAllAppointments if getAppointmentsByUser fails
-        let allAppointments = [];
-        try {
-          allAppointments = await appointmentService.getAppointmentsByUser(client._id);
-        } catch (err) {
-          // fallback to old method if route fails
-          allAppointments = await appointmentService.getAllAppointments({ userId: client._id });
+        if (!client.pets || client.pets.length === 0) {
+          setAppointments([]);
+          setIsLoading(false);
+          return;
         }
+        // Fetch all appointments for all pets
         const now = new Date();
-        const futureAppointments = allAppointments.filter(appt => new Date(appt.date) >= now);
-        setAppointments(futureAppointments);
+        let allAppointments: Appointment[] = [];
+        for (const pet of client.pets) {
+          try {
+            const petAppointments = await appointmentService.getAppointmentsByPet(pet._id);
+            const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
+            allAppointments = allAppointments.concat(futurePetAppointments);
+          } catch (err) {
+            // Optionally handle per-pet errors
+            console.error(`Failed to load appointments for pet ${pet.name}:`, err);
+          }
+        }
+        setAppointments(allAppointments);
       } catch (err: any) {
         let errorMsg = 'Failed to load appointments. Please try again.';
         if (err instanceof Error) {
@@ -72,7 +80,10 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
       }
     };
 
-    loadAppointments();
+    // Only call loadAppointments if not already loading
+    if (!isLoading) {
+      loadAppointments();
+    }
   }, []);
 
   const sortedAppointments = useMemo(() => {
@@ -91,12 +102,15 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
       <h1 className="text-2xl font-bold mb-6 text-[#4A3F35] dark:text-[#FDF6F0]">My Upcoming Appointments</h1>
 
-      <button
-        onClick={() => setShowAddForm(true)}
-        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-      >
-        Add New Appointment
-      </button>
+      {/* Only show the Add New Appointment button if the add form is not open */}
+      {!showAddForm && (
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          Add New Appointment
+        </button>
+      )}
 
       {showAddForm && (
         <section className="mb-8">
@@ -122,10 +136,14 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
         <ul className="space-y-4">
           {sortedAppointments.map(apt => {
             const formatted = formatAppointmentForDisplay(apt);
+            let petName = formatted.petName;
+            if (petName === 'Unknown Pet' && apt.petId && typeof apt.petId === 'object' && 'name' in apt.petId) {
+              petName = apt.petId.name;
+            }
             return (
               <li key={apt._id} className="p-4 border rounded shadow bg-gray-50 dark:bg-gray-700">
+                <p><strong>Pet:</strong> {petName}</p>
                 <p><strong>Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
-                <p><strong>Time:</strong> {formatted.time}</p>
                 <p><strong>Service:</strong> {formatted.service}</p>
                 <p><strong>Status:</strong> {formatted.status}</p>
                 {formatted.notes && <p><strong>Notes:</strong> {formatted.notes}</p>}

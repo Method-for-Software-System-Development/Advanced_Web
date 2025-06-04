@@ -6,14 +6,17 @@ interface PetSelectionClientProps {
   selectedPetId: string | null;
   onPetSelect: (petId: string) => void;
   clientName: string;
+  showPetType?: boolean; // Add this prop
 }
 
 const PetSelectionClient: React.FC<PetSelectionClientProps> = ({
   pets,
   selectedPetId,
   onPetSelect,
-  clientName
-}) => {  if (pets.length === 0) {
+  clientName,
+  showPetType = true // Default to true for backward compatibility
+}) => {
+  if (pets.length === 0) {
     return (
       <div className="border-b pb-4 dark:border-gray-600">
         <h3 className="text-lg font-semibold text-gray-700 mb-3 dark:text-[#FDF6F0]">Pet Information</h3>
@@ -34,7 +37,8 @@ const PetSelectionClient: React.FC<PetSelectionClientProps> = ({
           Select Pet *
         </label>
         <div className="space-y-2">
-          {pets.map(pet => (            <label key={pet._id} className="flex items-center space-x-2 p-2 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer dark:border-gray-600 dark:hover:bg-gray-700">
+          {pets.map(pet => (
+            <label key={pet._id} className="flex items-center space-x-2 p-2 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer dark:border-gray-600 dark:hover:bg-gray-700">
               <input
                 type="radio"
                 name="selectedPet"
@@ -45,18 +49,23 @@ const PetSelectionClient: React.FC<PetSelectionClientProps> = ({
               />
               <div className="flex-1">
                 <span className="font-medium dark:text-gray-200">{pet.name}</span>
-                <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-                  ({pet.type}) - {pet.breed}
-                </span>
-                {pet.birthYear && (
-                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                    Born: {pet.birthYear}
-                  </span>
-                )}
-                {pet.weight && (
-                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                    Weight: {pet.weight}kg
-                  </span>
+                {/* Only show type/breed/birthYear/weight if showPetType is true */}
+                {showPetType && (
+                  <>
+                    <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                      ({pet.type}) - {pet.breed}
+                    </span>
+                    {pet.birthYear && (
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                        Born: {pet.birthYear}
+                      </span>
+                    )}
+                    {pet.weight && (
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                        Weight: {pet.weight}kg
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </label>
