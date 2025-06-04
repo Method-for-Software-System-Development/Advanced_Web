@@ -1,34 +1,19 @@
-/**
- * Chat-bot API – routes/chatbot.route.ts
- * -------------------------------------
- * Handles conversational requests from the front-end.
- *
- *  Flow:
- *   1. Detect simple menu commands (book / cancel / history / info).
- *   2. If none match, forward the prompt to Google Gemini.
- *      • Auto-retry up to 3× on HTTP 503 (model overloaded).
- *   3. Always respond   { reply: string, menu: string[] }
- */
-
 import express from "express";
 import axios from "axios";
-
+import { authMiddleware, AuthRequest } from "../services/authMiddleware";
 import {
   createAppointment,
   cancelAppointment,
   getFutureAppointments,
 } from "../services/appointmentService";
-
 import { getPetHistory } from "../services/treatmentService";
 
 const router = express.Router();
 
-/* --- Gemini configuration --------------------------------------------- */
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || "").trim();
 
-/** Main quick-reply menu presented to the user */
 const MAIN_MENU = [
   "Book appointment",
   "Cancel appointment",
@@ -46,28 +31,34 @@ const NUMBERED_MENU = [
   { label: "Emergency", display: "Emergency" },
 ];
 
-/* ---------------------------------------------------------------------- */
-/* Helper: call Gemini with up-to-3 retries on 503 (“model overloaded”)   */
-/* ---------------------------------------------------------------------- */
 async function callGemini(prompt: string, retries = 3): Promise<string> {
+  const systemPrompt =
+    "You are Kayo, the friendly virtual assistant for FurEver Friends – Pet Clinic in Karmiel, Israel.\n" +
+    "Always answer as Kayo, in a warm and welcoming way, and never mention that you are an AI model.\n" +
+    "Here is some background about the clinic:\n" +
+    "At FurEver Friends, we care for your pets as if they were our own. With years of experience and a deep love for animals, our expert team of veterinarians and caregivers is dedicated to delivering compassionate, personalized care tailored to each pet’s unique needs. Whether it’s a routine check-up, preventive care, or specialized treatment, we strive to create a calm, welcoming environment where both pets and their owners feel safe and understood. We believe in building long-term relationships based on trust, empathy, and medical excellence—because your pet deserves nothing less. Schedule a free introductory consultation or your first appointment today.\n" +
+    "The user asked: \"" + prompt + "\"\n" +
+    "Please answer as Kayo, in a brief, clear, and friendly way (maximum 3 sentences).";
+
   try {
     const { data } = await axios.post(
       `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text: prompt + "\n\nPlease answer briefly and clearly, in up to 3 sentences." }] }] }
+      { contents: [{ parts: [{ text: systemPrompt }] }] }
     );
     return (
       data.candidates?.[0]?.content?.parts?.[0]?.text ??
       "Sorry, I didn't understand."
     );
   } catch (err: any) {
-    /* Retry ONLY on 503 - everything else bubbles up */
     if (retries > 0 && err.response?.status === 503) {
-      await new Promise((r) => setTimeout(r, 1000)); // wait 1 s
+      await new Promise((r) => setTimeout(r, 1000));
       return callGemini(prompt, retries - 1);
     }
     throw err;
   }
 }
+
+
 function getNumberedMenuText() {
   return (
     "Please choose an option by typing the corresponding number:\n" +
@@ -76,136 +67,156 @@ function getNumberedMenuText() {
   );
 }
 
-
-
-/* ====================================================================== */
-/*  POST /api/chatbot  – single endpoint for all chat requests            */
-/* ====================================================================== */
-router.post("/", async (req, res) => {
-  const {
-    message,
-    userId,
-    petId,
-    date,
-    time,
-    type,
-    description,
-  } = req.body;
+/**
+ * Chatbot main endpoint.
+ * Supports both guests and logged-in users (JWT optional).
+ * Some actions (appointments/history) require authentication; others don't.
+ */
+router.post("/", async (req, res, next) => {
+  // Parse menu numbers
+  let { message, petId, date, time, type, description } = req.body;
   let normalizedMessage = message;
-const idx = parseInt(message, 10) - 1;
-if (!isNaN(idx) && idx >= 0 && idx < NUMBERED_MENU.length) {
-  normalizedMessage = NUMBERED_MENU[idx].label;
-}
-
-// Exit command
-if (normalizedMessage.toLowerCase() === "exit") {
+  const idx = parseInt(message, 10) - 1;
+  if (!isNaN(idx) && idx >= 0 && idx < NUMBERED_MENU.length) {
+    normalizedMessage = NUMBERED_MENU[idx].label;
+    
+  }
+// --- Handle "help" requests globally ---
+const helpKeywords = [
+  "help", "support", "i need help", "assistance"
+];
+if (helpKeywords.some(kw => normalizedMessage.toLowerCase().includes(kw))) {
   return res.json({
-    reply: "You have exited the menu. To start over, type 'menu'.",
-    menu: [],
+    reply:
+      "Of course! Here’s what I can help you with:\n" +
+      getNumberedMenuText() +
+      "\nTo perform any of these actions, simply type the number, select from the menu, or type 'menu' at any time to see your options. For any other question, just ask!",
+    menu: MAIN_MENU,
   });
 }
 
-  /* ------------------------------------------------------------------ */
-  /* 1.  Book appointment – initial step                                */
-  /* ------------------------------------------------------------------ */
-  if (normalizedMessage === "Book appointment") {
-    if (!userId) {
-      return res.json({
-        reply: "Please log in to book an appointment.",
-        menu: MAIN_MENU,
+  // Always parse JWT if exists
+  let userId: string | undefined = undefined;
+  if (req.headers.authorization?.startsWith("Bearer ")) {
+    // Reuse your existing middleware as a function
+    await new Promise<void>((resolve) => {
+      authMiddleware(req as AuthRequest, res, (result: any) => {
+        if ((req as AuthRequest).user) userId = (req as AuthRequest).user?.userId;
+        resolve();
       });
-    }
+    });
+  }
+
+  // Exit command
+  if (normalizedMessage.toLowerCase() === "exit") {
     return res.json({
-      reply:
-        "To book an appointment please provide:\n" +
-        "1. Pet ID\n2. Date (YYYY-MM-DD)\n3. Time (e.g. 10:30 AM)\n4. Type (e.g. vaccination)",
+      reply: "You have exited the menu. To start over, type 'menu'.",
       menu: [],
     });
   }
 
-  /* 1b.  Book appointment – final step (all details supplied) */
-  if (normalizedMessage=== "Book now" && userId && petId && date && time && type) {
-    await createAppointment(
-      userId,
-      petId,
-      "", // staffId not chosen yet → pass empty string
-      date,
-      time,
-      type,
-      description || ""
-    );
-    return res.json({
-      reply: `Appointment booked for ${date} at ${time}.`,
-      menu: MAIN_MENU,
-    });
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* 2.  Cancel appointment                                             */
-  /* ------------------------------------------------------------------ */
-  if (normalizedMessage === "Cancel appointment" && userId) {
-    const appts = await getFutureAppointments(userId);
-
-    if (!appts.length) {
+  // ================== Actions that require login ==================
+  if (
+    normalizedMessage === "Book appointment" ||
+    (normalizedMessage === "Book now" && petId && date && time && type) ||
+    normalizedMessage === "Cancel appointment" ||
+    normalizedMessage.startsWith("Cancel ") ||
+    normalizedMessage === "Show history"
+  ) {
+    if (!userId) {
       return res.json({
-        reply: "You have no upcoming appointments to cancel.",
+        reply: "Please log in to perform this action.",
         menu: MAIN_MENU,
       });
     }
-    const menu = appts.map(
-      (a) => `${a._id} – ${a.date.toISOString().slice(0, 10)} ${a.time}`
-    );
-    return res.json({
-      reply: "Which appointment do you want to cancel? Reply with the ID.",
-      menu,
-    });
-  }
 
-  /* 2b.  Cancel by ID */
-  if (normalizedMessage.startsWith("Cancel ") && userId) {
-    const id = normalizedMessage.replace("Cancel ", "");
-    const ok = await cancelAppointment(userId, id);
-    return res.json({
-      reply: ok
-        ? "Appointment cancelled."
-        : "Could not cancel (check the ID).",
-      menu: MAIN_MENU,
-    });
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* 3.  Show pet history                                               */
-  /* ------------------------------------------------------------------ */
-  if (normalizedMessage === "Show history") {
-    if (!petId) {
+    // Book appointment – step 1
+    if (normalizedMessage === "Book appointment") {
       return res.json({
-        reply: "Please provide your Pet ID.",
+        reply:
+          "To book an appointment please provide:\n" +
+          "1. Pet ID\n2. Date (YYYY-MM-DD)\n3. Time (e.g. 10:30 AM)\n4. Type (e.g. vaccination)",
+        menu: [],
+      });
+    }
+
+    // Book now – final step
+    if (normalizedMessage === "Book now" && petId && date && time && type) {
+      await createAppointment(
+        userId,
+        petId,
+        "",
+        date,
+        time,
+        type,
+        description || ""
+      );
+      return res.json({
+        reply: `Appointment booked for ${date} at ${time}.`,
         menu: MAIN_MENU,
       });
     }
-    const treatments = await getPetHistory(petId);
-    if (!treatments.length) {
+
+    // Cancel appointment
+    if (normalizedMessage === "Cancel appointment") {
+      const appts = await getFutureAppointments(userId);
+      if (!appts.length) {
+        return res.json({
+          reply: "You have no upcoming appointments to cancel.",
+          menu: MAIN_MENU,
+        });
+      }
+      const menu = appts.map(
+        (a) => `${a._id} – ${a.date.toISOString().slice(0, 10)} ${a.time}`
+      );
       return res.json({
-        reply: "No treatment history found for this pet.",
+        reply: "Which appointment do you want to cancel? Reply with the ID.",
+        menu,
+      });
+    }
+
+    // Cancel by ID
+    if (normalizedMessage.startsWith("Cancel ")) {
+      const id = normalizedMessage.replace("Cancel ", "");
+      const ok = await cancelAppointment(userId, id);
+      return res.json({
+        reply: ok
+          ? "Appointment cancelled."
+          : "Could not cancel (check the ID).",
         menu: MAIN_MENU,
       });
     }
-    return res.json({
-      reply: treatments
-        .slice(0, 3)
-        .map(
-          (t) =>
-            `${t.visitDate.toISOString().slice(0, 10)}: ` +
-            `${t.treatmentType} – ${t.notes}`
-        )
-        .join("\n"),
-      menu: MAIN_MENU,
-    });
+
+    // Show pet history
+    if (normalizedMessage === "Show history") {
+      if (!petId) {
+        return res.json({
+          reply: "Please provide your Pet ID.",
+          menu: MAIN_MENU,
+        });
+      }
+      const treatments = await getPetHistory(petId);
+      if (!treatments.length) {
+        return res.json({
+          reply: "No treatment history found for this pet.",
+          menu: MAIN_MENU,
+        });
+      }
+      return res.json({
+        reply: treatments
+          .slice(0, 3)
+          .map(
+            (t) =>
+              `${t.visitDate.toISOString().slice(0, 10)}: ` +
+              `${t.treatmentType} – ${t.notes}`
+          )
+          .join("\n"),
+        menu: MAIN_MENU,
+      });
+    }
   }
 
-  /* ------------------------------------------------------------------ */
-  /* 4.  Static answers (hours / contact / emergency)                   */
-  /* ------------------------------------------------------------------ */
+  // ================== Actions open for all ==================
   if (normalizedMessage === "Show clinic hours") {
     return res.json({
       reply:
@@ -234,14 +245,11 @@ if (normalizedMessage.toLowerCase() === "exit") {
     });
   }
 
- if (normalizedMessage === "Main menu" || normalizedMessage === "menu") {
-  return res.json({ reply: getNumberedMenuText(), menu: [] });
-}
+  if (normalizedMessage === "Main menu" || normalizedMessage === "menu") {
+    return res.json({ reply: getNumberedMenuText(), menu: [] });
+  }
 
-
-  /* ------------------------------------------------------------------ */
-  /* 5.  Fallback → Gemini                                              */
-  /* ------------------------------------------------------------------ */
+  // ================== Fallback to Gemini AI ==================
   try {
     const aiReply = await callGemini(normalizedMessage);
     res.json({ reply: aiReply, menu: MAIN_MENU });
