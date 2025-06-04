@@ -131,7 +131,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a message…"
-            className="flex-1 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
+            className="flex-1 min-w-0 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
                        focus:outline-none dark:text-white"
             disabled={isTyping}
           />
