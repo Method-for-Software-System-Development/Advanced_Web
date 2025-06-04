@@ -5,6 +5,8 @@ import ClientProfile from "../components/user/ClientProfile";
 import TreatmentHistory from "../components/user/TreatmentHistory";
 import UserNavButton from "../components/user/UserNavButton";
 import ShowPrescriptions from "../components/user/ShowPrescriptions";
+import AppointmentViewClient from "../components/user/AppointmentViewClient";
+
 
 // Define all 5 views (combine makeAppointment and showAppointments into 'appointments')
 export type ClientView =
@@ -51,9 +53,7 @@ const ClientPage: React.FC = () => {
         </div>
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}
-        {currentView === "appointments" && (
-          <div>Appointments Section Coming Soon</div>
-        )}
+        {currentView === "appointments" && <AppointmentViewClient onBack={() => setCurrentView("profile")} />}
         {currentView === "prescriptions" && <ShowPrescriptions />}
         {currentView === "history" && <TreatmentHistory />}
       </main>
