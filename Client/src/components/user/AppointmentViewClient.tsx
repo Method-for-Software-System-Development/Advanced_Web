@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import AddAppointmentFormToClient from './AddAppointmentFormToClient.tsx';
 import appointmentService from '../../services/appointmentService';
 import { Appointment } from '../../types';
-
+import UserNavButton from './UserNavButton';
 
 interface AppointmentViewClientProps {
   onBack: () => void;
@@ -34,6 +34,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const loadAppointments = async () => {
@@ -88,6 +89,18 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
     return [...appointments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [appointments]);
 
+  // Filter appointments by pet name
+  const filteredAppointments = useMemo(() => {
+    if (!searchTerm.trim()) return sortedAppointments;
+    return sortedAppointments.filter(apt => {
+      let petName = "";
+      if (typeof apt.petId === "object" && apt.petId && "name" in apt.petId) {
+        petName = apt.petId.name.toLowerCase();
+      }
+      return petName.includes(searchTerm.trim().toLowerCase());
+    });
+  }, [searchTerm, sortedAppointments]);
+
   const handleAppointmentAdded = (newAppointment: Appointment) => {
     setShowAddForm(false);
     if (new Date(newAppointment.date) >= new Date()) {
@@ -98,17 +111,34 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
 
  return (
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
-      {/* Only show the Add New Appointment button if the add form is not open */}
+      {/* Header and search bar, styled like Treatment History */}
       {!showAddForm && (
-        <h1 className="text-2xl font-bold mb-6 text-[#4A3F35] dark:text-[#FDF6F0]">My Upcoming Appointments</h1>
-      )}
-      {!showAddForm && (
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="mb-6 px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
-        >
-          Add New Appointment
-        </button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-1">My Upcoming Appointments</h1>
+            <div className="text-sm text-gray-500 dark:text-gray-300">
+              Showing {filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled').length} appointments
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <label htmlFor="search-pet" className="sr-only">Search by Pet Name</label>
+            <input
+              id="search-pet"
+              type="text"
+              placeholder="Enter pet name..."
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{ minWidth: 200 }}
+            />
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
+            >
+              Add New Appointment
+            </button>
+          </div>
+        </div>
       )}
 
       {showAddForm && (
@@ -121,6 +151,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
         </section>
       )}
 
+      {/* Filter appointments by pet name */}
       {error && (
         <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded">
           {error}
@@ -129,27 +160,43 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
 
       {isLoading ? (
         <p className="text-gray-500 dark:text-gray-400 text-center">Loading appointments...</p>
-      ) : sortedAppointments.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400 text-center">No upcoming appointments.</p>
-      ) : (
+      ) : filteredAppointments && filteredAppointments.length > 0 ? (
         <ul className="space-y-4">
-          {sortedAppointments.map(apt => {
-            const formatted = formatAppointmentForDisplay(apt);
-            let petName = formatted.petName;
-            if (petName === 'Unknown Pet' && apt.petId && typeof apt.petId === 'object' && 'name' in apt.petId) {
-              petName = apt.petId.name;
-            }
-            return (
-              <li key={apt._id} className="p-4 border rounded shadow bg-gray-50 dark:bg-gray-700">
-                <p><strong>Pet:</strong> {petName}</p>
-                <p><strong>Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
-                <p><strong>Service:</strong> {formatted.service}</p>
-                <p><strong>Status:</strong> {formatted.status}</p>
-                {formatted.notes && <p><strong>Notes:</strong> {formatted.notes}</p>}
-              </li>
-            );
-          })}
+          {filteredAppointments
+            .filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled')
+            .map(apt => {
+              const formatted = formatAppointmentForDisplay(apt);
+              let petName = formatted.petName;
+              if (petName === 'Unknown Pet' && apt.petId && typeof apt.petId === 'object' && 'name' in apt.petId) {
+                petName = apt.petId.name;
+              }
+              return (
+                <li key={apt._id} className="p-4 border rounded shadow bg-[#FDF6F0] dark:bg-[#664147] flex flex-col relative">
+                  <UserNavButton
+                    label="Cancel Appointment"
+                    onClick={async () => {
+                      try {
+                        await appointmentService.cancelAppointment(apt._id);
+                        setAppointments(prev => prev.filter(a => a._id !== apt._id));
+                      } catch (err) {
+                        alert('Failed to cancel appointment.');
+                      }
+                    }}
+                    className="user-cancel-btn"
+                  />
+                  <div className="mt-2">
+                    <p><strong>Pet:</strong> {petName}</p>
+                    <p><strong>Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
+                    <p><strong>Service:</strong> {formatted.service}</p>
+                    <p><strong>Staff Member:</strong> {formatted.staffName}</p>
+                    {formatted.notes && <p><strong>Notes:</strong> {formatted.notes}</p>}
+                  </div>
+                </li>
+              );
+            })}
         </ul>
+      ) : (
+        <p className="text-gray-500 dark:text-gray-400 text-center">No upcoming appointments.</p>
       )}
     </div>
   );
