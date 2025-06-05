@@ -20,7 +20,7 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
   const [petBreed, setPetBreed] = useState('');
   const [petBirthYear, setPetBirthYear] = useState('');
   const [petWeight, setPetWeight] = useState('');
-
+  const [isActive, setIsActive] = useState(true);
   // Reset form when pets change
   useEffect(() => {
     setSelectedPetId('');
@@ -29,8 +29,8 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
     setPetBreed('');
     setPetBirthYear('');
     setPetWeight('');
+    setIsActive(true);
   }, [pets]);
-
   // Update form fields when a pet is selected
   useEffect(() => {
     if (selectedPetId) {
@@ -41,6 +41,7 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
         setPetBreed(selectedPet.breed);
         setPetBirthYear(selectedPet.birthYear.toString());
         setPetWeight(selectedPet.weight.toString());
+        setIsActive(selectedPet.isActive);
       }
     } else {
       setPetName('');
@@ -48,6 +49,7 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
       setPetBreed('');
       setPetBirthYear('');
       setPetWeight('');
+      setIsActive(true);
     }
   }, [selectedPetId, pets]);
 
@@ -61,13 +63,13 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
       alert('Please fill in all fields.');
       return;
     }
-    
-    const petData = {
+      const petData = {
       name: petName,
       type: petType,
       breed: petBreed,
       birthYear: Number(petBirthYear),
-      weight: Number(petWeight)
+      weight: Number(petWeight),
+      isActive: isActive
     };
     
     onEditPet(selectedPetId, petData);
@@ -142,8 +144,7 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
                 onChange={(e) => setPetBirthYear(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               />
-            </div>
-            <div>
+            </div>            <div>
               <label htmlFor="petWeight" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Weight (kg):</label>
               <input 
                 type="number" 
@@ -152,6 +153,18 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
                 onChange={(e) => setPetWeight(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               />
+            </div>
+            <div>
+              <label htmlFor="petStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Pet Status:</label>
+              <select
+                id="petStatus"
+                value={isActive ? 'active' : 'inactive'}
+                onChange={(e) => setIsActive(e.target.value === 'active')}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
           </>
         )}

@@ -93,8 +93,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
       console.error('Error updating patient:', error);
     }
   };
-
-  const handleAddNewPet = async (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number) => {
+  const handleAddNewPet = async (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number, isActive: boolean) => {
     try {
       const newPetData = {
         name: petName,
@@ -102,6 +101,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
         breed: petBreed,
         birthYear: petBirthYear,
         weight: petWeight,
+        isActive: isActive,
         prescriptions: [], // Ensure these are initialized if not provided by form
         treatments: []
       };

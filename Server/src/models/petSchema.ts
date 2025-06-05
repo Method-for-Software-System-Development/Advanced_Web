@@ -11,6 +11,7 @@ export interface IPet extends Document {
   breed: string;
   birthYear: number;
   weight: number;
+  isActive: boolean;
   prescriptions: mongoose.Types.ObjectId[]; // Or a custom type if you embed
   treatments: mongoose.Types.ObjectId[];    // Or a custom type if you embed
 }
@@ -21,6 +22,7 @@ const petSchema: Schema = new Schema({
   breed: { type: String, required: true },
   birthYear: { type: Number, required: true },
   weight: { type: Number, required: true },
+  isActive: { type: Boolean, required: true, default: true },
   prescriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Prescription", default: [] }],
   treatments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Treatment", default: [] }],
 });

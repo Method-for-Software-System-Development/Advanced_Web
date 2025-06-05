@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-// Assuming Patient interface is defined elsewhere or passed
-interface Patient {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  street: string;
-  city: string;
-  postalCode?: string; // Optional field for postal code
-}
-
 interface AddPetFormProps {
   selectedPatientName: string;
   selectedPatientId: string;
-  onAddPet: (patientId: string, petName: string, petType: string, petBreed: string, petBirthYear: number, petWeight: number) => void;
+  onAddPet: (patientId: string, petName: string, petType: string, petBreed: string, petBirthYear: number, petWeight: number, isActive: boolean) => void;
   onCancel: () => void;
 }
 
@@ -30,7 +18,7 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
   const [petBreed, setPetBreed] = useState('');
   const [petBirthYear, setPetBirthYear] = useState('');
   const [petWeight, setPetWeight] = useState('');
-
+  const [isActive, setIsActive] = useState(true);
   // Effect to reset pet form fields if the selected patient changes or form is re-shown
   useEffect(() => {
     setPetName('');
@@ -38,15 +26,15 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
     setPetBreed('');
     setPetBirthYear('');
     setPetWeight('');
+    setIsActive(true);
   }, [selectedPatientId]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim()) {
       alert('Please fill in all fields.');
       return;
     }
-    onAddPet(selectedPatientId, petName, petType, petBreed, Number(petBirthYear), Number(petWeight));
+    onAddPet(selectedPatientId, petName, petType, petBreed, Number(petBirthYear), Number(petWeight), isActive);
     // Parent will hide form and reset selectedPatientId if needed
   };
   return (
@@ -117,6 +105,18 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             onChange={(e) => setPetWeight(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
+        </div>
+        <div>
+          <label htmlFor="petStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Pet Status:</label>
+          <select
+            id="petStatus"
+            value={isActive ? 'active' : 'inactive'}
+            onChange={(e) => setIsActive(e.target.value === 'active')}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
         <div className="flex justify-end gap-3">
             <button onClick={handleSubmit} className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50">Add Pet</button>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Patient } from '../../types';
 import AddPetForm from './AddPetForm';
 import EditPetForm from './EditPetForm';
@@ -6,7 +6,7 @@ import EditPetForm from './EditPetForm';
 interface PatientCardProps {
   patient: Patient;
   onEditPatient: (patient: Patient) => void;
-  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number) => void;
+  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, isActive: boolean) => void;
   onEditPet: (petId: string, petData: any) => void;
   showAddPetForm: boolean;
   showEditPetForm: boolean;
@@ -24,8 +24,10 @@ const PatientCard: React.FC<PatientCardProps> = ({
   onToggleAddPetForm,
   onToggleEditPetForm 
 }) => {
-  const handleAddPet = (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number) => {
-    onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight);
+  const [showInactivePets, setShowInactivePets] = useState(true);
+
+  const handleAddPet = (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, isActive: boolean) => {
+    onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight, isActive);
     onToggleAddPetForm();
   };
 
@@ -48,22 +50,47 @@ const PatientCard: React.FC<PatientCardProps> = ({
       <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Email: {patient.email} </p>
       {patient.phone && <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Phone: {patient.phone}</p>}
       {patient.street && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Street: {patient.street}</p>}
-      {patient.city && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">City: {patient.city}</p>}
-      {patient.postalCode && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Postal Code: {patient.postalCode}</p>}
-      <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Pets:</h4>
-      
-      
-      {patient.pets && patient.pets.length > 0 ? (
-        <ul className="list-disc list-inside pl-4 space-y-1 text-sm text-gray-700 dark:text-gray-300">
-          {patient.pets.map(pet => (
-            <li key={pet._id}>
-              <strong>{pet.name}</strong> ({pet.type})
-              {pet.breed && `, ${pet.breed}`}
-              {pet.birthYear && `, Birth Year: ${pet.birthYear}`}
-              {pet.weight !== undefined && `, Weight: ${pet.weight}kg`}
-            </li>
-          ))}
-        </ul>
+      {patient.city && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">City: {patient.city}</p>}      {patient.postalCode && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Postal Code: {patient.postalCode}</p>}
+      <div className="flex justify-between items-center mb-2">
+        <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300">Pets:</h4>
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id={`showInactive-${patient._id}`}
+            checked={showInactivePets}
+            onChange={(e) => setShowInactivePets(e.target.checked)}
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+          />
+          <label htmlFor={`showInactive-${patient._id}`} className="text-sm text-gray-600 dark:text-gray-300">
+            Show inactive pets
+          </label>
+        </div>
+      </div>
+        {patient.pets && patient.pets.length > 0 ? (
+        (() => {
+          const filteredPets = patient.pets.filter(pet => showInactivePets || pet.isActive);
+          return filteredPets.length > 0 ? (
+            <ul className="list-disc list-inside pl-4 space-y-3 text-sm text-gray-700 dark:text-gray-300">
+              {filteredPets.map(pet => (
+                <li key={pet._id}>
+                  <strong>{pet.name}</strong> ({pet.type})
+                  {pet.breed && `, Breed: ${pet.breed}`}
+                  {pet.birthYear && `, Birth Year: ${pet.birthYear}`}
+                  {pet.weight !== undefined && `, Weight: ${pet.weight}kg`}
+                  <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                    pet.isActive 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  }`}>
+                    {pet.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic">No active pets to display. Check "Show inactive pets" to see all pets.</p>
+          );
+        })()
       ) : (
         <p className="text-sm text-gray-500 dark:text-gray-400 italic">No pets registered for this owner.</p>
       )}

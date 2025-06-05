@@ -5,6 +5,7 @@ export interface Pet {
   breed: string;
   birthYear: number;
   weight: number;
+  isActive: boolean;
   prescriptions: string[]; 
   treatments: string[];
 }

@@ -6,7 +6,7 @@ import { Patient } from '../../types';
 interface PatientListProps {
   patients: Patient[];
   onSaveEdit: (updatedPatient: Patient) => void;
-  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number) => void;
+  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, isActive: boolean) => void;
   onEditPet: (petId: string, petData: any) => void;
   openAddPetForId: string | null;
   setOpenAddPetForId: (id: string | null) => void;
