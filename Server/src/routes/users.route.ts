@@ -38,8 +38,6 @@ usersRouter.get("/", async (req: Request, res: Response) => {
     });
 
 /**
- * POST /api/users/login
- * Authenticates a user by email and password.
  * POST /api/users/register
  * Registers a new user. Expects JSON body with user data.
  */
@@ -59,6 +57,31 @@ usersRouter.post("/register", async (req: Request, res: Response) => {
         });
         await user.save();
         res.status(201).send({ message: "User registered successfully", user });
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(500).send({ error: error.message });
+        } else {
+            res.status(500).send({ error: "An unknown error occurred" });
+        }
+    }
+});
+
+/**
+ * PUT /api/users/update/:id
+ * Updates an existing user. Expects JSON body with user data.
+ */
+usersRouter.put("/update/:id", async (req: Request, res: Response) => {
+    try {
+        const { firstName, lastName, email, phone, street, city, postalCode } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { firstName, lastName, email, phone, street, city, postalCode },
+            { new: true }
+        );
+        if (!updatedUser) {
+            return res.status(404).send({ error: "User not found" });
+        }
+        res.status(200).send({ message: "User updated successfully", user: updatedUser });
     } catch (error) {
         if (error instanceof Error) {
             res.status(500).send({ error: error.message });

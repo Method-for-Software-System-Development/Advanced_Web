@@ -18,20 +18,6 @@ export const patientService = {
     }
   },
 
-  // Get patient by ID
-  async getPatientById(id: string): Promise<Patient> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/patients/${id}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching patient:', error);
-      throw error;
-    }
-  },
-
   // Create a new patient
   async createPatient(patientData: Omit<Patient, '_id'>): Promise<Patient> {
     try {
@@ -50,12 +36,19 @@ export const patientService = {
       throw error;
     }
   },
-  
 
   // Update patient
-  async updatePatient(id: string, patientData: Partial<Patient>): Promise<Patient> {
+  async updatePatient(id: string, patientData: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    street?: string;
+    city?: string;
+    postalCode?: string;
+  }): Promise<{ message: string; patient: Patient }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/patients/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/users/update/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patientData),
@@ -71,24 +64,7 @@ export const patientService = {
     }
   },
 
-  // Delete patient
-  async deletePatient(id: string): Promise<{ message: string; patient: Patient }> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/patients/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error deleting patient:', error);
-      throw error;
-    }
-  },
-
-    // Search patients by name or email
+  // Search patients by name or email
     async searchPatients(query: string): Promise<Patient[]> {
       try {
         const response = await fetch(`${API_BASE_URL}/users/search?q=${encodeURIComponent(query)}`);

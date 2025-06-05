@@ -16,8 +16,8 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
   const [error, setError] = useState<string | null>(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingPatient, setEditingPatient] = useState<Patient | null>(null); // For editing
   const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
+  const [clearEditFormFlag, setClearEditFormFlag] = useState(false);
 
   useEffect(() => {
     // Call loadPatients with isInitialCall = true for the first load
@@ -68,12 +68,30 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     }
   };
 
-  const handleSaveUpdatedPatient = (updatedPatientData: Patient) => {
-    setPatients(currentPatients =>
-      currentPatients.map(p => (p._id === updatedPatientData._id ? updatedPatientData : p))
-    );
-    setEditingPatient(null);
-    alert('Patient details updated successfully!');
+  const handleSaveUpdatedPatient = async (updatedPatientData: Patient) => {
+    try {
+      // Call the backend API to update the patient
+      await patientService.updatePatient(updatedPatientData._id, { 
+        firstName: updatedPatientData.firstName,
+        lastName: updatedPatientData.lastName,
+        email: updatedPatientData.email,
+        phone: updatedPatientData.phone,
+        street: updatedPatientData.street,
+        city: updatedPatientData.city,
+        postalCode: updatedPatientData.postalCode
+      });
+      setPatients(currentPatients =>
+        currentPatients.map(p =>
+          p._id === updatedPatientData._id
+            ? { ...p, email: updatedPatientData.email, phone: updatedPatientData.phone }
+            : p
+        )
+      );
+      alert('Patient details updated successfully!');
+    } catch (error: any) {
+      alert(error.message || 'Failed to update patient.');
+      console.error('Error updating patient:', error);
+    }
   };
 
   const handleAddNewPet = async (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number) => {
@@ -107,17 +125,6 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     }
   };
   
-  const openAddPatientForm = () => {
-    setShowAddPatientForm(true);
-    setOpenAddPetForId(null); // Close any open Add New Pet form
-    setEditingPatient(null); // Close edit form if open
-  }
-
-  const openEditPatientForm = (patient: Patient) => {
-    setEditingPatient(patient);
-    setShowAddPatientForm(false); // Close add form if open
-  };
-
   // Memoized filtered patients list
   const filteredPatients = useMemo(() => {
     if (!searchTerm) {
@@ -165,38 +172,34 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       </div>      {/* Action Buttons */}
       <div className="mb-8 flex flex-col sm:flex-row justify-center gap-4">
         <button
-          onClick={openAddPatientForm}
+          onClick={() => {
+            setShowAddPatientForm(true);
+            setOpenAddPetForId(null);
+            setClearEditFormFlag(f => !f); // Toggle to signal PatientList to clear edit
+          }}
           className="px-6 py-3 bg-green-500 dark:bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
         >
           Add New Patient
         </button>
       </div>
 
-      {showAddPatientForm && !editingPatient && (
+      {showAddPatientForm && (
         <AddPatientForm 
-          onSave={handleSaveNewPatient} // Changed from onAddPatient to onSave
+          onSave={handleSaveNewPatient}
           onCancel={() => setShowAddPatientForm(false)}
-        />
-      )}
-
-      {editingPatient && (
-        <AddPatientForm // Re-using AddPatientForm for editing, could be a separate EditPatientForm
-          onSave={handleSaveUpdatedPatient as (patientData: Patient | Omit<Patient, '_id' | 'pets'>) => void} // Changed from onAddPatient to onSave
-          onCancel={() => setEditingPatient(null)}
-          //initialData={editingPatient} // Pass initial data for editing
         />
       )}
 
       <PatientList
         patients={filteredPatients}
-        onEditPatient={openEditPatientForm}
-        onAddPet= {handleAddNewPet}
+        onSaveEdit={handleSaveUpdatedPatient}
+        onAddPet={handleAddNewPet}
         openAddPetForId={openAddPetForId}
         setOpenAddPetForId={(id) => {
           setOpenAddPetForId(id);
-          setShowAddPatientForm(false); // Always close add-client form when opening or closing add-pet
-          setEditingPatient(null); // Also close edit patient form
+          setShowAddPatientForm(false);
         }}
+        clearEditFormFlag={clearEditFormFlag}
       />
 
     </div>
