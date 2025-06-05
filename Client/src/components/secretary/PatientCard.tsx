@@ -1,19 +1,37 @@
 import React from 'react';
 import { Patient } from '../../types';
 import AddPetForm from './AddPetForm';
+import EditPetForm from './EditPetForm';
 
 interface PatientCardProps {
   patient: Patient;
   onEditPatient: (patient: Patient) => void;
   onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number) => void;
+  onEditPet: (petId: string, petData: any) => void;
   showAddPetForm: boolean;
+  showEditPetForm: boolean;
   onToggleAddPetForm: () => void;
+  onToggleEditPetForm: () => void;
 }
 
-const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAddPet, showAddPetForm, onToggleAddPetForm }) => {
+const PatientCard: React.FC<PatientCardProps> = ({ 
+  patient, 
+  onEditPatient, 
+  onAddPet, 
+  onEditPet,
+  showAddPetForm, 
+  showEditPetForm,
+  onToggleAddPetForm,
+  onToggleEditPetForm 
+}) => {
   const handleAddPet = (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number) => {
     onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight);
     onToggleAddPetForm();
+  };
+
+  const handleEditPet = (petId: string, petData: any) => {
+    onEditPet(petId, petData);
+    onToggleEditPetForm();
   };
   
   return (
@@ -51,16 +69,31 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient, onEditPatient, onAdd
       )}
       <button 
         onClick={onToggleAddPetForm}
-        className="mt-4 px-3 py-2 bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 text-sm"
+        className="mt-4 mr-2 px-3 py-2 bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 text-sm"
       >
         {showAddPetForm ? 'Cancel' : 'Add New Pet'}
       </button>
-      {showAddPetForm && (
+      {patient.pets && patient.pets.length > 0 && (
+        <button 
+          onClick={onToggleEditPetForm}
+          className="mt-4 px-3 py-2 bg-orange-500 dark:bg-orange-600 text-white rounded hover:bg-orange-600 dark:hover:bg-orange-700 text-sm"
+        >
+          {showEditPetForm ? 'Cancel' : 'Edit Pet'}
+        </button>
+      )}      {showAddPetForm && (
         <AddPetForm
           selectedPatientId={patient._id}
           selectedPatientName={`${patient.firstName} ${patient.lastName}`}
           onAddPet={handleAddPet}
           onCancel={onToggleAddPetForm}
+        />
+      )}
+      {showEditPetForm && (
+        <EditPetForm
+          patientName={`${patient.firstName} ${patient.lastName}`}
+          pets={patient.pets}
+          onEditPet={handleEditPet}
+          onCancel={onToggleEditPetForm}
         />
       )}
     </div>

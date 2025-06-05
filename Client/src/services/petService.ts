@@ -36,4 +36,23 @@ export const petService = {
       throw error;
     }
   },
+
+  // Update an existing pet
+  async updatePet(petId: string, petData: Omit<Pet, '_id' | 'prescriptions' | 'treatments'>): Promise<Pet> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/pets/${petId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(petData),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating pet:', error);
+      throw error;
+    }
+  },
 };

@@ -10,13 +10,13 @@ interface ManagePatientsViewProps { // Renamed from EditManagePatientsViewProps 
   onBack: () => void;
 }
 
-const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
-  const [patients, setPatients] = useState<Patient[]>([]);
+const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {  const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
+  const [openEditPetForId, setOpenEditPetForId] = useState<string | null>(null);
   const [clearEditFormFlag, setClearEditFormFlag] = useState(false);
 
   useEffect(() => {
@@ -124,6 +124,26 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       alert("Failed to add new pet. Please try again.");
     }
   };
+
+  const handleEditPet = async (petId: string, petData: any) => {
+    try {
+      // Call the service to update the pet
+      const updatedPet = await petService.updatePet(petId, petData);
+      
+      setPatients(currentPatients =>
+        currentPatients.map(p => ({
+          ...p,
+          pets: p.pets.map(pet => 
+            pet._id === petId ? updatedPet : pet
+          )
+        }))
+      );
+      alert('Pet updated successfully!');
+    } catch (error) {
+      console.error("Failed to update pet:", error);
+      alert("Failed to update pet. Please try again.");
+    }
+  };
   
   // Memoized filtered patients list
   const filteredPatients = useMemo(() => {
@@ -175,6 +195,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
           onClick={() => {
             setShowAddPatientForm(true);
             setOpenAddPetForId(null);
+            setOpenEditPetForId(null); // Close edit pet form if open
             setClearEditFormFlag(f => !f); // Toggle to signal PatientList to clear edit
           }}
           className="px-6 py-3 bg-green-500 dark:bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
@@ -194,9 +215,15 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
         patients={filteredPatients}
         onSaveEdit={handleSaveUpdatedPatient}
         onAddPet={handleAddNewPet}
+        onEditPet={handleEditPet}
         openAddPetForId={openAddPetForId}
         setOpenAddPetForId={(id) => {
           setOpenAddPetForId(id);
+          setShowAddPatientForm(false);
+        }}
+        openEditPetForId={openEditPetForId}
+        setOpenEditPetForId={(id) => {
+          setOpenEditPetForId(id);
           setShowAddPatientForm(false);
         }}
         clearEditFormFlag={clearEditFormFlag}
