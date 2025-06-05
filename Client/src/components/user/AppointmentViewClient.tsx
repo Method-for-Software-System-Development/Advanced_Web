@@ -5,7 +5,7 @@ import { Appointment } from '../../types';
 import UserNavButton from './UserNavButton';
 
 interface AppointmentViewClientProps {
-  onBack: () => void;
+  onBack?: () => void; // Make this optional since it's not being used
 }
 
 // Helper function to format appointment data for display
@@ -13,7 +13,6 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
   // Handle populated vs unpopulated references
   const staff = typeof appointment.staffId === 'object' ? appointment.staffId : null;
   const pet = typeof appointment.petId === 'object' ? appointment.petId : null;
-  const user = typeof appointment.userId === 'object' ? appointment.userId : null;
   
   return {
     id: appointment._id,
@@ -29,61 +28,83 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
   };
 };
 
-const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack }) => {
+const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    const loadAppointments = async () => {
-      setIsLoading(true);
-      setError('');
-      try {
-        const clientRaw = localStorage.getItem("client");
-        if (!clientRaw) {
-          setError('No client info found.');
-          setIsLoading(false);
-          return;
-        }
-        const client = JSON.parse(clientRaw);
-        if (!client.pets || client.pets.length === 0) {
-          setAppointments([]);
-          setIsLoading(false);
-          return;
-        }
-        // Fetch all appointments for all pets
-        // Only keep future appointments for each pet
-        const now = new Date();
-        let allAppointments: Appointment[] = [];
-        for (const pet of client.pets) {
-          try {
-            const petAppointments = await appointmentService.getAppointmentsByPet(pet._id);
-            const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
-            allAppointments = allAppointments.concat(futurePetAppointments as Appointment[]);
-          } catch (err) {
-            // Optionally handle per-pet errors
-            console.error(`Failed to load appointments for pet ${pet.name}:`, err);
-          }
-        }
-        // Deduplicate appointments by _id
-        const dedupedAppointments = Array.from(new Map(allAppointments.map(appt => [appt._id, appt])).values());
-        setAppointments(dedupedAppointments);
-      } catch (err: any) {
-        let errorMsg = 'Failed to load appointments. Please try again.';
-        if (err instanceof Error) {
-          errorMsg += `\n${err.message}`;
-        } else if (typeof err === 'string') {
-          errorMsg += `\n${err}`;
-        }
-        setError(errorMsg);
-        console.error('Appointment loading error:', err);
-      } finally {
+  // Function to load all appointments from pets
+  const loadAppointments = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const clientRaw = localStorage.getItem("client");
+      if (!clientRaw) {
+        setError('No client info found.');
         setIsLoading(false);
+        return;
       }
-    };
+      
+      const client = JSON.parse(clientRaw);
+      if (!client.pets || client.pets.length === 0) {
+        setAppointments([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fetch all appointments for all pets
+      // Only keep future appointments for each pet
+      const now = new Date();
+      let allAppointments: Appointment[] = [];
+      
+      for (const pet of client.pets) {
+        try {
+          // Check if pet is a string (ID) or an object with _id property
+          const petId = typeof pet === 'string' ? pet : pet._id;
+          
+          if (!petId) {
+            console.error('Invalid pet ID:', pet);
+            continue;
+          }
+          
+          console.log("Fetching appointments for pet ID:", petId);
+          const petAppointments = await appointmentService.getAppointmentsByPet(petId);
+          console.log(`Received ${petAppointments.length} appointments for pet ${petId}`);
+          
+          const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
+          allAppointments = [...allAppointments, ...futurePetAppointments];
+        } catch (err) {
+          // Optionally handle per-pet errors
+          const petName = typeof pet === 'object' && pet.name ? pet.name : 'unknown';
+          console.error(`Failed to load appointments for pet ${petName}:`, err);
+        }
+      }
+      
+      // Deduplicate appointments by _id
+      const dedupedAppointments = Array.from(
+        new Map(allAppointments.map(appt => [appt._id, appt])).values()
+      ) as Appointment[];
+      
+      console.log(`Final appointments list: ${dedupedAppointments.length} items`);
+      setAppointments(dedupedAppointments);
+    } catch (err: any) {
+      let errorMsg = 'Failed to load appointments. Please try again.';
+      if (err instanceof Error) {
+        errorMsg += `\n${err.message}`;
+      } else if (typeof err === 'string') {
+        errorMsg += `\n${err}`;
+      }
+      setError(errorMsg);
+      console.error('Appointment loading error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Load appointments on component mount
+  useEffect(() => {
     loadAppointments();
   }, []);
 
@@ -103,19 +124,16 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
     });
   }, [searchTerm, sortedAppointments]);
 
+  // Handler for when a new appointment is added
   const handleAppointmentAdded = (newAppointment: Appointment) => {
     setShowAddForm(false);
-    if (new Date(newAppointment.date) >= new Date()) {
-      setAppointments(prev => {
-        const updated = [...prev, newAppointment];
-        // Deduplicate by _id
-        return Array.from(new Map(updated.map(appt => [appt._id, appt])).values());
-      });
-    }
+    console.log("New appointment added:", newAppointment);
+    
+    // Reload all appointments to ensure consistency
+    loadAppointments();
   };
   
-
- return (
+  return (
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
       {/* Header and search bar, styled like Treatment History */}
       {!showAddForm && (
@@ -195,26 +213,8 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = ({ onBack })
                         onClick={async () => {
                           try {
                             await appointmentService.cancelAppointment(apt._id);
-                            // After cancel, reload appointments using the same logic as initial load
-                            const clientRaw = localStorage.getItem("client");
-                            if (!clientRaw) return;
-                            const client = JSON.parse(clientRaw);
-                            if (!client.pets || client.pets.length === 0) {
-                              setAppointments([]);
-                              return;
-                            }
-                            const now = new Date();
-                            let allAppointments: Appointment[] = [];
-                            for (const pet of client.pets) {
-                              try {
-                                const petAppointments = await appointmentService.getAppointmentsByPet(pet._id);
-                                const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
-                                allAppointments = allAppointments.concat(futurePetAppointments as Appointment[]);
-                              } catch {}
-                            }
-                            // Deduplicate appointments by _id
-                            const dedupedAppointments = Array.from(new Map(allAppointments.map(appt => [appt._id, appt])).values());
-                            setAppointments(dedupedAppointments);
+                            // After cancel, reload all appointments
+                            loadAppointments();
                           } catch (err) {
                             alert('Failed to cancel appointment.');
                           }

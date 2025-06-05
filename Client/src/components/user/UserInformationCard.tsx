@@ -52,10 +52,9 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
               <span className="font-bold text-[var(--color-wine)] whitespace-nowrap">Phone Number:</span>
               <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg sm:ml-2">{phone}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            </div>            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
               <span className="font-bold text-[var(--color-wine)] whitespace-nowrap">City:</span>
-              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg sm:ml-2">{city}</span>
+              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg sm:ml-2">{capitalize(city)}</span>
             </div>
             {/* Edit button for mobile only */}
             {!isEditing && (

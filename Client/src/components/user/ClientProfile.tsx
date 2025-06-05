@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import UserInformationCard from "./UserInformationCard";
 import EditUserProfile from "./EditUserProfile";
 import PetCard from "./PetCard";
+import { userService } from "../../services/userService";
 
 interface Pet {
   _id: string;
@@ -28,9 +29,13 @@ const ClientProfile: React.FC = () => {
   const [client, setClient] = useState<Client | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("");  
   const [isEditing, setIsEditing] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [toastMessage, setToastMessage] = useState("Profile updated successfully!");
 
   // Load client from localStorage on mount
   useEffect(() => {
@@ -74,19 +79,52 @@ const ClientProfile: React.FC = () => {
         console.error("Error fetching pets:", err);
       });
   }, [client]);
-  
-  const handleEditSave = (data: { email: string; phone: string }) => {
-    setEmail(data.email);
-    setPhone(data.phone);
-    setIsEditing(false);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
 
-    // Optionally update client in localStorage
-    if (client) {
+  const handleEditSave = async (data: { email: string; phone: string }) => {
+    if (!client) {
+      setError("No client information available");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Call the API to update user profile
+      const response = await userService.updateUser(client._id, {
+        email: data.email,
+        phone: data.phone
+      });
+
+      // Update local state only after successful API call
+      setEmail(data.email);
+      setPhone(data.phone);
+      setIsEditing(false);
+      
+      // Show success toast
+      setToastType('success');
+      setToastMessage("Profile updated successfully!");
+      setShowToast(true);
+      
+      // Update client in localStorage with the updated data
       const updatedClient = { ...client, email: data.email, phone: data.phone };
       setClient(updatedClient);
       localStorage.setItem("client", JSON.stringify(updatedClient));
+
+      console.log("Profile updated successfully:", response);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setError(error instanceof Error ? error.message : "Failed to update profile");
+      
+      // Show error toast
+      setToastType('error');
+      setToastMessage(error instanceof Error ? error.message : "Failed to update profile");
+      setShowToast(true);
+      // Don't close editing mode if there's an error
+    } finally {
+      setIsLoading(false);
+      // Hide toast after 3 seconds
+      setTimeout(() => setShowToast(false), 3000);
     }
   };
 
@@ -106,14 +144,22 @@ const ClientProfile: React.FC = () => {
           phone={phone}
           city={client.city}
           isEditing={isEditing}
-          onEdit={() => setIsEditing(true)}
+          onEdit={() => {
+            setError(null); // Clear any previous errors when entering edit mode
+            setIsEditing(true);
+          }}
         >
           {isEditing && (
             <EditUserProfile
               initialEmail={email}
               initialPhone={phone}
               onSave={handleEditSave}
-              onCancel={() => setIsEditing(false)}
+              onCancel={() => {
+                setError(null); // Clear errors when canceling
+                setIsEditing(false);
+              }}
+              isLoading={isLoading}
+              error={error}
             />
           )}
         </UserInformationCard>
@@ -134,8 +180,10 @@ const ClientProfile: React.FC = () => {
 
         {/* Toast */}
         {showToast && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 mobile-toast-text">
-            Profile updated successfully!
+          <div className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 ${
+            toastType === 'success' ? 'bg-green-600' : 'bg-red-600'
+          } text-white px-4 py-2 rounded shadow-lg z-50 mobile-toast-text`}>
+            {toastMessage}
           </div>
         )}
       </div>

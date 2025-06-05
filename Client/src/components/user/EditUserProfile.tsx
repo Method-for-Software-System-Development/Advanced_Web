@@ -5,6 +5,8 @@ interface EditUserProfileProps {
   initialPhone: string;
   onSave: (data: { email: string; phone: string }) => void;
   onCancel: () => void;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 const EditUserProfile: React.FC<EditUserProfileProps> = ({
@@ -12,6 +14,8 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
   initialPhone,
   onSave,
   onCancel,
+  isLoading = false,
+  error = null,
 }) => {
   const [email, setEmail] = useState(initialEmail);
   const [phone, setPhone] = useState(initialPhone);
@@ -27,6 +31,13 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
     setEmailValid(true);
     setPhoneValid(true);
   }, [initialEmail, initialPhone]);
+
+  // Update local error message when error prop changes
+  useEffect(() => {
+    if (error) {
+      setErrorMessage(error);
+    }
+  }, [error]);
 
   const isValidEmail = (email: string): boolean => {
     // Must have text before @, then @, then text, then .com at the end
@@ -82,6 +93,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             autoComplete="email"
             style={{ fontSize: '16px', fontFamily: 'monospace', letterSpacing: '0.01em' }}
             inputMode="email"
+            disabled={isLoading}
           />
         </div>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
@@ -98,6 +110,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             autoComplete="tel"
             style={{ fontSize: '16px', fontFamily: 'monospace', letterSpacing: '0.01em' }}
             inputMode="tel"
+            disabled={isLoading}
           />
         </div>
         {errorMessage && (
@@ -106,13 +119,17 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
         <div className="flex flex-row justify-end gap-3 pt-4 w-full">
           <button
             onClick={handleSubmit}
-            className="w-24 px-2 py-1 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] font-semibold text-base transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs"
+            className={`w-24 px-2 py-1 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] font-semibold text-base transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs ${
+              isLoading ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
+            disabled={isLoading}
           >
-            Save
+            {isLoading ? 'Saving...' : 'Save'}
           </button>
           <button
             onClick={onCancel}
             className="w-24 px-2 py-1 bg-[var(--color-skyDark)] text-[var(--color-wine)] rounded-lg hover:bg-[var(--color-sky)] text-base font-semibold transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs"
+            disabled={isLoading}
           >
             Cancel
           </button>

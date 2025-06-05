@@ -198,7 +198,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
             setOpenEditPetForId(null); // Close edit pet form if open
             setClearEditFormFlag(f => !f); // Toggle to signal PatientList to clear edit
           }}
-          className="px-6 py-3 bg-green-500 dark:bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
+          className="px-6 py-3 bg-greenButton dark:bg-greenButtonDark text-white font-semibold rounded-lg shadow-md hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
         >
           Add New Patient
         </button>

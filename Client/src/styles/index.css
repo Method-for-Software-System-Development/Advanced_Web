@@ -18,6 +18,10 @@
   --color-wineDark: #58383E;
   --color-grayText: #3B3B3B;
   --color-darkMode: #121212;
+  --color-greenButton: #00c951;
+  --color-greenButtonDark: #00a63e;
+  --color-redButton: #ff4d4d;
+  --color-redButtonDark: #e60000;
 }
 
 /* --- Global styles --- */
