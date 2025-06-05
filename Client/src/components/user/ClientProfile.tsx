@@ -3,17 +3,7 @@ import UserInformationCard from "./UserInformationCard";
 import EditUserProfile from "./EditUserProfile";
 import PetCard from "./PetCard";
 import { userService } from "../../services/userService";
-
-interface Pet {
-  _id: string;
-  name: string;
-  type: string;
-  breed: string;
-  birthYear: number;
-  weight: number;
-  prescriptions: string[];
-  treatments: string[];
-}
+import { Pet } from "../../types";
 
 interface Client {
   _id: string;
