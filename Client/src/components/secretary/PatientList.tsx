@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PatientCard from './PatientCard';
 import EditPatientForm from './EditPatientForm';
 import { Patient } from '../../types';
@@ -6,21 +6,28 @@ import { Patient } from '../../types';
 interface PatientListProps {
   patients: Patient[];
   onSaveEdit: (updatedPatient: Patient) => void;
-  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, isActive: boolean) => void;
+  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, sex: string, isActive: boolean) => void;
   onEditPet: (petId: string, petData: any) => void;
   openAddPetForId: string | null;
   setOpenAddPetForId: (id: string | null) => void;
   openEditPetForId: string | null;
   setOpenEditPetForId: (id: string | null) => void;
-  clearEditFormFlag?: boolean;
+  editingPatientId: string | null;
+  setEditingPatientId: (id: string | null) => void;
 }
 
-const PatientList: React.FC<PatientListProps> = ({ patients, onSaveEdit, onAddPet, onEditPet, openAddPetForId, setOpenAddPetForId, openEditPetForId, setOpenEditPetForId, clearEditFormFlag }) => {
-  const [editingPatientId, setEditingPatientId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setEditingPatientId(null);
-  }, [clearEditFormFlag]);
+const PatientList: React.FC<PatientListProps> = ({ 
+  patients, 
+  onSaveEdit, 
+  onAddPet, 
+  onEditPet, 
+  openAddPetForId, 
+  setOpenAddPetForId, 
+  openEditPetForId, 
+  setOpenEditPetForId, 
+  editingPatientId,
+  setEditingPatientId
+}) => {
 
   // Helper function to check if patient has all required fields
   const isValidPatient = (patient: Patient) => {

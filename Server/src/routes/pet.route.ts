@@ -64,8 +64,8 @@ petRouter.post("/byIds", async (req: Request, res: Response) => {
  */
 petRouter.post("/", async (req: Request, res: Response) => {
   try {
-    const { name, type, breed, birthYear, weight, isActive, prescriptions, treatments, owner } = req.body;
-    const pet = new Pet({ name, type, breed, birthYear, weight, isActive, prescriptions, treatments, owner });
+    const { name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner } = req.body;
+    const pet = new Pet({ name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner });
     await pet.save();
 
     // Add the pet's _id to the user's pets array
