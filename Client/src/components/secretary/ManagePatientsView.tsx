@@ -15,18 +15,30 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
   const [error, setError] = useState<string | null>(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);
-  const [openEditPetForId, setOpenEditPetForId] = useState<string | null>(null);
-  const [clearEditFormFlag, setClearEditFormFlag] = useState(false);
+  const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null);  const [openEditPetForId, setOpenEditPetForId] = useState<string | null>(null);
+  const [editingPatientId, setEditingPatientId] = useState<string | null>(null);
 
+  // Initial load effect - runs only once on mount
   useEffect(() => {
-    // Call loadPatients with isInitialCall = true for the first load
     loadPatients(true);
-    const intervalId = setInterval(() => loadPatients(false), 10000); // Poll every 10 seconds
+  }, []); // Empty dependency array - runs only once
+  // Interval effect - updates when form states change
+  useEffect(() => {  
+    const intervalId = setInterval(() => {
+      // Check if any forms are currently open before refreshing
+      const isAnyFormOpen = showAddPatientForm || 
+                           openAddPetForId !== null || 
+                           openEditPetForId !== null || 
+                           editingPatientId !== null;
+
+      // Only refresh if no forms are open
+      if (!isAnyFormOpen) {
+        loadPatients(false);
+      } 
+    }, 10000); // Poll every 10 seconds
 
     return () => clearInterval(intervalId); // Cleanup interval on component unmount
-  }, []); // Empty dependency array ensures this runs only on mount and unmount
-
+  }, [showAddPatientForm, openAddPetForId, openEditPetForId, editingPatientId]); // Dependencies to track form states
   const loadPatients = async (isInitialCall: boolean = false) => { // Added type for isInitialCall
     if (isInitialCall) {
       setLoading(true); // Only set global loading true for initial load
@@ -92,8 +104,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
       alert(error.message || 'Failed to update patient.');
       console.error('Error updating patient:', error);
     }
-  };
-  const handleAddNewPet = async (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number, isActive: boolean) => {
+  };  const handleAddNewPet = async (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number, sex: string, isActive: boolean) => {
     try {
       const newPetData = {
         name: petName,
@@ -101,6 +112,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
         breed: petBreed,
         birthYear: petBirthYear,
         weight: petWeight,
+        sex: sex,
         isActive: isActive,
         prescriptions: [], // Ensure these are initialized if not provided by form
         treatments: []
@@ -196,7 +208,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
             setShowAddPatientForm(true);
             setOpenAddPetForId(null);
             setOpenEditPetForId(null); // Close edit pet form if open
-            setClearEditFormFlag(f => !f); // Toggle to signal PatientList to clear edit
+            setEditingPatientId(null); // Close edit patient form if open
           }}
           className="px-6 py-3 bg-greenButton dark:bg-greenButtonDark text-white font-semibold rounded-lg shadow-md hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
         >
@@ -226,7 +238,8 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
           setOpenEditPetForId(id);
           setShowAddPatientForm(false);
         }}
-        clearEditFormFlag={clearEditFormFlag}
+        editingPatientId={editingPatientId}
+        setEditingPatientId={setEditingPatientId}
       />
 
     </div>

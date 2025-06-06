@@ -20,8 +20,8 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
   const [petBreed, setPetBreed] = useState('');
   const [petBirthYear, setPetBirthYear] = useState('');
   const [petWeight, setPetWeight] = useState('');
-  const [isActive, setIsActive] = useState(true);
-  // Reset form when pets change
+  const [petSex, setPetSex] = useState('');
+  const [isActive, setIsActive] = useState(true);  // Reset form when pets change
   useEffect(() => {
     setSelectedPetId('');
     setPetName('');
@@ -29,9 +29,9 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
     setPetBreed('');
     setPetBirthYear('');
     setPetWeight('');
+    setPetSex('');
     setIsActive(true);
-  }, [pets]);
-  // Update form fields when a pet is selected
+  }, [pets]);  // Update form fields when a pet is selected
   useEffect(() => {
     if (selectedPetId) {
       const selectedPet = pets.find(pet => pet._id === selectedPetId);
@@ -41,6 +41,7 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
         setPetBreed(selectedPet.breed);
         setPetBirthYear(selectedPet.birthYear.toString());
         setPetWeight(selectedPet.weight.toString());
+        setPetSex(selectedPet.sex);
         setIsActive(selectedPet.isActive);
       }
     } else {
@@ -49,17 +50,17 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
       setPetBreed('');
       setPetBirthYear('');
       setPetWeight('');
+      setPetSex('');
       setIsActive(true);
     }
   }, [selectedPetId, pets]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPetId) {
       alert('Please select a pet to edit.');
       return;
     }
-    if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim()) {
+    if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim() || !petSex.trim()) {
       alert('Please fill in all fields.');
       return;
     }
@@ -69,6 +70,7 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
       breed: petBreed,
       birthYear: Number(petBirthYear),
       weight: Number(petWeight),
+      sex: petSex,
       isActive: isActive
     };
     
@@ -153,6 +155,19 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
                 onChange={(e) => setPetWeight(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               />
+            </div>
+            <div>
+              <label htmlFor="petSex" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sex:</label>
+              <select
+                id="petSex"
+                value={petSex}
+                onChange={(e) => setPetSex(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+              >
+                <option value="">Select sex</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
             </div>
             <div>
               <label htmlFor="petStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Pet Status:</label>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 interface AddPetFormProps {
   selectedPatientName: string;
   selectedPatientId: string;
-  onAddPet: (patientId: string, petName: string, petType: string, petBreed: string, petBirthYear: number, petWeight: number, isActive: boolean) => void;
+  onAddPet: (patientId: string, petName: string, petType: string, petBreed: string, petBirthYear: number, petWeight: number, sex: string, isActive: boolean) => void;
   onCancel: () => void;
 }
 
@@ -18,23 +18,24 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
   const [petBreed, setPetBreed] = useState('');
   const [petBirthYear, setPetBirthYear] = useState('');
   const [petWeight, setPetWeight] = useState('');
-  const [isActive, setIsActive] = useState(true);
-  // Effect to reset pet form fields if the selected patient changes or form is re-shown
+  const [petSex, setPetSex] = useState('');
+  const [isActive, setIsActive] = useState(true);  // Effect to reset pet form fields if the selected patient changes or form is re-shown
   useEffect(() => {
     setPetName('');
     setPetType('');
     setPetBreed('');
     setPetBirthYear('');
     setPetWeight('');
+    setPetSex('');
     setIsActive(true);
   }, [selectedPatientId]);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim()) {
+    if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim() || !petSex.trim()) {
       alert('Please fill in all fields.');
       return;
     }
-    onAddPet(selectedPatientId, petName, petType, petBreed, Number(petBirthYear), Number(petWeight), isActive);
+    onAddPet(selectedPatientId, petName, petType, petBreed, Number(petBirthYear), Number(petWeight), petSex, isActive);
     // Parent will hide form and reset selectedPatientId if needed
   };
   return (
@@ -105,6 +106,19 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             onChange={(e) => setPetWeight(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
+        </div>
+        <div>
+          <label htmlFor="petSex" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sex:</label>
+          <select
+            id="petSex"
+            value={petSex}
+            onChange={(e) => setPetSex(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+          >
+            <option value="">Select sex</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
         </div>
         <div>
           <label htmlFor="petStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Pet Status:</label>

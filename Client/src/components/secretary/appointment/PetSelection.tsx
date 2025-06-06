@@ -42,12 +42,16 @@ const PetSelection: React.FC<PetSelectionProps> = ({
                 checked={selectedPetId === pet._id}
                 onChange={() => onPetSelect(pet._id)}
                 className="text-[#EF92A6] focus:ring-[#EF92A6]"
-              />
-              <div className="flex-1">
+              />              <div className="flex-1">
                 <span className="font-medium dark:text-gray-200">{pet.name}</span>
                 <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
                   ({pet.type}) - {pet.breed}
                 </span>
+                {pet.sex && (
+                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                    Sex: {pet.sex}
+                  </span>
+                )}
                 {pet.birthYear && (
                   <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
                     Born: {pet.birthYear}

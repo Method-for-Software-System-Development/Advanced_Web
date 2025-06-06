@@ -6,7 +6,7 @@ import EditPetForm from './EditPetForm';
 interface PatientCardProps {
   patient: Patient;
   onEditPatient: (patient: Patient) => void;
-  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, isActive: boolean) => void;
+  onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, sex: string, isActive: boolean) => void;
   onEditPet: (petId: string, petData: any) => void;
   showAddPetForm: boolean;
   showEditPetForm: boolean;
@@ -25,9 +25,8 @@ const PatientCard: React.FC<PatientCardProps> = ({
   onToggleEditPetForm 
 }) => {
   const [showInactivePets, setShowInactivePets] = useState(true);
-
-  const handleAddPet = (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, isActive: boolean) => {
-    onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight, isActive);
+  const handleAddPet = (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, sex: string, isActive: boolean) => {
+    onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight, sex, isActive);
     onToggleAddPetForm();
   };
 
@@ -44,7 +43,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
           onClick={() => onEditPatient(patient)}
           className="px-3 py-1 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 text-sm"
         >
-          Edit
+          Edit Patient
         </button>
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Email: {patient.email} </p>
@@ -75,6 +74,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                 <li key={pet._id}>
                   <strong>{pet.name}</strong> ({pet.type})
                   {pet.breed && `, Breed: ${pet.breed}`}
+                  {pet.sex && `, Sex: ${pet.sex}`}
                   {pet.birthYear && `, Birth Year: ${pet.birthYear}`}
                   {pet.weight !== undefined && `, Weight: ${pet.weight}kg`}
                   <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
