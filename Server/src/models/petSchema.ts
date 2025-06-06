@@ -14,6 +14,8 @@ export interface IPet extends Document {
   isActive: boolean;
   prescriptions: mongoose.Types.ObjectId[]; // Or a custom type if you embed
   treatments: mongoose.Types.ObjectId[];    // Or a custom type if you embed
+  imageUrl: string; // URL or path to the pet's image
+  sex: "Male" | "Female"; // Added sex field
 }
 
 const petSchema: Schema = new Schema({
@@ -25,6 +27,8 @@ const petSchema: Schema = new Schema({
   isActive: { type: Boolean, required: true, default: true },
   prescriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Prescription", default: [] }],
   treatments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Treatment", default: [] }],
+  imageUrl: { type: String, required: true, default: "/images/default-pet.png" }, // Default neutral image
+  sex: { type: String, enum: ["Male", "Female"], required: true }, // Added sex field
 });
 
 export default mongoose.model<IPet>("Pet", petSchema, "Pets");
