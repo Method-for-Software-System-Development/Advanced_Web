@@ -4,9 +4,10 @@ import EnhancedSecretaryWelcome from '../components/secretary/EnhancedSecretaryW
 import AppointmentView from '../components/secretary/AppointmentView';
 import ManagePatientsView from '../components/secretary/ManagePatientsView';
 import StaffManagement from '../components/secretary/StaffManagement'; // Updated import
+import PrescriptionManagement from '../components/secretary/PrescriptionManagement';
 import FooterSection from '../components/FooterSection';
 
-export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editStaff'; // Updated view name
+export type SecretaryView = 'welcome' | 'appointments' | 'managePatients' | 'editStaff' | 'addPrescription';
 
 const SecretaryPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<SecretaryView>('welcome');
@@ -21,6 +22,7 @@ const SecretaryPage: React.FC = () => {
             onNavigateToAppointments={() => navigateTo('appointments')} 
             onNavigateToManagePatients={() => navigateTo('managePatients')}
             onNavigateToEditStaff={() => navigateTo('editStaff')} // Updated function name
+            onNavigateToAddPrescription={() => navigateTo('addPrescription')}
           />
         )}
         {currentView === 'appointments' && (
@@ -30,6 +32,9 @@ const SecretaryPage: React.FC = () => {
           <ManagePatientsView onBack={() => navigateTo('welcome')}/>
         )}        {currentView === 'editStaff' && ( // Updated view name
           <StaffManagement onBack={() => navigateTo('welcome')} />
+        )}
+        {currentView === 'addPrescription' && (
+          <PrescriptionManagement onBack={() => navigateTo('welcome')} />
         )}
       </main>
       <FooterSection />

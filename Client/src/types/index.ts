@@ -19,8 +19,7 @@ export interface Prescription {
   expirationDate: string;
   fulfilled: boolean;
   referralType: string;
-  cost: number;
-  appointmentId: string; 
+  petId: string;
 }
 
 export interface Patient {

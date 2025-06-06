@@ -50,9 +50,6 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription, petNa
           <span className="font-semibold">Referral Type:</span> {prescription.referralType}
         </p>
         <p>
-          <span className="font-semibold">Cost:</span> {Number.isInteger(prescription.cost) ? prescription.cost : prescription.cost.toFixed(2)}$
-        </p>
-        <p>
           <span className="font-semibold">Fulfilled:</span> {prescription.fulfilled ? "Yes" : "No"}
         </p>
       </div>

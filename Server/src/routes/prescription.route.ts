@@ -6,8 +6,22 @@
 import { Router, Request, Response } from "express";
 import mongoose from "mongoose";
 import Prescription from "../models/prescriptionSchema";
+import Pet from "../models/petSchema";
 
 const prescriptionRouter = Router();
+
+/**
+ * GET /api/prescriptions
+ * Get all prescriptions
+ */
+prescriptionRouter.get("/", async (req: Request, res: Response) => {
+  try {
+    const prescriptions = await Prescription.find().sort({ issueDate: -1 });
+    res.send(prescriptions);
+  } catch (error) {
+    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+  }
+});
 
 /**
  * GET /api/prescriptions/:id
@@ -27,14 +41,28 @@ prescriptionRouter.get("/:id", async (req: Request, res: Response) => {
 
 /**
  * POST /api/prescriptions
- * Create a new prescription
+ * Create a new prescription and add its ID to the pet's prescriptions array
  */
 prescriptionRouter.post("/", async (req: Request, res: Response) => {
   try {
+    // Create the prescription
     const prescription = new Prescription(req.body);
-    await prescription.save();
+    await prescription.save();    
+    // First, verify the pet exists
+    const petExists = await Pet.findById(prescription.petId);
+    
+    if (petExists) {
+      // Add prescription ID to the pet's prescriptions array
+      const petUpdate = await Pet.findByIdAndUpdate(
+        prescription.petId,
+        { $addToSet: { prescriptions: prescription._id } },
+        { new: true }
+      );
+      }
+    
     res.status(201).send(prescription);
   } catch (error) {
+    console.error('Error creating prescription:', error);
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
 });
@@ -61,10 +89,21 @@ prescriptionRouter.put("/:id", async (req: Request, res: Response) => {
  */
 prescriptionRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
-    const deleted = await Prescription.findByIdAndDelete(req.params.id);
-    if (!deleted) {
+    const prescription = await Prescription.findById(req.params.id);
+    if (!prescription) {
       return res.status(404).send({ error: "Prescription not found" });
     }
+    
+    // Remove prescription ID from the pet's prescriptions array
+    await Pet.findByIdAndUpdate(
+      prescription.petId,
+      { $pull: { prescriptions: prescription._id } },
+      { new: true }
+    );
+    
+    // Delete the prescription
+    await Prescription.findByIdAndDelete(req.params.id);
+    
     res.send({ message: "Prescription deleted" });
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });

@@ -5,12 +5,14 @@ interface EnhancedSecretaryWelcomeProps {
   onNavigateToAppointments: () => void;
   onNavigateToManagePatients: () => void;
   onNavigateToEditStaff: () => void;
+  onNavigateToAddPrescription: () => void;
 }
 
 const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({ 
   onNavigateToAppointments, 
   onNavigateToManagePatients,
-  onNavigateToEditStaff 
+  onNavigateToEditStaff,
+  onNavigateToAddPrescription
 }) => {
   const [statistics, setStatistics] = useState<DashboardStatistics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,7 +129,8 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
                   </span>
                 </div>
               )}
-            </button>            {/* Manage Patients Card */}
+            </button>            
+            {/* Manage Patients Card */}
             <button
               onClick={onNavigateToManagePatients}
               className="block p-6 bg-gradient-to-br from-sky-400 to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-sky-200 focus:ring-opacity-50"
@@ -139,7 +142,8 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
                   </span>
                 </div>
               )}
-            </button>            {/* Manage Staff Card */}
+            </button>            
+            {/* Manage Staff Card */}
             <button
               onClick={onNavigateToEditStaff}
               className="block p-6 bg-gradient-to-br from-purple-400 to-purple-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-200 focus:ring-opacity-50"
@@ -150,17 +154,24 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
                     {statistics.overview.totalStaff} active
                   </span>
                 </div>
-              )}
-            </button>            {/* Settings Card */}
-            <div className="block p-6 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg shadow-lg cursor-not-allowed opacity-60">
-              <h3 className="text-xl font-semibold mb-2">&#9881; Settings</h3>
-              <p className="text-sm opacity-90">Configure application preferences</p>
+              )}            
+            </button>            
+            {/* Add Prescription Card */}
+            <button
+              onClick={onNavigateToAddPrescription}
+              className="block p-6 bg-gradient-to-br from-green-400 to-green-500 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-200 focus:ring-opacity-50"
+            >
+              <h3 className="text-xl font-semibold mb-2">&#128138; Add Prescription</h3>
+              <p className="text-sm opacity-90">Create new prescriptions for patients</p>
               <div className="mt-3 text-sm">
-                <span className="bg-gray-300 dark:bg-gray-600 px-2 py-1 rounded text-xs">Coming Soon</span>
+                <span className="bg-white bg-opacity-20 dark:bg-black dark:bg-opacity-20 px-2 py-1 rounded text-gray-600 dark:text-gray-300">
+                  Manage Medications
+                </span>
               </div>
-            </div>
+            </button>
           </div>
-        </div>        {/* Today's Appointments Summary */}
+        </div>        
+        {/* Today's Appointments Summary */}
         <div className="bg-white dark:bg-[#664147] rounded-lg shadow-lg p-6">
           <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">&#128203; Today's Schedule</h3>
           {statistics && statistics.todayAppointments.length > 0 ? (

@@ -12,9 +12,7 @@ export interface IPrescription extends Document {
   expirationDate: Date;
   fulfilled: boolean;
   referralType: string;
-  cost: number;
-  appointmentId: mongoose.Types.ObjectId;
-  petId: mongoose.Types.ObjectId; // Added petId reference
+  petId: mongoose.Types.ObjectId;
 }
 
 const PrescriptionSchema: Schema = new Schema({
@@ -24,9 +22,7 @@ const PrescriptionSchema: Schema = new Schema({
   expirationDate: { type: Date, required: true },
   fulfilled:      { type: Boolean, default: false },
   referralType:   { type: String, required: true },
-  cost:           { type: Number, required: true },
-  appointmentId:  { type: mongoose.Schema.Types.ObjectId, ref: "Appointment", required: true },
-  petId:          { type: mongoose.Schema.Types.ObjectId, ref: "Pet", required: true } // Added petId field
+  petId:          { type: mongoose.Schema.Types.ObjectId, ref: "Pet", required: true }
 });
 
 export default mongoose.model<IPrescription>("Prescription", PrescriptionSchema, "Prescription");
