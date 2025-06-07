@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import TailwindCalendar from './TailwindCalendar';
 import DashboardButton from './DashboardButton';
 import AddAppointmentForm from './AddAppointmentForm';
+import AppointmentNotesInline from './AppointmentNotesInline';
 import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
 
@@ -23,7 +24,8 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
     petName: pet ? pet.name : 'Unknown Pet',
     service: appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1).replace('_', ' '),
     staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
-    notes: appointment.notes || appointment.description,
+    description: appointment.description,
+    notes: appointment.notes,
     status: appointment.status,
     duration: appointment.duration,
     cost: appointment.cost,
@@ -39,6 +41,12 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   const [error, setError] = useState<string>('');
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [currentCalendarMonthView, setCurrentCalendarMonthView] = useState<Date>(new Date());
+    // Inline notes state
+  const [showNotesForAppointment, setShowNotesForAppointment] = useState<string | null>(null);
+  const [notesEditMode, setNotesEditMode] = useState<boolean>(false);
+  
+  // Success message state
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   // Load appointments for selected date
   useEffect(() => {
@@ -105,12 +113,11 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
           apt._id === appointmentId 
             ? { ...apt, status: AppointmentStatus.CANCELLED }
             : apt
-        )
-      );
-      alert('Appointment cancelled successfully.');
+        )      );
+      showSuccessMessage('Appointment cancelled successfully!');
     } catch (err) {
       console.error('Error cancelling appointment:', err);
-      alert('Failed to cancel appointment. Please try again.');
+      setError('Failed to cancel appointment. Please try again.');
     }
   };const handleUpdateStatus = async (appointmentId: string, newStatus: AppointmentStatus) => {
     try {
@@ -130,11 +137,65 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             : apt
         )
       );
-      alert(`Appointment status updated to ${newStatus}.`);
+        // If status is changed to "completed", show inline notes
+      if (newStatus === AppointmentStatus.COMPLETED) {
+        setShowNotesForAppointment(appointmentId);
+        setNotesEditMode(false);
+      } else {
+        showSuccessMessage(`Appointment status updated to ${newStatus}!`);
+      }
     } catch (err) {
       console.error('Error updating appointment status:', err);
-      alert('Failed to update appointment status. Please try again.');
+      setError('Failed to update appointment status. Please try again.');
     }
+  };
+
+  // Handle opening inline notes for editing existing notes
+  const handleEditNotes = (appointmentId: string) => {
+    setShowNotesForAppointment(appointmentId);
+    setNotesEditMode(true);
+  };
+  // Handle saving notes
+  const handleSaveNotes = async (appointmentId: string, notes: string) => {
+    try {
+      await appointmentService.updateAppointment(appointmentId, { notes });
+      
+      // Update the appointment in state
+      setAppointments(prevAppointments => 
+        prevAppointments.map(apt => 
+          apt._id === appointmentId 
+            ? { ...apt, notes }
+            : apt
+        )
+      );
+      
+      // Also update monthly appointments if needed
+      setMonthlyAppointments(prevMonthlyAppointments => 
+        prevMonthlyAppointments.map(apt => 
+          apt._id === appointmentId 
+            ? { ...apt, notes }
+            : apt
+        )
+      );
+      
+      showSuccessMessage('Appointment notes saved successfully!');
+    } catch (err) {
+      console.error('Error saving appointment notes:', err);
+      throw err; // Re-throw to let the inline component handle the error display
+    }
+  };
+  // Handle closing inline notes
+  const handleCloseInlineNotes = () => {
+    setShowNotesForAppointment(null);
+    setNotesEditMode(false);
+  };
+
+  // Function to show success message with auto-dismiss
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000); // Auto-dismiss after 3 seconds
   };
   const handleAppointmentAdded = (newAppointment: Appointment) => {
     setShowAddForm(false);
@@ -163,10 +224,9 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
     } else if (Array.isArray(value) && value[0] instanceof Date) {
       setSelectedDate(value[0]);
     }
-  };
-  const handleExportToExcel = async () => {
+  };  const handleExportToExcel = async () => {
     if (appointments.length === 0) {
-      alert("No appointments to export for the selected date.");
+      setError("No appointments to export for the selected date.");
       return;
     }
 
@@ -197,9 +257,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
         if (filenameMatch) {
           filename = filenameMatch[1];
         }
-      }
-
-      // Convert response to blob and download
+      }      // Convert response to blob and download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -209,10 +267,10 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-    } catch (error) {
+      
+      showSuccessMessage('Appointments exported to Excel successfully!');} catch (error) {
       console.error('Error exporting to Excel:', error);
-      alert('Failed to export appointments to Excel. Please try again.');
+      setError('Failed to export appointments to Excel. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -277,11 +335,23 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
     }
     return null;
   };
-
   return (
-    <>      <div className="mb-8 text-center">
+    <>
+      {/* Success Message Banner */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            {successMessage}
+          </div>
+        </div>
+      )}
+
+      <div className="mb-8 text-center">
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
-      </div>      {/* Calendar and Export Section */}
+      </div>{/* Calendar and Export Section */}
       <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-3xl mx-auto">
         <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Select Date to View Appointments</h2>        <div className="flex justify-center mb-6">
           <TailwindCalendar
@@ -353,8 +423,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                       <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full inline-block">
                         {formattedApt.service}
                       </span>
-                    </div>
-                    <div className="flex gap-2">
+                    </div>                    <div className="flex gap-2">
                       <select
                         value={formattedApt.status}
                         onChange={(e) => handleUpdateStatus(apt._id, e.target.value as AppointmentStatus)}
@@ -366,7 +435,15 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                         <option value={AppointmentStatus.IN_PROGRESS}>In Progress</option>
                         <option value={AppointmentStatus.COMPLETED}>Completed</option>
                         <option value={AppointmentStatus.NO_SHOW}>No Show</option>
-                      </select>
+                      </select>                      {formattedApt.status === AppointmentStatus.COMPLETED && (
+                        <button
+                          onClick={() => handleEditNotes(apt._id)}
+                          className="px-3 py-1 bg-[#EF92A6] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-[#E57D98] transition-colors duration-150"
+                          title="Edit appointment notes"
+                        >
+                          {formattedApt.notes ? 'Edit Notes' : 'Add Notes'}
+                        </button>
+                      )}
                       <button
                         onClick={() => handleCancelAppointment(apt._id)}
                         className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
@@ -386,19 +463,31 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                       <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formattedApt.duration} min</p>
                     </div>
                   </div>
-                  
-                  {formattedApt.cost && (
+                    {formattedApt.cost && (
                     <p className="mt-2 text-sm text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formattedApt.cost}</p>
+                  )}                  
+                  
+                  {formattedApt.description && (
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400"><strong className="font-medium">Description:</strong> {formattedApt.description}</p>
                   )}
                   
                   {formattedApt.notes && (
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400"><strong className="font-medium">Notes:</strong> {formattedApt.notes}</p>
                   )}
+
+                  {/* Inline Notes Component */}
+                  {showNotesForAppointment === apt._id && (
+                    <AppointmentNotesInline
+                      appointment={apt}
+                      onSave={handleSaveNotes}
+                      onCancel={handleCloseInlineNotes}
+                      isEditMode={notesEditMode}
+                    />
+                  )}
                 </li>
               );
             })}
-          </ul>        ) : (
-          <div className="flex justify-center items-center h-32">
+          </ul>        ) : (          <div className="flex justify-center items-center h-32">
             <p className="text-gray-500 dark:text-gray-400 text-lg">No appointments scheduled for this date.</p>
           </div>
         )}

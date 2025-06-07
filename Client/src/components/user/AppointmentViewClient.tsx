@@ -20,7 +20,8 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
     petName: pet ? pet.name : 'Unknown Pet',
     service: appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1).replace('_', ' '),
     staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
-    notes: appointment.notes || appointment.description,
+    description: appointment.description,
+    notes: appointment.notes,
     status: appointment.status,
     duration: appointment.duration,
     cost: appointment.cost,
@@ -28,12 +29,20 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
   };
 };
 
-const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string>('');
+
+  // Function to show success message with auto-dismiss
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000); // Auto-dismiss after 3 seconds
+  };
 
   // Function to load all appointments from pets
   const loadAppointments = async () => {
@@ -132,9 +141,20 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     // Reload all appointments to ensure consistency
     loadAppointments();
   };
-  
-  return (
+    return (
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
+      {/* Success Message Banner */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            {successMessage}
+          </div>
+        </div>
+      )}
+
       {/* Header and search bar, styled like Treatment History */}
       {!showAddForm && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
@@ -209,14 +229,14 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                     </div>
                     <div className="flex gap-2">
                       <UserNavButton
-                        label="Cancel Appointment"
-                        onClick={async () => {
+                        label="Cancel Appointment"                        onClick={async () => {
                           try {
                             await appointmentService.cancelAppointment(apt._id);
                             // After cancel, reload all appointments
                             loadAppointments();
+                            showSuccessMessage('Appointment cancelled successfully!');
                           } catch (err) {
-                            alert('Failed to cancel appointment.');
+                            setError('Failed to cancel appointment.');
                           }
                         }}
                         className="user-cancel-btn px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
@@ -231,8 +251,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                     <div>
                       <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm mt-2">
+                  </div>                  <div className="grid grid-cols-2 gap-4 text-sm mt-2">
                     <div>
                       <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
                       <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
@@ -241,11 +260,16 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                       {formatted.cost && (
                         <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
                       )}
-                      {formatted.notes && (
-                        <p className="text-gray-600 dark:text-gray-400"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
-                      )}
                     </div>
                   </div>
+                  
+                  {formatted.description && (
+                    <p className="mt-2 text-gray-600 dark:text-gray-400"><strong className="font-medium">Description:</strong> {formatted.description}</p>
+                  )}
+                  
+                  {formatted.notes && (
+                    <p className="mt-2 text-gray-600 dark:text-gray-400"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
+                  )}
                 </li>
               );
             })}
