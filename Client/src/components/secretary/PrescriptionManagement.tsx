@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import DashboardButton from './DashboardButton';
 import { prescriptionService } from '../../services/prescriptionService';
 import { patientService } from '../../services/patientService';
-import { Prescription, Patient } from '../../types';
+import { Prescription, Patient, Pet } from '../../types';
+import ClientSearchPrescription from './prescription/ClientSearchPrescription';
+import PetSelectionPrescription from './prescription/PetSelectionPrescription';
 
 interface PrescriptionManagementProps {
   onBack: () => void;
@@ -29,12 +31,16 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState<PrescriptionFormData>(initialFormData);
-  const [selectedPatientId, setSelectedPatientId] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState('');  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);  const [formData, setFormData] = useState<PrescriptionFormData>(initialFormData);
+  const [searchTerm, setSearchTerm] = useState('');const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);  const [statusFilter, setStatusFilter] = useState<'all' | 'fulfilled' | 'pending'>('all');
   const [expiredFilter, setExpiredFilter] = useState<'all' | 'expired' | 'not-expired'>('not-expired');
+  
+  // New state for search functionality
+  const [selectedClient, setSelectedClient] = useState<Patient | null>(null);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+  const [clientPets, setClientPets] = useState<Pet[]>([]);
+  
   // Load initial data
   useEffect(() => {
     loadData();
@@ -57,13 +63,24 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     } finally {
       setIsLoading(false);
     }
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
+  };  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
     // Validation
+    if (!selectedClient) {
+      setError('Please select a patient.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!selectedPetId) {
+      setError('Please select a pet.');
+      setIsSubmitting(false);
+      return;
+    }
+
     const expirationDate = new Date(formData.expirationDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day for comparison
@@ -72,7 +89,9 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       setError('Expiration date must be in the future.');
       setIsSubmitting(false);
       return;
-    }    if (formData.quantity < 1) {
+    }
+
+    if (formData.quantity < 1) {
       setError('Quantity must be at least 1.');
       setIsSubmitting(false);
       return;
@@ -81,14 +100,16 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     try {
       const prescriptionData = {
         ...formData,
+        petId: selectedPetId,
         issueDate: new Date().toISOString(),
         fulfilled: false
       };
       await prescriptionService.createPrescription(prescriptionData);
       await loadData(); // Refresh data
       setShowAddForm(false);
-      setFormData(initialFormData);
-      setSelectedPatientId('');
+      setFormData(initialFormData);      setSelectedClient(null);
+      setSelectedPetId(null);
+      setClientPets([]);
       setSuccessMessage('Prescription created successfully!');
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(null), 5000);
@@ -174,6 +195,27 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     
     return matchesSearch && matchesStatus && matchesExpiredFilter;
   });
+  const handleClientSelect = (client: Patient) => {
+    setSelectedClient(client);
+    setSelectedPetId(null);
+    setFormData({ ...formData, petId: '' });
+    
+    // Set client pets for selection - only show active pets
+    if (client && client.pets) {
+      const pets: Pet[] = client.pets.filter((pet): pet is Pet => 
+        typeof pet === 'object' && pet !== null && pet.isActive === true
+      );
+      setClientPets(pets);
+    } else {
+      setClientPets([]);
+    }
+      // Update selectedPatientId for backward compatibility if needed
+  };
+
+  const handlePetSelect = (petId: string) => {
+    setSelectedPetId(petId);
+    setFormData({ ...formData, petId });
+  };
 
   if (isLoading) {
     return (
@@ -287,51 +329,35 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
           <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg border">
             <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Create New Prescription</h3>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-4">              <div className="space-y-6">
+                {/* Client Search Section */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Select Patient *
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Search Patient *
                   </label>
-                  <select
-                    value={selectedPatientId}
-                    onChange={(e) => setSelectedPatientId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    required
-                  >
-                    <option value="">Select a patient...</option>
-                    {patients.map(patient => (
-                      <option key={patient._id} value={patient._id}>
-                        {patient.firstName} {patient.lastName}
-                      </option>
-                    ))}
-                  </select>
-                </div>                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Select Pet *
-                  </label>
-                  <select
-                    value={formData.petId}
-                    onChange={(e) => setFormData({ ...formData, petId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    required
-                    disabled={!selectedPatientId}
-                  >
-                    <option value="">Select a pet...</option>
-                    {selectedPatientId && (() => {
-                      const selectedPatient = patients.find(p => p._id === selectedPatientId);
-                      return selectedPatient?.pets.map(pet => {
-                        const petId = typeof pet === 'string' ? pet : pet._id;
-                        const petName = typeof pet === 'object' ? pet.name : 'Unknown Pet';
-                        return (
-                          <option key={petId} value={petId}>
-                            {petName}
-                          </option>
-                        );
-                      });
-                    })()}
-                  </select>
+                  <ClientSearchPrescription
+                    onClientSelect={handleClientSelect}
+                    selectedClient={selectedClient}
+                  />
                 </div>
+
+                {/* Pet Selection Section */}
+                {selectedClient && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Select Pet *
+                    </label>
+                    <PetSelectionPrescription
+                      pets={clientPets}
+                      selectedPetId={selectedPetId}
+                      onPetSelect={handlePetSelect}
+                      clientName={`${selectedClient.firstName} ${selectedClient.lastName}`}
+                    />
+                  </div>
+                )}
+
+                {/* Medicine and other details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -380,18 +406,19 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                     value={formData.referralType}
                     onChange={(e) => setFormData({ ...formData, referralType: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    placeholder="e.g., Prescription, Over-the-counter, Emergency"
-                    required                  />
+                    placeholder="e.g., Prescription, Over-the-counter, Emergency"                    required                  />
                 </div>
               </div>
+            </div>
 
               <div className="flex justify-end gap-4 pt-4">
                 <button
-                  type="button"
-                  onClick={() => {
+                  type="button"                  onClick={() => {
                     setShowAddForm(false);
                     setFormData(initialFormData);
-                    setSelectedPatientId('');
+                    setSelectedClient(null);
+                    setSelectedPetId(null);
+                    setClientPets([]);
                   }}
                   className="px-4 py-2 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
