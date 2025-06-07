@@ -1,37 +1,76 @@
 import React, { useEffect, useState } from "react";
-import { Treatment } from "../../types";
+import { appointmentService } from "../../services/appointmentService";
+import { AppointmentStatus } from "../../types";
 
 interface PetLastTreatmentProps {
   petId: string;
 }
 
+// Type for transformed appointment data to match display format
+interface TreatmentData {
+  visitDate: string;
+  visitTime: string;
+  treatmentType: string;
+  cost: number;
+  visitationCategory: string;
+  notes: string;
+  vetName: string;
+}
+
 const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
-  const [treatments, setTreatments] = useState<Treatment[]>([]);
+  const [lastTreatment, setLastTreatment] = useState<TreatmentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchTreatments = async () => {
+  const fetchLastTreatment = async () => {
     setLoading(true);
     setError("");
     
     try {
-      const response = await fetch(`http://localhost:3000/api/treatments/pet/${petId}/sorted`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch treatments");
+      // Fetch completed appointments for this pet
+      const appointments = await appointmentService.getAllAppointments({
+        petId: petId,
+        status: AppointmentStatus.COMPLETED
+      });
+
+      if (appointments.length > 0) {
+        // Sort by date descending to get the most recent
+        const sortedAppointments = appointments.sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        
+        const mostRecentAppointment = sortedAppointments[0];
+        
+        // Transform appointment data to match treatment display format
+        const staff = typeof mostRecentAppointment.staffId === 'object' 
+          ? mostRecentAppointment.staffId 
+          : null;
+        
+        const transformedTreatment: TreatmentData = {
+          visitDate: mostRecentAppointment.date,
+          visitTime: mostRecentAppointment.time,
+          treatmentType: mostRecentAppointment.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+          cost: mostRecentAppointment.cost || 0,
+          visitationCategory: mostRecentAppointment.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+          notes: mostRecentAppointment.notes || 'No notes available',
+          vetName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Vet'
+        };
+        
+        setLastTreatment(transformedTreatment);
+      } else {
+        setLastTreatment(null);
       }
-      const data = await response.json();
-      setTreatments(Array.isArray(data) ? data : []);
     } catch (err) {
       setError("Unable to load treatment information");
-      console.error("Error fetching treatments:", err);
+      console.error("Error fetching last treatment:", err);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    fetchTreatments();
+    fetchLastTreatment();
   }, [petId]);
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -43,6 +82,7 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
       </div>
     );
   }
+  
   if (error) {
     return (
       <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-600 rounded-lg p-4">
@@ -53,7 +93,7 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
           <span className="text-red-700 dark:text-red-200 font-medium">{error}</span>
         </div>
         <button
-          onClick={fetchTreatments}
+          onClick={fetchLastTreatment}
           className="px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-md text-sm hover:bg-red-700 dark:hover:bg-red-800 transition-colors"
         >
           Try Again
@@ -61,18 +101,18 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
       </div>
     );
   }
-  if (!treatments.length) {
+  
+  if (!lastTreatment) {
     return (
       <div className="text-center py-8 bg-gray-50 dark:bg-[#4A2F33] rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
         <svg className="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         <p className="text-gray-500 dark:text-gray-300 font-medium">No treatments found</p>
-        <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">This pet has no treatment history yet</p>
+        <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">This pet has no completed treatment history yet</p>
       </div>
     );
-  }
-  const treatment = treatments[0];
+  }  
   return (
     <div className="bg-white dark:bg-[#58383E] rounded-lg shadow-md border border-gray-200 dark:border-gray-600 p-6">
       <div className="flex items-center mb-4">
@@ -85,17 +125,23 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
           <div className="flex items-center">
             <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] min-w-[80px]">Date:</span>
             <span className="ml-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-              {new Date(treatment.visitDate).toLocaleDateString('en-US', {
+              {new Date(lastTreatment.visitDate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
-              })} at {treatment.visitTime}
+              })} at {lastTreatment.visitTime}
             </span>
           </div>
           <div className="flex items-center">
             <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] min-w-[80px]">Type:</span>
             <span className="ml-2 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
-              {treatment.treatmentType}
+              {lastTreatment.treatmentType}
+            </span>
+          </div>
+          <div className="flex items-center">
+            <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] min-w-[80px]">Vet:</span>
+            <span className="ml-2 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm font-medium">
+              {lastTreatment.vetName}
             </span>
           </div>
         </div>
@@ -104,23 +150,23 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
           <div className="flex items-center">
             <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] min-w-[80px]">Cost:</span>
             <span className="ml-2 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm font-medium">
-              ${treatment.cost}
+              ${lastTreatment.cost}
             </span>
           </div>
           <div className="flex items-center">
             <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] min-w-[80px]">Category:</span>
             <span className="ml-2 px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-sm font-medium">
-              {treatment.visitationCategory}
+              {lastTreatment.visitationCategory}
             </span>
           </div>
         </div>
       </div>
       
-      {treatment.notes && (
+      {lastTreatment.notes && lastTreatment.notes !== 'No notes available' && (
         <div className="mt-4 p-4 bg-gray-50 dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex items-start">
             <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] mr-3 mt-1">Notes:</span>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{treatment.notes}</p>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{lastTreatment.notes}</p>
           </div>
         </div>
       )}
