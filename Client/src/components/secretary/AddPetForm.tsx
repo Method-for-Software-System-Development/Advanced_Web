@@ -35,7 +35,19 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
       alert('Please fill in all fields.');
       return;
     }
-    onAddPet(selectedPatientId, petName, petType, petBreed, Number(petBirthYear), Number(petWeight), petSex, isActive);
+      const weightValue = Number(petWeight);
+    if (weightValue <= 0) {
+      alert('Weight must be greater than 0.');
+      return;
+    }
+    
+    const birthYearValue = Number(petBirthYear);
+    if (birthYearValue < 1995) {
+      alert('Birth year must be 1995 or later.');
+      return;
+    }
+    
+    onAddPet(selectedPatientId, petName, petType, petBreed, birthYearValue, weightValue, petSex, isActive);
     // Parent will hide form and reset selectedPatientId if needed
   };
   return (
@@ -94,6 +106,7 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             id="petBirthYear" 
             value={petBirthYear}
             onChange={(e) => setPetBirthYear(e.target.value)}
+            min="1995"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
@@ -104,6 +117,8 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             id="petWeight" 
             value={petWeight}
             onChange={(e) => setPetWeight(e.target.value)}
+            min="1"
+            step="0.5"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>

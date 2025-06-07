@@ -32,10 +32,9 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState<PrescriptionFormData>(initialFormData);
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'fulfilled' | 'pending'>('all');
+  const [searchTerm, setSearchTerm] = useState('');  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);  const [statusFilter, setStatusFilter] = useState<'all' | 'fulfilled' | 'pending'>('all');
+  const [expiredFilter, setExpiredFilter] = useState<'all' | 'expired' | 'not-expired'>('not-expired');
   // Load initial data
   useEffect(() => {
     loadData();
@@ -92,7 +91,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       setSelectedPatientId('');
       setSuccessMessage('Prescription created successfully!');
       // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError('Failed to create prescription. Please try again.');
       console.error('Error creating prescription:', err);
@@ -105,7 +104,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       await prescriptionService.updatePrescription(prescriptionId, { fulfilled: !currentStatus });
       await loadData(); // Refresh data
       setSuccessMessage(`Prescription marked as ${!currentStatus ? 'fulfilled' : 'pending'}!`);
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError('Failed to update prescription status.');
       console.error('Error updating prescription:', err);
@@ -117,7 +116,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       await prescriptionService.deletePrescription(prescriptionId);
       await loadData(); // Refresh data
       setSuccessMessage('Prescription deleted successfully!');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError('Failed to delete prescription.');
       console.error('Error deleting prescription:', err);
@@ -164,8 +163,16 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     const matchesStatus = statusFilter === 'all' || 
                          (statusFilter === 'fulfilled' && prescription.fulfilled) ||
                          (statusFilter === 'pending' && !prescription.fulfilled);
+      // Expired filter
+    const today = new Date();
+    const expirationDate = new Date(prescription.expirationDate);
+    const isExpired = expirationDate <= today && !prescription.fulfilled;
+    const matchesExpiredFilter = 
+      expiredFilter === 'all' || 
+      (expiredFilter === 'expired' && isExpired) ||
+      (expiredFilter === 'not-expired' && !isExpired);
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesExpiredFilter;
   });
 
   if (isLoading) {
@@ -197,7 +204,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
             {successMessage}
           </div>
         )}        {/* Prescription Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg">
             <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">Total Prescriptions</h3>
             <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{prescriptions.length}</p>
@@ -214,72 +221,51 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
               {prescriptions.filter(p => !p.fulfilled).length}
             </p>
           </div>
-        </div>
-
-        {/* Expiration Warnings */}
+          <div className="bg-red-100 dark:bg-red-900 p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">Expired</h3>
+            <p className="text-2xl font-bold text-red-900 dark:text-red-100">
+              {prescriptions.filter(p => {
+                const today = new Date();
+                const expirationDate = new Date(p.expirationDate);
+                return expirationDate <= today && !p.fulfilled;
+              }).length}
+            </p>
+          </div>
+        </div>{/* Expiration Warnings */}
         {(() => {
           const today = new Date();
-          const expiredPrescriptions = prescriptions.filter(p => {
-            const expirationDate = new Date(p.expirationDate);
-            return expirationDate <= today && !p.fulfilled;
-          }).sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
           const expiringSoonPrescriptions = prescriptions.filter(p => {
             const expirationDate = new Date(p.expirationDate);
             const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
             return daysUntilExpiration <= 15 && daysUntilExpiration > 0 && !p.fulfilled;
           }).sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
 
-          if (expiredPrescriptions.length > 0 || expiringSoonPrescriptions.length > 0) {
+          if (expiringSoonPrescriptions.length > 0) {
             return (
-              <div className="mb-8 space-y-4">
-                {expiredPrescriptions.length > 0 && (
-                  <div className="p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-red-600 dark:text-red-400 text-xl">⚠️</span>
-                      <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
-                        Expired Prescriptions ({expiredPrescriptions.length})
-                      </h3>
-                    </div>
-                    <p className="text-red-700 dark:text-red-300 text-sm mb-3">
-                      These prescriptions have expired and need immediate attention.
-                    </p>
-                    <div className="h-32 overflow-y-auto space-y-2 pr-2">
-                      {expiredPrescriptions.map(p => {
-                        const { patientName, petName } = getPatientInfo(p);
-                        return (
-                          <div key={p._id} className="text-sm text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-800 p-2 rounded flex-shrink-0">
-                            <strong>{p.medicineType}</strong> for {petName} ({patientName}) - Expired: {new Date(p.expirationDate).toLocaleDateString()}
-                          </div>
-                        );
-                      })}
-                    </div>
+              <div className="mb-8">
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-yellow-600 dark:text-yellow-400 text-xl">⏰</span>
+                    <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">
+                      Expiring Soon ({expiringSoonPrescriptions.length})
+                    </h3>
                   </div>
-                )}
-
-                {expiringSoonPrescriptions.length > 0 && (
-                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-yellow-600 dark:text-yellow-400 text-xl">⏰</span>
-                      <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">
-                        Expiring Soon ({expiringSoonPrescriptions.length})
-                      </h3>
-                    </div>                    <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-3">
-                      These prescriptions will expire within 15 days.
-                    </p>
-                    <div className="h-32 overflow-y-auto space-y-2 pr-2">
-                      {expiringSoonPrescriptions.map(p => {
-                        const { patientName, petName } = getPatientInfo(p);
-                        const expirationDate = new Date(p.expirationDate);
-                        const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                        return (
-                          <div key={p._id} className="text-sm text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800 p-2 rounded flex-shrink-0">
-                            <strong>{p.medicineType}</strong> for {petName} ({patientName}) - Expires in {daysUntilExpiration} days ({new Date(p.expirationDate).toLocaleDateString()})
-                          </div>
-                        );
-                      })}
-                    </div>
+                  <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-3">
+                    These prescriptions will expire within 15 days.
+                  </p>
+                  <div className="h-32 overflow-y-auto space-y-2 pr-2">
+                    {expiringSoonPrescriptions.map(p => {
+                      const { patientName, petName } = getPatientInfo(p);
+                      const expirationDate = new Date(p.expirationDate);
+                      const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      return (
+                        <div key={p._id} className="text-sm text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800 p-2 rounded flex-shrink-0">
+                          <strong>{p.medicineType}</strong> for {petName} ({patientName}) - Expires in {daysUntilExpiration} days ({new Date(p.expirationDate).toLocaleDateString()})
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
               </div>
             );
           }
@@ -422,7 +408,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
             </form>
           </div>
         )}        {/* Search and Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="searchPrescriptions" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Search Prescriptions
@@ -449,6 +435,20 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
               <option value="all">All Prescriptions</option>
               <option value="pending">Pending Only</option>
               <option value="fulfilled">Fulfilled Only</option>
+            </select>
+          </div>          <div>
+            <label htmlFor="expiredFilter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Filter by Expiration
+            </label>
+            <select
+              id="expiredFilter"
+              value={expiredFilter}
+              onChange={(e) => setExpiredFilter(e.target.value as 'all' | 'expired' | 'not-expired')}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
+            >
+              <option value="not-expired">Active Only</option>
+              <option value="expired">Expired Only</option>
+              <option value="all">All Prescriptions</option>
             </select>
           </div>
         </div>
@@ -495,6 +495,11 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                           >
                             {prescription.fulfilled ? 'Fulfilled' : 'Pending'}
                           </span>
+                          {isExpired && !prescription.fulfilled && (
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                              Expired
+                            </span>
+                          )}
                         </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
                           <p><strong>Patient:</strong> {patientName}</p>
