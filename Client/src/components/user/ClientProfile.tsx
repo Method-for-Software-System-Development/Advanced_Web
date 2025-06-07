@@ -15,17 +15,34 @@ interface Client {
   pets: string[]; // Array of pet IDs
 }
 
-const ClientProfile: React.FC = () => {
-  const [client, setClient] = useState<Client | null>(null);
+const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Client | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");  
   const [isEditing, setIsEditing] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPetsLoading, setIsPetsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  const [toastMessage, setToastMessage] = useState("Profile updated successfully!");
+  const [petsError, setPetsError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+
+  // Function to show success message with auto-dismiss
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000); // Auto-dismiss after 3 seconds
+  };
+
+  // Function to retry loading pets
+  const retryLoadPets = () => {
+    setPetsError(null);
+    // Re-trigger the useEffect by setting client to itself
+    if (client) {
+      const tempClient = { ...client };
+      setClient(tempClient);
+    }
+  };
 
   // Load client from localStorage on mount
   useEffect(() => {
@@ -37,7 +54,6 @@ const ClientProfile: React.FC = () => {
       setPhone(user.phone);
     }
   }, []);
-
   // Fetch full pets by IDs once client is loaded
   useEffect(() => {
     if (!client || !Array.isArray(client.pets) || client.pets.length === 0) {
@@ -50,6 +66,10 @@ const ClientProfile: React.FC = () => {
       setPets([]);
       return;
     }
+    
+    setIsPetsLoading(true);
+    setPetsError(null);
+    
     fetch("http://localhost:3000/api/pets/byIds", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -60,16 +80,20 @@ const ClientProfile: React.FC = () => {
         setPets(Array.isArray(data) ? data : []);
         if (!Array.isArray(data)) {
           console.error("Expected array from /api/pets/byIds, got:", data);
+          setPetsError("Unexpected response format from server");
         }
         // Debug: log the response
         console.log("Response from /api/pets/byIds:", data);
       })
       .catch((err) => {
         setPets([]);
+        setPetsError("Failed to load pet information. Please try again.");
         console.error("Error fetching pets:", err);
+      })
+      .finally(() => {
+        setIsPetsLoading(false);
       });
   }, [client]);
-
   const handleEditSave = async (data: { email: string; phone: string }) => {
     if (!client) {
       setError("No client information available");
@@ -91,39 +115,29 @@ const ClientProfile: React.FC = () => {
       setPhone(data.phone);
       setIsEditing(false);
       
-      // Show success toast
-      setToastType('success');
-      setToastMessage("Profile updated successfully!");
-      setShowToast(true);
-      
       // Update client in localStorage with the updated data
       const updatedClient = { ...client, email: data.email, phone: data.phone };
       setClient(updatedClient);
       localStorage.setItem("client", JSON.stringify(updatedClient));
 
+      // Show success message
+      showSuccessMessage("Profile updated successfully!");
+
       console.log("Profile updated successfully:", response);
     } catch (error) {
       console.error("Error updating profile:", error);
       setError(error instanceof Error ? error.message : "Failed to update profile");
-      
-      // Show error toast
-      setToastType('error');
-      setToastMessage(error instanceof Error ? error.message : "Failed to update profile");
-      setShowToast(true);
       // Don't close editing mode if there's an error
     } finally {
       setIsLoading(false);
-      // Hide toast after 3 seconds
-      setTimeout(() => setShowToast(false), 3000);
     }
   };
 
   if (!client) return <div>Loading...</div>;
-
   return (
     <div className="flex justify-center w-full min-h-[600px]">
       <div
-        className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8"
+        className="w-full max-w-5xl bg-white dark:bg-[#664147] rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8"
         style={{ width: "100%" }}
       >
         {/* --- User Info Card --- */}
@@ -152,13 +166,43 @@ const ClientProfile: React.FC = () => {
               error={error}
             />
           )}
-        </UserInformationCard>
-
-        {/* --- Pets Section --- */}
+        </UserInformationCard>        {/* --- Pets Section --- */}
         <div>
-          <h3 className="text-xl font-semibold mb-4">Pets</h3>
-          {pets.length === 0 ? (
-            <p className="text-gray-500">No pets found.</p>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold dark:text-[#FDF6F0]">My Pets</h3>
+            {isPetsLoading && (
+              <div className="flex items-center text-gray-500 dark:text-gray-400">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-sm">Loading pets...</span>
+              </div>
+            )}
+          </div>
+            {petsError ? (
+            <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-600 rounded-lg p-4 mb-4">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-red-400 dark:text-red-300 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-red-700 dark:text-red-200 font-medium">{petsError}</span>
+              </div>
+              <button
+                onClick={retryLoadPets}
+                className="mt-2 px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-md text-sm hover:bg-red-700 dark:hover:bg-red-800 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : pets.length === 0 && !isPetsLoading ? (
+            <div className="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <p className="text-gray-500 dark:text-gray-300 text-lg">No pets found</p>
+              <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">Contact your veterinarian to add pets to your profile</p>
+            </div>
           ) : (
             <ul className="flex flex-wrap gap-6">
               {pets.map((pet) => (
@@ -166,14 +210,15 @@ const ClientProfile: React.FC = () => {
               ))}
             </ul>
           )}
-        </div>
-
-        {/* Toast */}
-        {showToast && (
-          <div className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 ${
-            toastType === 'success' ? 'bg-green-600' : 'bg-red-600'
-          } text-white px-4 py-2 rounded shadow-lg z-50 mobile-toast-text`}>
-            {toastMessage}
+        </div>        {/* Success Message Banner */}
+        {successMessage && (
+          <div className="fixed top-4 right-4 z-50 bg-green-500 dark:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 dark:border-green-500 transition-all duration-300 ease-in-out">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              {successMessage}
+            </div>
           </div>
         )}
       </div>

@@ -36,58 +36,129 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
         setLoading(false);
       });
   }, [prescriptionIds]);
-
-  if (loading) return <div className="text-gray-500 text-xs sm:text-base whitespace-nowrap text-left">Loading prescriptions...</div>;
-  if (error) return <div className="text-red-500 text-xs sm:text-base whitespace-nowrap text-left">{error}</div>;
-  if (!prescriptions.length) return <div className="text-gray-500 text-xs sm:text-base whitespace-nowrap text-left">No prescriptions found.</div>;
-
-  return (
-    <div className="bg-gray-50 rounded-lg shadow p-4 mt-2 w-full">
-      <h4 className="font-bold mb-2 text-[#664147] text-lg">Prescriptions</h4>
-      {/* Table Headline Row - only shown if there are unfulfilled prescriptions */}
-      <div className="hidden sm:grid grid-cols-5 gap-x-2 text-xs sm:text-base font-bold text-center text-[var(--color-wine)] mb-1">
-        <span>Medicine</span>
-        <span>Quantity</span>
-        <span>Issued</span>
-        <span>Expires</span>
-        <span>Fulfilled</span>
+  if (loading) {
+    return (
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow p-4 mt-2 w-full">
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+            <span className="text-sm text-[var(--color-wine)] dark:text-[#FDF6F0]">Loading prescriptions...</span>
+          </div>
+        </div>
       </div>
-      <ul className="space-y-2">
-        {prescriptions.map((presc) => (
-          <li key={presc._id} className="border-b pb-2 last:border-b-0">
-            {/* Responsive data row: grid on desktop, stacked on mobile */}
-            <div className="sm:grid sm:grid-cols-5 gap-y-1 gap-x-2 text-xs sm:text-base items-center">
+    );
+  }
+  if (error) {
+    return (
+      <div className="bg-red-50 dark:bg-red-900 rounded-lg shadow p-4 mt-2 w-full border border-red-200 dark:border-red-600">
+        <div className="flex items-center text-red-700 dark:text-red-200">
+          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          <span className="text-sm">{error}</span>
+        </div>
+      </div>
+    );
+  }
+  if (!prescriptions.length) {
+    return (
+      <div className="bg-green-50 dark:bg-green-900 rounded-lg shadow p-4 mt-2 w-full border border-green-200 dark:border-green-600">
+        <div className="flex items-center text-green-700 dark:text-green-200">
+          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          <span className="text-sm">All prescriptions fulfilled! 🎉</span>
+        </div>
+      </div>
+    );
+  }  return (
+    <div className="bg-gray-50 dark:bg-[#4A2F33] rounded-lg shadow p-4 mt-2 w-full">
+      <h4 className="font-bold mb-4 text-[#664147] dark:text-[#FDF6F0] text-lg flex items-center">
+        💊 Unfulfilled Prescriptions
+        <span className="ml-3 text-sm font-normal bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded-full text-orange-700 dark:text-orange-200">
+          {prescriptions.length} pending
+        </span>
+      </h4>
+      
+      {/* Enhanced prescription cards */}
+      <div className="space-y-3">
+        {prescriptions.map((presc) => {
+          // Check if prescription is expired or expiring soon
+          const now = new Date();
+          const expiry = new Date(presc.expirationDate);
+          const isExpired = expiry < now;
+          const isExpiringSoon = !isExpired && (expiry.getTime() - now.getTime()) < (7 * 24 * 60 * 60 * 1000); // 7 days
+          
+          return (            <div key={presc._id} className="bg-white dark:bg-[#58383E] rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors">
+              {/* Medicine header with status */}
+              <div className="flex justify-between items-center mb-3">
+                <div className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-lg">
+                  {presc.medicineType}
+                </div>
+                <div className="flex items-center gap-2">
+                  {isExpired ? (
+                    <span className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 px-2 py-1 rounded-full text-xs font-medium">
+                      ⚠️ Expired
+                    </span>
+                  ) : isExpiringSoon ? (
+                    <span className="bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 px-2 py-1 rounded-full text-xs font-medium">
+                      ⏰ Expiring Soon
+                    </span>
+                  ) : (
+                    <span className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 px-2 py-1 rounded-full text-xs font-medium">
+                      ✅ Valid
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Desktop grid view */}
+              <div className="hidden sm:grid grid-cols-4 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Quantity:</span>
+                  <div className="font-semibold dark:text-gray-100">{presc.quantity}</div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Issued:</span>
+                  <div className="dark:text-gray-100">{new Date(presc.issueDate).toLocaleDateString()}</div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Expires:</span>
+                  <div className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : isExpiringSoon ? 'text-yellow-600 dark:text-yellow-400 font-medium' : 'dark:text-gray-100'}>
+                    {new Date(presc.expirationDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Referral:</span>
+                  <div className="dark:text-gray-100">{presc.referralType}</div>
+                </div>
+              </div>
+              
               {/* Mobile stacked view */}
-              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
-                <span className="font-bold text-[var(--color-wine)]">Medicine:</span>
-                <span className="text-right">{presc.medicineType}</span>
+              <div className="sm:hidden space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Quantity:</span>
+                  <span className="font-semibold dark:text-gray-100">{presc.quantity}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Issued:</span>
+                  <span className="dark:text-gray-100">{new Date(presc.issueDate).toLocaleDateString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Expires:</span>
+                  <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : isExpiringSoon ? 'text-yellow-600 dark:text-yellow-400 font-medium' : 'dark:text-gray-100'}>
+                    {new Date(presc.expirationDate).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Referral:</span>
+                  <span className="dark:text-gray-100">{presc.referralType}</span>
+                </div>
               </div>
-              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
-                <span className="font-bold text-[var(--color-wine)]">Quantity:</span>
-                <span className="text-right">{presc.quantity}</span>
-              </div>
-              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
-                <span className="font-bold text-[var(--color-wine)]">Issued:</span>
-                <span className="text-right">{new Date(presc.issueDate).toLocaleDateString()}</span>
-              </div>
-              <div className="flex sm:hidden justify-between py-1 border-b border-gray-200">
-                <span className="font-bold text-[var(--color-wine)]">Expires:</span>
-                <span className="text-right">{new Date(presc.expirationDate).toLocaleDateString()}</span>
-              </div>
-              <div className="flex sm:hidden justify-between py-1">
-                <span className="font-bold text-[var(--color-wine)]">Fulfilled:</span>
-                <span className="text-right">{presc.fulfilled ? "Yes" : "No"}</span>
-              </div>
-              {/* Desktop/tablet grid view */}
-              <span className="hidden sm:block whitespace-nowrap text-center">{presc.medicineType}</span>
-              <span className="hidden sm:block text-center">{presc.quantity}</span>
-              <span className="hidden sm:block text-center">{new Date(presc.issueDate).toLocaleDateString()}</span>
-              <span className="hidden sm:block text-center">{new Date(presc.expirationDate).toLocaleDateString()}</span>
-              <span className="hidden sm:block text-center">{presc.fulfilled ? "Yes" : "No"}</span>
             </div>
-          </li>
-        ))}
-      </ul>
+          );
+        })}
+      </div>
     </div>
   );
 };

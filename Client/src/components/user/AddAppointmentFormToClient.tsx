@@ -35,13 +35,22 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     cost: 55,
     description: '',
   });
-
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string>('');
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [staffAppointments, setStaffAppointments] = useState<Appointment[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+
+  // Function to show success message with auto-dismiss
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000);
+  };
   
   // Client and pet state
   const [clientPets, setClientPets] = useState<Pet[]>([]);
@@ -176,22 +185,29 @@ useEffect(() => {
     setSelectedPetId(petId);
   };  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-      if ( !selectedPetId || !selectedStaff) {
-      setError('Please select a pet, and staff member.');
+    setError(null);
+    setIsSubmitting(true);
+
+    if (!selectedPetId || !selectedStaff) {
+      setError('Please select a pet and staff member.');
+      setIsSubmitting(false);
       return;
     }
     if (!client) {
       setError('Client info is missing.');
+      setIsSubmitting(false);
       return;
     }
 
     if (!formData.time) {
       setError('Please select an appointment time.');
+      setIsSubmitting(false);
       return;
     }
 
     if (!formData.description || formData.description.trim() === '') {
       setError('Please provide a description for the appointment.');
+      setIsSubmitting(false);
       return;
     }
 
@@ -202,7 +218,8 @@ useEffect(() => {
     console.log('selectedStaff:', selectedStaff);
     console.log('formData:', formData);
 
-    try {      // Create appointment data with proper typing
+    try {
+      // Create appointment data with proper typing
       const appointmentData = {
         userId: client._id,
         petId: selectedPetId,
@@ -214,7 +231,9 @@ useEffect(() => {
         description: formData.description?.trim() || 'No description provided',
         notes: formData.notes || '',
         cost: formData.cost || 0
-      };      // Service returns { message: string, appointment: Appointment }
+      };
+
+      // Service returns { message: string, appointment: Appointment }
       console.log('Sending appointment data:', appointmentData);
       console.log('Validation check - all required fields:');
       console.log('- userId:', appointmentData.userId);
@@ -227,10 +246,17 @@ useEffect(() => {
       
       const response = await appointmentService.createAppointment(appointmentData);
       console.log('Received response:', response);
-      console.log('Received response:', response);
+      
+      // Show success message
+      showSuccessMessage('Appointment created successfully!');
+      
       // Pass just the appointment part to the handler
       onAppointmentAdded(response.appointment);
-      onClose();
+      
+      // Close form after a brief delay to show success message
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
       console.error('Detailed error creating appointment:', err);
       console.error('Error type:', typeof err);
@@ -242,14 +268,27 @@ useEffect(() => {
         errorMessage = err.message;
       }
       setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   useEffect(() => {
     loadStaff();
   }, []);
-
   return (
     <div className="w-full">
+      {/* Success Message Banner */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            {successMessage}
+          </div>
+        </div>
+      )}
+
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
         <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
@@ -304,8 +343,7 @@ useEffect(() => {
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF92A6] dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors duration-150"
           >
             Cancel
-          </button>
-          <button
+          </button>          <button
             type="submit"
             disabled={
               !formData.time ||
@@ -313,12 +351,22 @@ useEffect(() => {
               !selectedPetId ||
               !selectedStaff ||
               !formData.description?.trim() ||
-              loadingStaff
+              loadingStaff ||
+              isSubmitting
             }
-            className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
-            title={`Client: ${client ? 'Yes' : 'No'}, Pet: ${selectedPetId ? 'Yes' : 'No'}, Staff: ${selectedStaff ? 'Yes' : 'No'}, Description: ${formData.description?.trim() ? 'Yes' : 'No'}, Loading: ${loadingStaff ? 'Yes' : 'No'}, Time selected: ${formData.time ? 'Yes' : 'No'}`}
+            className="flex items-center px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
           >
-            Create Appointment
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating...
+              </>
+            ) : (
+              'Create Appointment'
+            )}
           </button>
         </div>
       </form>

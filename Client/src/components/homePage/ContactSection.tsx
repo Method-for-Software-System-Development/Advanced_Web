@@ -2,17 +2,15 @@ import React from "react";
 import { MapPin, Phone, Mail } from "lucide-react";
 
 const ContactSection = () => {
-    return (
-        <section
+    return (        <section
             id="contact"
             className="scroll-mt-32 relative w-full bg-gradient-to-b from-[#C7DFF5] to-[#91C0EC] pt-32 pb-16 px-6 md:px-20 flex flex-col md:flex-row gap-12 items-start"
         >
             {/* SVG wave divider on top */}
-            <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0]">
-                <svg
+            <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0]">                <svg
                     viewBox="0 0 1200 120"
                     preserveAspectRatio="none"
-                    className="relative block w-[calc(150%+1.3px)] h-[80px] text-white dark:text-wine"
+                    className="relative block w-[calc(150%+1.3px)] h-[80px] text-white"
                 >
                     <path
                         d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"

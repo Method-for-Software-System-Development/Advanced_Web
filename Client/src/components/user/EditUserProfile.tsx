@@ -72,15 +72,13 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
     setErrorMessage("");
     onSave({ email, phone });
   };
-
   return (
-    <div className="bg-[var(--color-cream)] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)] w-full mobile:rounded-lg mobile:shadow-sm mobile:text-sm mobile:max-w-none mobile:px-4 mobile:w-[95vw]">
-      <h3 className="text-xl font-bold text-[var(--color-wine)] mb-4 min-w-[220px] h-12 flex items-center text-left justify-start sm:justify-center">
+    <div className="bg-[var(--color-cream)] dark:bg-[#58383E] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)] dark:text-gray-200 w-full mobile:rounded-lg mobile:shadow-sm mobile:text-sm mobile:max-w-none mobile:px-4 mobile:w-[95vw]">
+      <h3 className="text-xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-4 min-w-[220px] h-12 flex items-center text-left justify-start sm:justify-center">
         <span className="block mobile:hidden w-full mobile:text-xl mobile:text-left">Edit Information</span>
       </h3>
-      <div className="space-y-4">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px] sm:min-w-[120px] mb-1 sm:mb-0">
+      <div className="space-y-4">        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <label className="block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[120px] sm:min-w-[120px] mb-1 sm:mb-0">
             Email:
           </label>
           <input
@@ -88,8 +86,8 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={`mt-1 w-full px-3 py-2 border ${
-              emailValid ? "border-gray-300" : "border-red-500"
-            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white text-ellipsis overflow-x-auto sm:text-clip mobile:text-xs mobile:py-1 mobile:px-2`}
+              emailValid ? "border-gray-300 dark:border-gray-600" : "border-red-500 dark:border-red-400"
+            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-ellipsis overflow-x-auto sm:text-clip mobile:text-xs mobile:py-1 mobile:px-2`}
             autoComplete="email"
             style={{ fontSize: '16px', fontFamily: 'monospace', letterSpacing: '0.01em' }}
             inputMode="email"
@@ -97,16 +95,15 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
           />
         </div>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-          <label className="block text-base font-semibold text-[var(--color-wine)] min-w-[120px] sm:min-w-[120px] mb-1 sm:mb-0">
+          <label className="block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[120px] sm:min-w-[120px] mb-1 sm:mb-0">
             Phone:
-          </label>
-          <input
+          </label>          <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className={`mt-1 w-full px-3 py-2 border ${
-              phoneValid ? "border-gray-300" : "border-red-500"
-            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white mobile:text-xs mobile:py-1 mobile:px-2`}
+              phoneValid ? "border-gray-300 dark:border-gray-600" : "border-red-500 dark:border-red-400"
+            } rounded-md shadow-sm focus:ring-[var(--color-skyDark)] focus:border-[var(--color-skyDark)] text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 mobile:text-xs mobile:py-1 mobile:px-2`}
             autoComplete="tel"
             style={{ fontSize: '16px', fontFamily: 'monospace', letterSpacing: '0.01em' }}
             inputMode="tel"
@@ -114,12 +111,12 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
           />
         </div>
         {errorMessage && (
-          <div className="text-red-600 text-sm pt-1 mobile-error-text">{errorMessage}</div>
+          <div className="text-red-600 dark:text-red-400 text-sm pt-1 mobile-error-text">{errorMessage}</div>
         )}
         <div className="flex flex-row justify-end gap-3 pt-4 w-full">
           <button
             onClick={handleSubmit}
-            className={`w-24 px-2 py-1 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] font-semibold text-base transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs ${
+            className={`w-24 px-2 py-1 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-lg hover:bg-[var(--color-wineDark)] dark:hover:bg-[#4A2F33] font-semibold text-base transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs ${
               isLoading ? 'opacity-70 cursor-not-allowed' : ''
             }`}
             disabled={isLoading}
@@ -128,7 +125,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
           </button>
           <button
             onClick={onCancel}
-            className="w-24 px-2 py-1 bg-[var(--color-skyDark)] text-[var(--color-wine)] rounded-lg hover:bg-[var(--color-sky)] text-base font-semibold transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs"
+            className="w-24 px-2 py-1 bg-[var(--color-skyDark)] dark:bg-[#4A7C7D] text-[var(--color-wine)] dark:text-[#FDF6F0] rounded-lg hover:bg-[var(--color-sky)] dark:hover:bg-[#3A6C6D] text-base font-semibold transition-colors duration-150 mobile:w-20 mobile:px-1 mobile:py-1 mobile:text-xs"
             disabled={isLoading}
           >
             Cancel
