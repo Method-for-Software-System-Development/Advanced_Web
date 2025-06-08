@@ -46,6 +46,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 /** Serve static files from uploads directory */
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../UserUploads')));
 
 /** User routes API */
 app.use("/api/users", usersRouter);
