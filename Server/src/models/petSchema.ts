@@ -27,8 +27,8 @@ const petSchema: Schema = new Schema({
   isActive: { type: Boolean, required: true, default: true },
   prescriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Prescription", default: [] }],
   treatments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Treatment", default: [] }],
-  imageUrl: { type: String, required: true, default: "/images/default-pet.png" }, // Default neutral image
-  sex: { type: String, enum: ["Male", "Female"], required: true }, // Added sex field
+  imageUrl: { type: String, required: false }, 
+  sex: { type: String, enum: ["Male", "Female"], required: true },
 });
 
 export default mongoose.model<IPet>("Pet", petSchema, "Pets");

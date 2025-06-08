@@ -9,6 +9,7 @@ export interface Pet {
   isActive: boolean;
   prescriptions: string[]; 
   treatments: string[];
+  imageUrl: string;
 }
 
 export interface Prescription {
