@@ -35,6 +35,8 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [sortField, setSortField] = useState<'date' | 'petName' | 'staffName' | 'service'>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
@@ -118,8 +120,35 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
   }, []);
 
   const sortedAppointments = useMemo(() => {
-    return [...appointments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [appointments]);
+    const sorted = [...appointments].sort((a, b) => {
+      let aVal: string | number = '';
+      let bVal: string | number = '';
+      switch (sortField) {
+        case 'date':
+          aVal = new Date(a.date).getTime();
+          bVal = new Date(b.date).getTime();
+          break;
+        case 'petName':
+          aVal = typeof a.petId === 'object' && a.petId && 'name' in a.petId ? a.petId.name.toLowerCase() : '';
+          bVal = typeof b.petId === 'object' && b.petId && 'name' in b.petId ? b.petId.name.toLowerCase() : '';
+          break;
+        case 'staffName':
+          aVal = typeof a.staffId === 'object' && a.staffId && 'firstName' in a.staffId ? `${a.staffId.firstName} ${a.staffId.lastName}`.toLowerCase() : '';
+          bVal = typeof b.staffId === 'object' && b.staffId && 'firstName' in b.staffId ? `${b.staffId.firstName} ${b.staffId.lastName}`.toLowerCase() : '';
+          break;
+        case 'service':
+          aVal = a.type.toLowerCase();
+          bVal = b.type.toLowerCase();
+          break;
+        default:
+          break;
+      }
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [appointments, sortField, sortDirection]);
 
   // Filter appointments by pet name
   const filteredAppointments = useMemo(() => {
@@ -155,33 +184,66 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
         </div>
       )}
 
-      {/* Header and search bar, styled like Treatment History */}
+      {/* Header, now only the title and count */}
       {!showAddForm && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-1">My Upcoming Appointments</h1>
             <div className="text-sm text-gray-500 dark:text-gray-300">
               Showing {filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled').length} appointments
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <label htmlFor="search-pet" className="sr-only">Search by Pet Name</label>
-            <input
-              id="search-pet"
-              type="text"
-              placeholder="Enter pet name..."
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ minWidth: 200 }}
-            />
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
-            >
-              Add New Appointment
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
+          >
+            Add New Appointment
+          </button>
+        </div>
+      )}
+      {/* Search row, like in treatment history */}
+      {!showAddForm && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Search by Pet Name:</span>
+          <input
+            id="search-pet"
+            type="text"
+            placeholder="Enter pet name..."
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{ minWidth: 200 }}
+          />
+        </div>
+      )}
+      {/* Sort controls row with label, like in treatment history */}
+      {!showAddForm && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Sort by:</span>
+          <select
+            id="sort-field"
+            value={sortField}
+            onChange={e => setSortField(e.target.value as any)}
+            className="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+            style={{ minWidth: 120 }}
+          >
+            <option value="date">Date</option>
+            <option value="petName">Pet Name</option>
+            <option value="staffName">Staff Member</option>
+            <option value="service">Service</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => setSortDirection(d => d === 'asc' ? 'desc' : 'asc')}
+            className="px-2 py-1 border border-gray-300 rounded-md text-sm bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            title={`Sort ${sortDirection === 'asc' ? 'Descending' : 'Ascending'}`}
+          >
+            {sortDirection === 'asc' ? (
+              <span>&uarr;</span>
+            ) : (
+              <span>&darr;</span>
+            )}
+          </button>
         </div>
       )}
 
@@ -215,62 +277,51 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
                 petName = apt.petId.name;
               }
               return (
-                <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md bg-gray-50 dark:bg-gray-700 hover:shadow-lg transition-shadow duration-200 ease-in-out">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
-                          Scheduled
-                        </span>
-                      </div>
-                      <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full inline-block">
+                <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl shadow bg-[#FDF6F0] dark:bg-[#4A3F35] hover:shadow-lg transition-shadow duration-200 ease-in-out">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
+                    <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
+                        Scheduled
+                      </span>
+                      <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full">
                         {formatted.service}
                       </span>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={async () => {
-                          try {
-                            await appointmentService.cancelAppointment(apt._id);
-                            loadAppointments();
-                            showSuccessMessage('Appointment cancelled successfully!');
-                          } catch (err) {
-                            setError('Failed to cancel appointment.');
-                          }
-                        }}
-                        className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
-                        disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await appointmentService.cancelAppointment(apt._id);
+                          loadAppointments();
+                          showSuccessMessage('Appointment cancelled successfully!');
+                        } catch (err) {
+                          setError('Failed to cancel appointment.');
+                        }
+                      }}
+                      className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                      disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
+                    >
+                      Cancel
+                    </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
-                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
+                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
+                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
+                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
                     </div>
                     <div>
-                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
-                    </div>
-                  </div>                  <div className="grid grid-cols-2 gap-4 text-sm mt-2">
-                    <div>
-                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
-                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
-                    </div>
-                    <div>
+                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
+                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
                       {formatted.cost && (
-                        <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
+                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
                       )}
                     </div>
                   </div>
-                  
                   {formatted.description && (
-                    <p className="mt-2 text-gray-600 dark:text-gray-400"><strong className="font-medium">Description:</strong> {formatted.description}</p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Description:</strong> {formatted.description}</p>
                   )}
-                  
                   {formatted.notes && (
-                    <p className="mt-2 text-gray-600 dark:text-gray-400"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
                   )}
                 </li>
               );
