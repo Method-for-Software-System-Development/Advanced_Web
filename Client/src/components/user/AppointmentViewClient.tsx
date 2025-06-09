@@ -228,19 +228,21 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
                       </span>
                     </div>
                     <div className="flex gap-2">
-                      <UserNavButton
-                        label="Cancel Appointment"                        onClick={async () => {
+                      <button
+                        onClick={async () => {
                           try {
                             await appointmentService.cancelAppointment(apt._id);
-                            // After cancel, reload all appointments
                             loadAppointments();
                             showSuccessMessage('Appointment cancelled successfully!');
                           } catch (err) {
                             setError('Failed to cancel appointment.');
                           }
                         }}
-                        className="user-cancel-btn px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
-                      />
+                        className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
+                        disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
+                      >
+                        Cancel
+                      </button>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
