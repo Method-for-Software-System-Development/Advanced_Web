@@ -38,29 +38,76 @@ mongoose.connect(process.env.MONGODB_URI!)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Configure CORS with more permissive settings for debugging
+// Enhanced CORS middleware configuration
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "*", // Allow all origins for debugging
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // List of allowed origins
+        const allowedOrigins = [
+            'https://client-tal-yagudins-projects.vercel.app',
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:3000'
+        ];
+        
+        // Add CORS_ORIGIN from environment if set
+        if (process.env.CORS_ORIGIN) {
+            allowedOrigins.push(process.env.CORS_ORIGIN);
+        }
+        
+        // Check if origin is allowed
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log(`CORS blocked origin: ${origin}`);
+            console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+            callback(null, true); // Allow all for now to debug
+        }
+    },
     credentials: true,
     optionsSuccessStatus: 200,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+        'Content-Type', 
+        'Authorization', 
+        'Accept', 
+        'Origin', 
+        'X-Requested-With',
+        'Access-Control-Request-Method',
+        'Access-Control-Request-Headers'
+    ],
     exposedHeaders: ['Content-Type', 'Authorization']
 };
+
 app.use(cors(corsOptions));
 
-// Add explicit CORS headers as fallback
+// Additional CORS middleware for manual control
 app.use((req: Request, res: Response, next: NextFunction) => {
-    res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
-    res.header('Access-Control-Allow-Credentials', 'true');
+    const origin = req.headers.origin;
     
-    // Handle preflight requests
+    // Set CORS headers explicitly
+    if (origin) {
+        res.header('Access-Control-Allow-Origin', origin);
+    } else {
+        res.header('Access-Control-Allow-Origin', '*');
+    }
+    
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Origin, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400'); // 24 hours
+    
+    // Handle preflight OPTIONS requests
     if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
+        console.log(`OPTIONS preflight for ${req.path} from ${origin}`);
+        res.status(200).end();
         return;
     }
+    
+    console.log(`${req.method} ${req.path} from ${origin || 'unknown origin'}`);
     next();
 });
 
@@ -97,6 +144,17 @@ console.log(">> Chatbot route registered");
 /** Simple health check route */
 app.get("/", (req: Request, res: Response) => {
     res.send("Server is running!");
+});
+
+/** CORS debugging endpoint */
+app.get("/api/cors-test", (req: Request, res: Response) => {
+    const origin = req.headers.origin;
+    res.json({
+        message: "CORS test successful",
+        origin: origin || "no origin header",
+        timestamp: new Date().toISOString(),
+        headers: req.headers
+    });
 });
 
 /** Start listening for incoming HTTP requests (only in development) */
