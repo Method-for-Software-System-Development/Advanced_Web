@@ -40,9 +40,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Configure CORS
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN || ["http://localhost:5173", "http://localhost:3000"],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
 
@@ -81,7 +83,12 @@ app.get("/", (req: Request, res: Response) => {
     res.send("Server is running!");
 });
 
-/** Start listening for incoming HTTP requests */
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+/** Start listening for incoming HTTP requests (only in development) */
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+// Export the Express app for Vercel
+export default app;
