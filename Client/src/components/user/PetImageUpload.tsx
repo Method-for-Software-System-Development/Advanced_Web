@@ -9,7 +9,6 @@ interface PetImageUploadProps {
 
 const PetImageUpload: React.FC<PetImageUploadProps> = ({
   petId,
-  currentImageUrl,
   onImageUpdate,
 }) => {
   const [isUploading, setIsUploading] = useState(false);

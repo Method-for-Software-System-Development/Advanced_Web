@@ -66,11 +66,10 @@ const TreatmentHistory: React.FC = () => {
           status: AppointmentStatus.COMPLETED
         });
         allAppointments.push(...petAppointments);
-      }
-
-      // If we don't have pet names, fetch them
+      }      // If we don't have pet names, fetch them
       if (Object.keys(petIdToName).length !== petIds.length) {
-        // Fetch all pets in parallel        const petResults = await Promise.all(
+        // Fetch all pets in parallel
+        const petResults = await Promise.all(
           petIds.map(async (id) => {
             if (petIdToName[id]) return { _id: id, name: petIdToName[id] };
             const petRes = await fetch(`${API_URL}/pets/${id}`);
@@ -79,7 +78,9 @@ const TreatmentHistory: React.FC = () => {
           })
         );
         petResults.forEach((p) => { petIdToName[p._id] = p.name; });
-      }      // Transform appointments to match TreatmentCard props
+      }
+
+      // Transform appointments to match TreatmentCard props
       const transformedAppointments = allAppointments.map((appointment) => {
         const pet = typeof appointment.petId === 'object' ? appointment.petId : null;
         const staff = typeof appointment.staffId === 'object' ? appointment.staffId : null;
@@ -101,10 +102,10 @@ const TreatmentHistory: React.FC = () => {
       });
 
       setAppointments(transformedAppointments);
-      
-      // Show success message if appointments were loaded
+        // Show success message if appointments were loaded
       if (transformedAppointments.length > 0) {
-        showSuccessMessage(`Successfully loaded ${transformedAppointments.length} completed appointment${transformedAppointments.length !== 1 ? 's' : ''}!`);      }
+        showSuccessMessage(`Successfully loaded ${transformedAppointments.length} completed appointment${transformedAppointments.length !== 1 ? 's' : ''}!`);
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error);
       setError('Failed to load treatment history. Please try again.');

@@ -75,15 +75,15 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
       alert('Birth year must be 1995 or later.');
       return;
     }
-      
-    const petData = {
+        const petData = {
       name: petName,
       type: petType,
       breed: petBreed,
       birthYear: Number(petBirthYear),
       weight: weightValue,
       sex: petSex,
-      isActive: isActive
+      isActive: isActive,
+      imageUrl: '' // Add required imageUrl property
     };
     
     onEditPet(selectedPetId, petData);

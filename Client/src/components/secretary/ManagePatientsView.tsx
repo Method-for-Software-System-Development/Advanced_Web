@@ -105,8 +105,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
       console.error('Error updating patient:', error);
     }
   };  const handleAddNewPet = async (patientId: string, petName: string, petType:string, petBreed: string, petBirthYear:number, petWeight:number, sex: string, isActive: boolean) => {
-    try {
-      const newPetData = {
+    try {      const newPetData = {
         name: petName,
         type: petType,
         breed: petBreed,
@@ -114,6 +113,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
         weight: petWeight,
         sex: sex,
         isActive: isActive,
+        imageUrl: '', // Add required imageUrl property
         prescriptions: [], // Ensure these are initialized if not provided by form
         treatments: []
       };

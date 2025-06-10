@@ -4,7 +4,6 @@ import appointmentService from '../../services/appointmentService';
 import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
-import { petService } from '../../services/petService';
 import { API_URL } from '../../config/api';
 
 interface AddAppointmentFormToClientProps {
@@ -68,9 +67,7 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
         } catch {}
       }
       return null;
-    }
-  );
-  const [showAddForm, setShowAddForm] = useState(false);
+    }  );
 
 useEffect(() => {
   try {
@@ -103,8 +100,7 @@ useEffect(() => {
             } else {
               setSelectedPetId(null);
             }
-          })
-          .catch((err) => {
+          })          .catch(() => {
             setClientPets([]);
             setSelectedPetId(null);
             setError('Failed to fetch pets.');
