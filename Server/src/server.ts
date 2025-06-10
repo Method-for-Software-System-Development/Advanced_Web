@@ -62,8 +62,6 @@ const corsOptions = {
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            console.log(`CORS blocked origin: ${origin}`);
-            console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
             callback(null, true); // Allow all for now to debug
         }
     },
@@ -102,12 +100,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     
     // Handle preflight OPTIONS requests
     if (req.method === 'OPTIONS') {
-        console.log(`OPTIONS preflight for ${req.path} from ${origin}`);
         res.status(200).end();
         return;
     }
     
-    console.log(`${req.method} ${req.path} from ${origin || 'unknown origin'}`);
     next();
 });
 
@@ -139,7 +135,6 @@ app.use("/api/treatments", treatmentRouter);
 
 /** Chatbot API Route */
 app.use("/api/chatbot", chatbotRouter);
-console.log(">> Chatbot route registered");
 
 /** Simple health check route */
 app.get("/", (req: Request, res: Response) => {

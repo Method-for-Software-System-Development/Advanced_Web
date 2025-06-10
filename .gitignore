@@ -3,7 +3,6 @@
 .env.production
 .env.development
 .env.test
-.env.local
 
 ### NextJS ###
 # dependencies

@@ -238,7 +238,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
       const dateString = selectedDate.toLocaleDateString('en-CA');
       
       // Call the server-side Excel export endpoint
-      const response = await fetch(`${API_URL}/api/appointments/export-excel?date=${dateString}`, {
+      const response = await fetch(`${API_URL}/appointments/export-excel?date=${dateString}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -102,7 +102,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
   const loadStaff = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/staff?includeInactive=true`);
+      const response = await axios.get(`${API_URL}/staff?includeInactive=true`);
       setStaff(response.data);
       setError(null);
     } catch (err) {
@@ -203,14 +203,13 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
       // This case handles removing an existing image
       staffDataToSend.append('imageUrl', '');
     }
-
-
     try {
-      if (editingStaff) {        await axios.put(`${API_URL}/api/staff/${editingStaff._id}`, staffDataToSend, {
+      if (editingStaff) {
+        await axios.put(`${API_URL}/staff/${editingStaff._id}`, staffDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        await axios.post(`${API_URL}/api/staff`, staffDataToSend, {
+        await axios.post(`${API_URL}/staff`, staffDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       }
@@ -226,10 +225,9 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
     // Set the editing staff - useEffect will handle populating the form data
     setEditingStaff(staffMember);
     setShowAddForm(true);
-  };
-  const handleDeactivate = async (id: string) => {
+  };  const handleDeactivate = async (id: string) => {
     try {
-      await axios.delete(`${API_URL}/api/staff/${id}`);
+      await axios.delete(`${API_URL}/staff/${id}`);
       loadStaff();
     } catch (err) {
       setError('Failed to deactivate staff.');
@@ -239,13 +237,13 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
 
   const handleActivate = async (id: string) => {
     try {
-      await axios.put(`${API_URL}/api/staff/${id}/activate`);
+      await axios.put(`${API_URL}/staff/${id}/activate`);
       loadStaff();
     } catch (err) {
       setError('Failed to activate staff.');
       console.error(err);
     }
-  };  const handleFormInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  };const handleFormInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => {
       const updated = { ...prev, [name]: name === 'yearsOfExperience' ? parseInt(value) || 0 : value };

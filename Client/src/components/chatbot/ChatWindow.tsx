@@ -26,9 +26,6 @@ async function sendChatMessage(message: string) {
       body: JSON.stringify({ message, userId }),
     });
 
-    console.log('Chatbot response status:', res.status);
-    console.log('Chatbot response ok:', res.ok);
-
     if (!res.ok) {
       const errorText = await res.text();
       console.error('Chatbot API error response:', errorText);
@@ -36,7 +33,6 @@ async function sendChatMessage(message: string) {
     }
 
     const data = await res.json();
-    console.log('Chatbot response data:', data);
     return data; // { reply, menu }
   } catch (error) {
     console.error('Chatbot API call failed:', error);
@@ -82,15 +78,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
 
     setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
-    setIsTyping(true);
-
-    try {
+    setIsTyping(true);    try {
       const resp = await sendChatMessage(text);
       setMessages((prev) => [...prev, { role: "bot", text: resp.reply }]);
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Chatbot error details:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: "Server error!" },
+        { role: "bot", text: `Sorry, I'm having trouble connecting to the server. Please try again later.` },
       ]);
     }
     setIsTyping(false);

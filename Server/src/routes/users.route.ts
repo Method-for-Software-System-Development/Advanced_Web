@@ -8,7 +8,6 @@ import User, { IUser } from '../models/userSchema';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 const usersRouter = Router();
-console.log("usersRouter loaded");
 
 /**
  * GET /api/Users
@@ -237,7 +236,6 @@ usersRouter.post("/verify-reset-code", async (req: Request, res: Response) => {
   /**
    * Checks if the provided code and email match a valid password reset request.
    */
-  console.log("POST /verify-reset-code called");
   try {
     const { email, code } = req.body;
     if (!email || !code) return res.status(400).send({ error: "Email and code are required." });

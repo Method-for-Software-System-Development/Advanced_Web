@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { API_BASE_URL } from '../../config/api';
+import { API_URL } from '../../config/api';
 
 interface PetImageUploadProps {
   petId: string;
@@ -20,10 +20,11 @@ const PetImageUpload: React.FC<PetImageUploadProps> = ({
 
     setIsUploading(true);
     
-    try {
-      const formData = new FormData();
+    try {      const formData = new FormData();
       formData.append('image', file);
-      formData.append('petId', petId);      const response = await fetch(`${API_BASE_URL}/api/pets/upload-image`, {
+      formData.append('petId', petId);
+      
+      const response = await fetch(`${API_URL}/pets/upload-image`, {
         method: 'POST',
         body: formData,
       });

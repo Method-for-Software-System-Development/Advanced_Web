@@ -83,7 +83,6 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
           setPetsError("Unexpected response format from server");
         }
         // Debug: log the response
-        console.log("Response from /api/pets/byIds:", data);
       })
       .catch((err) => {
         setPets([]);
@@ -123,7 +122,6 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
       // Show success message
       showSuccessMessage("Profile updated successfully!");
 
-      console.log("Profile updated successfully:", response);
     } catch (error) {
       console.error("Error updating profile:", error);
       setError(error instanceof Error ? error.message : "Failed to update profile");

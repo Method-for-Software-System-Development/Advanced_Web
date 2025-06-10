@@ -80,9 +80,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
             continue;
           }
           
-          console.log("Fetching appointments for pet ID:", petId);
           const petAppointments = await appointmentService.getAppointmentsByPet(petId);
-          console.log(`Received ${petAppointments.length} appointments for pet ${petId}`);
           
           const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
           allAppointments = [...allAppointments, ...futurePetAppointments];
@@ -98,7 +96,6 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
         new Map(allAppointments.map(appt => [appt._id, appt])).values()
       ) as Appointment[];
       
-      console.log(`Final appointments list: ${dedupedAppointments.length} items`);
       setAppointments(dedupedAppointments);
     } catch (err: any) {
       let errorMsg = 'Failed to load appointments. Please try again.';
@@ -165,7 +162,6 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
   // Handler for when a new appointment is added
   const handleAppointmentAdded = (newAppointment: Appointment) => {
     setShowAddForm(false);
-    console.log("New appointment added:", newAppointment);
     
     // Reload all appointments to ensure consistency
     loadAppointments();

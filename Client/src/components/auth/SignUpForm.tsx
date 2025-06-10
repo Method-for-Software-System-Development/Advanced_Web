@@ -43,7 +43,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
        * Send a POST request to our backend API endpoint to register a new user.
        * The API is expected to respond with { message, user } on success,
        * or { error } on failure.
-       */      await axios.post(`${API_URL}/api/users/register`, {
+       */      await axios.post(`${API_URL}/users/register`, {
         firstName, lastName, email, phone, password, street, city, postalCode
       });
 

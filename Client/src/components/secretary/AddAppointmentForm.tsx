@@ -144,13 +144,6 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
       return;
     }
 
-    // Debug validation
-    console.log('Form validation check:');
-    console.log('selectedClient:', selectedClient);
-    console.log('selectedPetId:', selectedPetId);
-    console.log('selectedStaff:', selectedStaff);
-    console.log('formData:', formData);
-
     try {      // Create appointment data with proper typing
       const appointmentData = {
         userId: selectedClient._id,
@@ -164,19 +157,8 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
         notes: formData.notes || '',
         cost: formData.cost || 0
       };      // Service returns { message: string, appointment: Appointment }
-      console.log('Sending appointment data:', appointmentData);
-      console.log('Validation check - all required fields:');
-      console.log('- userId:', appointmentData.userId);
-      console.log('- petId:', appointmentData.petId);
-      console.log('- staffId:', appointmentData.staffId);
-      console.log('- date:', appointmentData.date);
-      console.log('- time:', appointmentData.time);
-      console.log('- type:', appointmentData.type);
-      console.log('- description:', appointmentData.description);
-      
+
       const response = await appointmentService.createAppointment(appointmentData);
-      console.log('Received response:', response);
-      console.log('Received response:', response);
       // Pass just the appointment part to the handler
       onAppointmentAdded(response.appointment);
       onClose();
