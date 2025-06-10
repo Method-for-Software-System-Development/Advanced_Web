@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import TreatmentCard from "./TreatmentCard";
 import { appointmentService } from "../../services/appointmentService";
 import { Appointment, AppointmentStatus } from "../../types";
+import { API_URL } from '../../config/api';
 
 // Type for transformed appointment data to match TreatmentCard props
 interface TreatmentHistoryItem {
@@ -69,11 +70,10 @@ const TreatmentHistory: React.FC = () => {
 
       // If we don't have pet names, fetch them
       if (Object.keys(petIdToName).length !== petIds.length) {
-        // Fetch all pets in parallel
-        const petResults = await Promise.all(
+        // Fetch all pets in parallel        const petResults = await Promise.all(
           petIds.map(async (id) => {
             if (petIdToName[id]) return { _id: id, name: petIdToName[id] };
-            const petRes = await fetch(`http://localhost:3000/api/pets/${id}`);
+            const petRes = await fetch(`${API_URL}/pets/${id}`);
             const pet = petRes.ok ? await petRes.json() : null;
             return { _id: id, name: pet?.name || "Unknown" };
           })

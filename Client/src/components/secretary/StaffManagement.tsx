@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Staff, StaffRole } from '../../types'; // Corrected import path
+import { API_URL, API_BASE_URL } from '../../config/api';
 import StaffForm, { StaffFormData } from './staff/StaffForm';
 import AvailabilityScheduler from './staff/AvailabilityScheduler';
 import ImageUpload from './staff/ImageUpload';
@@ -101,7 +102,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
   const loadStaff = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:3000/api/staff?includeInactive=true');
+      const response = await axios.get(`${API_URL}/api/staff?includeInactive=true`);
       setStaff(response.data);
       setError(null);
     } catch (err) {
@@ -131,7 +132,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
       };
       setFormData(newFormData);
       setAvailability(convertSlotsToAvailability(editingStaff.availableSlots || []));
-      setImagePreview(editingStaff.imageUrl ? `http://localhost:3000${editingStaff.imageUrl}` : null);
+      setImagePreview(editingStaff.imageUrl ? `${API_BASE_URL}${editingStaff.imageUrl}` : null);
       setSelectedImage(null); // Clear any previously selected file when starting an edit
     } else {
       setFormData(initialFormData);
@@ -205,12 +206,11 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
 
 
     try {
-      if (editingStaff) {
-        await axios.put(`http://localhost:3000/api/staff/${editingStaff._id}`, staffDataToSend, {
+      if (editingStaff) {        await axios.put(`${API_URL}/api/staff/${editingStaff._id}`, staffDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        await axios.post('http://localhost:3000/api/staff', staffDataToSend, {
+        await axios.post(`${API_URL}/api/staff`, staffDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       }
@@ -229,7 +229,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
   };
   const handleDeactivate = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/staff/${id}`);
+      await axios.delete(`${API_URL}/api/staff/${id}`);
       loadStaff();
     } catch (err) {
       setError('Failed to deactivate staff.');
@@ -239,7 +239,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
 
   const handleActivate = async (id: string) => {
     try {
-      await axios.put(`http://localhost:3000/api/staff/${id}/activate`);
+      await axios.put(`${API_URL}/api/staff/${id}/activate`);
       loadStaff();
     } catch (err) {
       setError('Failed to activate staff.');
@@ -273,7 +273,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
       // If no file is selected (e.g., user cancels file dialog),
       // revert to the existing image if editing, or null if not.
       setSelectedImage(null);
-      setImagePreview(editingStaff?.imageUrl ? `http://localhost:3000${editingStaff.imageUrl}` : null);
+      setImagePreview(editingStaff?.imageUrl ? `${API_BASE_URL}${editingStaff.imageUrl}` : null);
       setFormData(prev => ({...prev, imageUrl: editingStaff?.imageUrl || ''}));
     }
   };

@@ -1,6 +1,7 @@
 import { Prescription } from '../types';
+import { API_URL } from '../config/api';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = API_URL;
 
 export const prescriptionService = {
   // Get all prescriptions

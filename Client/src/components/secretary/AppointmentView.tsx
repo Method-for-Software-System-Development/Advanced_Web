@@ -5,6 +5,7 @@ import AddAppointmentForm from './AddAppointmentForm';
 import AppointmentNotesInline from './AppointmentNotesInline';
 import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
+import { API_URL } from '../../config/api';
 
 interface AppointmentViewProps {
   onBack: () => void;
@@ -237,7 +238,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
       const dateString = selectedDate.toLocaleDateString('en-CA');
       
       // Call the server-side Excel export endpoint
-      const response = await fetch(`http://localhost:3000/api/appointments/export-excel?date=${dateString}`, {
+      const response = await fetch(`${API_URL}/api/appointments/export-excel?date=${dateString}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Staff, StaffRole } from '../../../types';
+import { API_BASE_URL } from '../../../config/api';
 
 interface StaffCardProps {
   staff: Staff;
@@ -15,7 +16,7 @@ const StaffCard: React.FC<StaffCardProps> = ({ staff, onEdit, onToggleStatus }) 
     <div className={`p-6 rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 ${staff.isActive ? 'bg-white dark:bg-[#664147]' : 'bg-gray-100 opacity-80 dark:bg-gray-800'}`}>
       <div className="flex items-center space-x-4 mb-4">
         {staff.imageUrl ? (
-          <img className="h-16 w-16 rounded-full object-cover border-2 border-indigo-300 dark:border-gray-500" src={`http://localhost:3000${staff.imageUrl}`} alt={`${staff.firstName} ${staff.lastName}`} />
+          <img className="h-16 w-16 rounded-full object-cover border-2 border-indigo-300 dark:border-gray-500" src={`${API_BASE_URL}${staff.imageUrl}`} alt={`${staff.firstName} ${staff.lastName}`} />
         ) : (
           <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500 text-2xl font-semibold dark:bg-gray-600 dark:text-gray-300">
             {staff.firstName.charAt(0)}{staff.lastName.charAt(0)}

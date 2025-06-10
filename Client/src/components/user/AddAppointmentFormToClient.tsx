@@ -5,6 +5,7 @@ import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
 import { petService } from '../../services/petService';
+import { API_URL } from '../../config/api';
 
 interface AddAppointmentFormToClientProps {
   onClose: () => void;
@@ -86,11 +87,10 @@ useEffect(() => {
         // Only send valid 24-char ObjectID strings
         const validPetIds = parsedClient.pets.filter((id: string) => typeof id === 'string' && id.length === 24);
         if (validPetIds.length === 0) {
-          setClientPets([]);
-          setSelectedPetId(null);
+          setClientPets([]);        setSelectedPetId(null);
           return;
         }
-        fetch('http://localhost:3000/api/pets/byIds', {
+        fetch(`${API_URL}/pets/byIds`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ids: validPetIds }),

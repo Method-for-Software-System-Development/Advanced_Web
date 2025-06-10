@@ -2,6 +2,7 @@ import React, { useState, useEffect, } from "react";
 import SignUpForm from "./SignUpForm";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from '../../config/api';
 
 interface LoginProps {
   onClose: () => void;
@@ -48,13 +49,12 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     }
     setLoginMessage("Logging in…");
 
-    try {
-      /**
+    try {      /**
        * Send a POST request to the login endpoint.
        * The API should return { message, user } on success,
        * or { error } on failure.
        */
-      const response = await axios.post("http://localhost:3000/api/users/login", {
+      const response = await axios.post(`${API_URL}/users/login`, {
         email,
         password,
       });
@@ -99,13 +99,12 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     // Show loading message while sending the code
     setFpMessage("Sending verification code…");
 
-    try {
-      /**
+    try {      /**
        * Send a POST request to the backend API endpoint for forgot password.
        * The API is expected to send a verification code to the email and return a success message.
        * On success, proceed to the code verification step.
        */
-      await axios.post("http://localhost:3000/api/users/forgot-password", {
+      await axios.post(`${API_URL}/users/forgot-password`, {
         email: fpEmail,
       });
 
@@ -131,10 +130,9 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
   const handleVerify = async (e: React.FormEvent) => {
     // Show loading message while verifying
     setFpMessage("Verifying code…");
-    e.preventDefault();
-    try {
+    e.preventDefault();    try {
       // Send the email and code to the backend for verification
-      await axios.post("http://localhost:3000/api/users/verify-reset-code", {
+      await axios.post(`${API_URL}/users/verify-reset-code`, {
         email: fpEmail,
         code: fpUserCode,
       });
@@ -164,11 +162,9 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     if (newPassword.length < 6) return setFpMessage("Password must be at least 6 chars.");
     if (newPassword !== confirmPassword) return setFpMessage("Passwords don't match.");
 
-    setFpMessage("Saving new password...");
-
-    try {
+    setFpMessage("Saving new password...");    try {
       // API request to update password on the server
-      await axios.post("http://localhost:3000/api/users/reset-password", {
+      await axios.post(`${API_URL}/users/reset-password`, {
         email: fpEmail,
         code: fpUserCode,
         password: newPassword,

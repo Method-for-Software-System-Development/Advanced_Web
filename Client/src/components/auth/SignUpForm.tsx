@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { API_URL } from "../../config/api";
 
 interface SignUpFormProps {
   onSuccess: () => void;
@@ -42,12 +43,11 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
        * Send a POST request to our backend API endpoint to register a new user.
        * The API is expected to respond with { message, user } on success,
        * or { error } on failure.
-       */
-      const response = await axios.post("http://localhost:3000/api/users/register", {
+       */      await axios.post(`${API_URL}/api/users/register`, {
         firstName, lastName, email, phone, password, street, city, postalCode
       });
 
-      // In Axios, response.data contains the returned JSON object
+      // Registration successful
       setMsg("Account created! Redirecting…");
       setTimeout(onSuccess, 1500);
 

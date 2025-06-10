@@ -4,6 +4,7 @@ import EditUserProfile from "./EditUserProfile";
 import PetCard from "./PetCard";
 import { userService } from "../../services/userService";
 import { Pet } from "../../types";
+import { API_URL } from '../../config/api';
 
 interface Client {
   _id: string;
@@ -66,11 +67,10 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
       setPets([]);
       return;
     }
-    
-    setIsPetsLoading(true);
+      setIsPetsLoading(true);
     setPetsError(null);
     
-    fetch("http://localhost:3000/api/pets/byIds", {
+    fetch(`${API_URL}/pets/byIds`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: validPetIds }),

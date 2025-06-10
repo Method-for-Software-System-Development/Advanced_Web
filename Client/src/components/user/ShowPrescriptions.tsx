@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Prescription } from "../../types";
 import PrescriptionCard from "./PrescriptionCard";
 import UserNavButton from "./UserNavButton";
+import { API_URL } from '../../config/api';
 
 const ShowPrescriptions: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<(Prescription & { petName?: string; treatmentType?: string })[]>([]);
@@ -46,10 +47,8 @@ const ShowPrescriptions: React.FC = () => {
       if (petIds.length === 0) {
         setError('No pets found for this account.');
         return;
-      }
-
-      // Fetch all prescriptions for all petIds
-      const res = await fetch("http://localhost:3000/api/prescriptions/byPetIds", {
+      }      // Fetch all prescriptions for all petIds
+      const res = await fetch(`${API_URL}/prescriptions/byPetIds`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ petIds }),
@@ -69,11 +68,10 @@ const ShowPrescriptions: React.FC = () => {
       }
 
       // If we don't have pet names, fetch them
-      if (Object.keys(petIdToName).length !== petIds.length) {
-        const petResults = await Promise.all(
+      if (Object.keys(petIdToName).length !== petIds.length) {        const petResults = await Promise.all(
           petIds.map(async (id) => {
             if (petIdToName[id]) return { _id: id, name: petIdToName[id] };
-            const petRes = await fetch(`http://localhost:3000/api/pets/${id}`);
+            const petRes = await fetch(`${API_URL}/pets/${id}`);
             const pet = petRes.ok ? await petRes.json() : null;
             return { _id: id, name: pet?.name || "Unknown" };
           })

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Prescription } from "../../types";
+import { API_URL } from '../../config/api';
 
 interface PrescriptionListProps {
   prescriptionIds: string[];
@@ -15,9 +16,8 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
       setPrescriptions([]);
       setLoading(false);
       return;
-    }
-    setLoading(true);
-    fetch("http://localhost:3000/api/prescriptions/byIds", {
+    }    setLoading(true);
+    fetch(`${API_URL}/prescriptions/byIds`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: prescriptionIds }),

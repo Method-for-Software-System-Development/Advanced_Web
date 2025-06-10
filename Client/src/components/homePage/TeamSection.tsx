@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import TeamMemberCard from "./TeamMemberCard";
 import staffService from "../../services/staffService";
 import { Staff } from "../../types";
+import { API_BASE_URL } from "../../config/api";
 
 /**
  * Maps backend role identifiers to display names for UI.
@@ -69,7 +70,7 @@ const TeamSection: React.FC = () => {
         {members.map((member) => (
           <TeamMemberCard
             key={member._id}
-            image={`http://localhost:3000${member.imageUrl}`}
+            image={`${API_BASE_URL}${member.imageUrl}`}
             name={`${member.firstName} ${member.lastName}`}
             role={mapRoleToDisplayName(member.role)}
             description={member.description}

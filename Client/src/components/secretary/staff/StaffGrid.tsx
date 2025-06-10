@@ -1,5 +1,6 @@
 import React from 'react';
 import { Staff } from '../../../types';
+import { API_BASE_URL } from '../../../config/api';
 
 interface StaffGridProps {
   staffList: Staff[];
@@ -38,7 +39,7 @@ const StaffGrid: React.FC<StaffGridProps> = ({
           {staffMember.imageUrl && (
             <div className="flex justify-center mb-4">
               <img
-                src={`http://localhost:3000${staffMember.imageUrl}`}
+                src={`${API_BASE_URL}${staffMember.imageUrl}`}
                 alt={`${staffMember.firstName} ${staffMember.lastName}`}
                 className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 shadow-sm dark:border-gray-500"
               />

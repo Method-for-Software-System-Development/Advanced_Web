@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import MessageBubble, { MessageBubbleProps } from "./MessageBubble";
+import { API_URL } from "../../config/api";
 
 export interface ChatWindowProps {
   open: boolean;
@@ -15,7 +16,7 @@ async function sendChatMessage(message: string) {
   const userId = user._id;
 
   // Send both userId in the body and the token in the Authorization header
-  const res = await fetch('http://localhost:3000/api/chatbot', {
+  const res = await fetch(`${API_URL}/api/chatbot`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import PrescriptionList from "./UnfulfilledPrescriptions";
 import PetLastTreatment from "./PetLastTreatment";
 import PetImageUpload from "./PetImageUpload";
 import { petService } from "../../services/petService";
+import { API_BASE_URL } from '../../config/api';
 import "../../styles/mobile-utilities.css";
 
 // Import all animal images
@@ -64,7 +65,7 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
   const getImageUrl = (imageUrl: string) => {
     // If it's an uploaded image (starts with /uploads/), use the full server URL
     if (imageUrl.startsWith('/uploads/')) {
-      return `http://localhost:3000${imageUrl}`;
+      return `${API_BASE_URL}${imageUrl}`;
     }
     
     // Otherwise, use the mapped asset images

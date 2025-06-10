@@ -25,24 +25,26 @@ import appointmentRouter from './routes/appointment.route';
 import statisticsRouter from './routes/statistics.route';
 
 const app: Application = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 /**
  * Connect to MongoDB database.
  */
-mongoose.connect(process.env.MONGO_URI!)
+mongoose.connect(process.env.MONGODB_URI!)
     .then(() => console.log('Connected to MongoDB!'))
     .catch(err => console.error('Failed to connect to MongoDB:', err));
 
 /** Middlewares for JSON parsing and CORS support */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
-app.use((req: Request, res: Response, next: NextFunction) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-    res.header("Access-Control-Allow-Headers", "Origin,X-Requested-With, Content-Type, Accept");
-    next();
-});
+
+// Configure CORS
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 /** Serve static files from uploads directory */
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
