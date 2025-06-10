@@ -63,7 +63,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     } finally {
       setIsLoading(false);
     }
-  };  const handleSubmit = async (e: React.FormEvent) => {
+  };
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -107,7 +108,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       await prescriptionService.createPrescription(prescriptionData);
       await loadData(); // Refresh data
       setShowAddForm(false);
-      setFormData(initialFormData);      setSelectedClient(null);
+      setFormData(initialFormData);      
+      setSelectedClient(null);
       setSelectedPetId(null);
       setClientPets([]);
       setSuccessMessage('Prescription created successfully!');
@@ -326,10 +328,11 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
 
         {/* Add Prescription Form */}
         {showAddForm && (
-          <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg border">
-            <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Create New Prescription</h3>
+        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg border">
+          <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Create New Prescription</h3>
             
-            <form onSubmit={handleSubmit} className="space-y-4">              <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">              
+            <div className="space-y-6">
                 {/* Client Search Section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -406,14 +409,18 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                     value={formData.referralType}
                     onChange={(e) => setFormData({ ...formData, referralType: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    placeholder="e.g., Prescription, Over-the-counter, Emergency"                    required                  />
+                    placeholder="e.g., Prescription, Over-the-counter, Emergency"
+                    required                  />
                 </div>
               </div>
             </div>
 
+              {/* Action Buttons */}
+
               <div className="flex justify-end gap-4 pt-4">
                 <button
-                  type="button"                  onClick={() => {
+                  type="button"
+                  onClick={() => {
                     setShowAddForm(false);
                     setFormData(initialFormData);
                     setSelectedClient(null);
