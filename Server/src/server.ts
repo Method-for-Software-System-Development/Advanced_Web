@@ -38,15 +38,31 @@ mongoose.connect(process.env.MONGODB_URI!)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Configure CORS
+// Configure CORS with more permissive settings for debugging
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || ["http://localhost:5173", "http://localhost:3000"],
+    origin: process.env.CORS_ORIGIN || "*", // Allow all origins for debugging
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
+
+// Add explicit CORS headers as fallback
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+        return;
+    }
+    next();
+});
 
 /** Serve static files from uploads directory */
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
