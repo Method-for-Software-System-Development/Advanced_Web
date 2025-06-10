@@ -15,16 +15,33 @@ async function sendChatMessage(message: string) {
   const user = JSON.parse(localStorage.getItem("client") || "{}");
   const userId = user._id;
 
-  // Send both userId in the body and the token in the Authorization header
-  const res = await fetch(`${API_URL}/api/chatbot`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}), // Adds token if exists
-    },
-    body: JSON.stringify({ message, userId }),
-  });
-  return await res.json(); // { reply, menu }
+  try {
+    // Send both userId in the body and the token in the Authorization header
+    const res = await fetch(`${API_URL}/chatbot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}), // Adds token if exists
+      },
+      body: JSON.stringify({ message, userId }),
+    });
+
+    console.log('Chatbot response status:', res.status);
+    console.log('Chatbot response ok:', res.ok);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Chatbot API error response:', errorText);
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log('Chatbot response data:', data);
+    return data; // { reply, menu }
+  } catch (error) {
+    console.error('Chatbot API call failed:', error);
+    throw error;
+  }
 }
 
 
