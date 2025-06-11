@@ -131,7 +131,8 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
     setSelectedPetId(petId);
   };  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-      if (!selectedClient || !selectedPetId || !selectedStaff) {
+    
+    if (!selectedClient || !selectedPetId || !selectedStaff) {
       setError('Please select a client, pet, and staff member.');
       return;
     }
@@ -146,7 +147,17 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
       return;
     }
 
-    try {      // Create appointment data with proper typing
+    // Validate that the selected date is not in the past
+    const selectedDate = new Date(formData.date as string);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      setError('Cannot schedule appointments in the past. Please select a future date.');
+      return;
+    }
+
+    try {// Create appointment data with proper typing
       const appointmentData = {
         userId: selectedClient._id,
         petId: selectedPetId,
