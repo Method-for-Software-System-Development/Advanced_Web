@@ -32,11 +32,15 @@ const viewLabels: Record<ClientView, string> = {
 const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
 
+  const handleBackToDashboard = () => {
+    setCurrentView("profile");
+  };
+
   // Show navigation buttons for all views except the current one
   const visibleViews = allViews.filter((v) => v !== currentView);
   return (
     <div className="min-h-screen flex flex-col bg-[#F9F3F0] dark:bg-[#2D1B1F] text-[#4A3F35] dark:text-[#FDF6F0]">
-      <Navbar />
+      <Navbar onBackToDashboard={currentView !== "profile" ? handleBackToDashboard : undefined} />
 
       <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">
         {/* Button Navigation */}
