@@ -4,49 +4,11 @@
  */
 
 import { Router, Request, Response } from "express";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
 import Pet from "../models/petSchema";
 import User from "../models/userSchema"; 
 import mongoose from "mongoose";
 
 const petRouter = Router();
-
-// Create UserUploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, '../../UserUploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure multer for pet image uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename: pet-timestamp-originalname
-    const uniqueName = `pet-${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-
-const fileFilter = (req: any, file: any, cb: any) => {
-  // Accept only image files
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed!'), false);
-  }
-};
-
-const upload = multer({ 
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
 
 /**
  * GET /api/pets/:id
@@ -79,7 +41,7 @@ petRouter.get("/user/:userId", async (req: Request, res: Response) => {
 
 /**
  * POST /api/pets/byIds
- * Get pets by an array of IDs
+ * Get pets by an array of IDs (only active pets)
  */
 petRouter.post("/byIds", async (req: Request, res: Response) => {
   try {
@@ -89,8 +51,14 @@ petRouter.post("/byIds", async (req: Request, res: Response) => {
     }
     // Convert all IDs to ObjectId for the query
     ids = ids.map((id: string) => new mongoose.Types.ObjectId(id));
-    const pets = await Pet.find({ _id: { $in: ids } });
-    res.send(pets);
+    const allPets = await Pet.find({ _id: { $in: ids } });
+    
+    // Filter for active pets only
+    const activePets = allPets.filter(pet => 
+      pet.isActive && pet.isActive.toString().toLowerCase() === 'true'
+    );
+    
+    res.send(activePets);
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
@@ -103,25 +71,7 @@ petRouter.post("/byIds", async (req: Request, res: Response) => {
 petRouter.post("/", async (req: Request, res: Response) => {
   try {
     const { name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner } = req.body;
-      // Generate image URL based on pet type and sex
-    const knownTypes = ['cat', 'dog', 'goat', 'parrot', 'rabbit', 'snake'];
-    const lowerType = type?.toLowerCase() || '';
-    const lowerSex = sex?.toLowerCase() || '';
-    
-    let imageUrl = '';
-    
-    // Check if it's a known animal type
-    if (knownTypes.includes(lowerType)) {
-      // For known types, use type_m or type_f based on sex
-      const suffix = lowerSex === 'female' ? 'f' : 'm';
-      imageUrl = `/assets/animals/${lowerType}_${suffix}.png`;
-    } else {
-      // For unknown types, use alien_m or alien_f based on sex
-      const suffix = lowerSex === 'female' ? 'f' : 'm';
-      imageUrl = `/assets/animals/alien_${suffix}.png`;
-    }
-    
-    const pet = new Pet({ name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner, imageUrl });
+    const pet = new Pet({ name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner });
     await pet.save();
 
     // Add the pet's _id to the user's pets array
@@ -164,65 +114,6 @@ petRouter.delete("/:id", async (req: Request, res: Response) => {
     res.send({ message: "Pet deleted" });
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
-  }
-});
-
-/**
- * POST /api/pets/upload-image
- * Upload a new image for a pet
- */
-petRouter.post("/upload-image", upload.single('image'), async (req: Request, res: Response) => {
-  try {
-    const { petId } = req.body;
-    
-    if (!petId) {
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
-      }
-      return res.status(400).json({ error: "Pet ID is required" });
-    }
-
-    if (!req.file) {
-      return res.status(400).json({ error: "No image file provided" });
-    }
-
-    // Find the pet to update
-    const pet = await Pet.findById(petId);
-    if (!pet) {
-      // Clean up uploaded file if pet not found
-      fs.unlinkSync(req.file.path);
-      return res.status(404).json({ error: "Pet not found" });
-    }
-
-    // Delete old image if it exists and it's an uploaded image (not an asset)
-    if (pet.imageUrl && pet.imageUrl.startsWith('/uploads/')) {
-      const oldImagePath = path.join(__dirname, '../../', pet.imageUrl);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
-      }
-    }
-
-    // Update pet with new image URL
-    const newImageUrl = `/uploads/${req.file.filename}`;
-    const updatedPet = await Pet.findByIdAndUpdate(
-      petId, 
-      { imageUrl: newImageUrl }, 
-      { new: true }
-    );
-
-    res.status(200).json({
-      message: "Image uploaded successfully",
-      imageUrl: newImageUrl,
-      pet: updatedPet
-    });
-  } catch (error) {
-    // Clean up uploaded file if there's an error
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
-    
-    console.error("Error uploading pet image:", error);
-    res.status(500).json({ error: "Failed to upload image" });
   }
 });
 
