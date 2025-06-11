@@ -298,11 +298,8 @@ const ShowPrescriptions: React.FC = () => {
                   acc[key].push(p);
                   return acc;
                 }, {} as Record<string, typeof sortedAndFiltered>)).map(([petName, prescList]) => (                  <div key={petName}>
-                    <div className="mb-4 text-xl font-semibold text-[#664147] dark:text-[#FDF6F0] flex items-center">
-                      🐾 {petName}
-                      <span className="ml-3 text-sm font-normal bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded-full dark:text-blue-100">
-                        {prescList.length} prescription{prescList.length !== 1 ? 's' : ''}
-                      </span>
+                    <div className="mb-4 text-xl font-semibold text-[#664147] dark:text-[#FDF6F0]">
+                      {petName}
                     </div>
                     <div className="flex flex-col gap-4">
                       {prescList.map((p, idx) => (

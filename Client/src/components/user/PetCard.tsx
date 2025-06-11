@@ -132,14 +132,12 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
             
             {showLastTreatment ? "Hide Treatment" : "Last Treatment"}
           </span>
-        </button>
-      </div>{showPrescriptions && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-lg border border-blue-200 dark:border-blue-700">
+        </button>      </div>      {showPrescriptions && (
+        <div className="mt-6">
           <PrescriptionList prescriptionIds={pet.prescriptions} />
         </div>
-      )}
-      {showLastTreatment && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 rounded-lg border border-green-200 dark:border-green-700">
+      )}      {showLastTreatment && (
+        <div className="mt-6">
           <PetLastTreatment petId={pet._id} />
         </div>
       )}

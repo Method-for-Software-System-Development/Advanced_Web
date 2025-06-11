@@ -35,10 +35,9 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
         setError("Failed to load prescriptions");
         setLoading(false);
       });
-  }, [prescriptionIds]);
-  if (loading) {
+  }, [prescriptionIds]);  if (loading) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow p-4 mt-2 w-full">
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow w-full">
         <div className="flex items-center justify-center py-8">
           <div className="flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
@@ -47,11 +46,10 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
         </div>
       </div>
     );
-  }
-  if (error) {
+  }  if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900 rounded-lg shadow p-4 mt-2 w-full border border-red-200 dark:border-red-600">
-        <div className="flex items-center text-red-700 dark:text-red-200">
+      <div className="bg-red-50 dark:bg-red-900 rounded-lg shadow w-full border border-red-200 dark:border-red-600">
+        <div className="flex items-center text-red-700 dark:text-red-200 p-4">
           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
           </svg>
@@ -61,26 +59,23 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
     );
   }  if (!prescriptions.length) {
     return (
-      <div className="bg-green-50 dark:bg-green-900 rounded-lg shadow p-4 mt-2 w-full border border-green-200 dark:border-green-600">
-        <div className="flex items-center text-green-700 dark:text-green-200">
+      <div className="bg-green-50 dark:bg-green-900 rounded-lg shadow w-full border border-green-200 dark:border-green-600">
+        <div className="flex items-center text-green-700 dark:text-green-200 p-4">
           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-          <span className="text-[9px] sm:text-sm">All prescriptions fulfilled! 🎉</span>
+          <span className="text-[9px] sm:text-sm">All prescriptions fulfilled! </span>
         </div>
       </div>
     );
   }  return (
-    <div className="bg-gray-50 dark:bg-[#4A2F33] rounded-lg shadow p-3 sm:p-4 mt-2 w-full">
-      <h4 className="font-bold mb-3 sm:mb-4 text-[#664147] dark:text-[#FDF6F0] text-[12px] sm:text-lg flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-        <span>💊 Unfulfilled Prescriptions</span>
-        <span className="text-xs sm:text-sm font-normal bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded-full text-orange-700 dark:text-orange-200 self-start sm:ml-3">
-          {prescriptions.length} pending
-        </span>
+    <div className="bg-gray-50 dark:bg-[#4A2F33] rounded-lg shadow w-full">
+      <h4 className="font-bold mb-3 sm:mb-4 text-[#664147] dark:text-[#FDF6F0] text-[17px] sm:text-lg flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 p-3 sm:p-4">
+        <span> Unfulfilled Prescriptions</span>
       </h4>
       
       {/* Enhanced prescription cards */}
-      <div className="space-y-2 sm:space-y-3">
+      <div className="space-y-2 sm:space-y-3 p-3 sm:p-4 pt-0">
         {prescriptions.map((presc) => {
           // Check if prescription is expired or expiring soon
           const now = new Date();
@@ -90,21 +85,21 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
           
           return (            <div key={presc._id} className="bg-white dark:bg-[#58383E] rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors">              {/* Medicine header with status */}
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2 sm:gap-0">
-                <div className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-[12px] sm:text-lg break-words">
+                <div className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-sm sm:text-lg break-words">
                   {presc.medicineType}
                 </div>
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                   {isExpired ? (
                     <span className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-                      ⚠️ Expired
+                       Expired
                     </span>
                   ) : isExpiringSoon ? (
                     <span className="bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-                      ⏰ Expiring Soon
+                       Expiring Soon
                     </span>
                   ) : (
                     <span className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-                      ✅ Valid
+                       Valid
                     </span>
                   )}
                 </div>              </div>
@@ -138,9 +133,9 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
                   </span>
                 </div>                <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
                   {/* Referral section - vertical layout if text is too long for one line */}
-                <div className={`py-2 ${(presc.referralType.length > 15) ? 'flex flex-col gap-1' : 'flex justify-between items-center'}`}>
+                <div className={`py-2 ${(presc.referralType.length > 20) ? 'flex flex-col gap-1' : 'flex justify-between items-center'}`}>
                   <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Referral:</span>
-                  <span className={`text-xs dark:text-gray-200 break-words ${(presc.referralType.length > 15) ? 'text-right' : ''}`}>
+                  <span className={`text-xs dark:text-gray-200 break-words ${(presc.referralType.length > 25) ? 'text-left' : ''}`}>
                     {presc.referralType}
                   </span>
                 </div>
