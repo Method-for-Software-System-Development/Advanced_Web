@@ -112,59 +112,101 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
         <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">This pet has no completed treatment history yet</p>
       </div>
     );
-  }  
-  return (
-    <div className="bg-white dark:bg-[#58383E] rounded-lg shadow-md border border-gray-200 dark:border-gray-600 p-6">
-      <div className="flex items-center mb-4">
-        <span className="text-2xl mr-3">🏥</span>
-        <h4 className="font-bold text-[#664147] dark:text-[#FDF6F0] text-xl">Most Recent Treatment</h4>
+  }    return (
+    <div className="bg-white dark:bg-[#58383E] rounded-lg shadow-md border border-gray-200 dark:border-gray-600 p-3 sm:p-6">
+      <div className="flex items-center mb-3 sm:mb-4">
+        <span className="text-[14px] sm:text-2xl mr-1 sm:mr-3">🏥</span>
+        <h4 className="font-bold text-[#664147] dark:text-[#FDF6F0] text-[12px] sm:text-xl">Most Recent Treatment</h4>
       </div>
+
+      {/* Desktop grid view */}
+      <div className="hidden sm:block">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center">
-            <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Date:</span>
-            <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium self-start">
-              {new Date(lastTreatment.visitDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })} at {lastTreatment.visitTime}
-            </span>
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Date:</span>
+              <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium self-start">
+                {new Date(lastTreatment.visitDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })} at {lastTreatment.visitTime}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Type:</span>
+              <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium self-start">
+                {lastTreatment.treatmentType}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Vet:</span>
+              <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm font-medium self-start">
+                {lastTreatment.vetName}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center">
-            <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Type:</span>
-            <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium self-start">
-              {lastTreatment.treatmentType}
-            </span>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center">
-            <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Vet:</span>
-            <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm font-medium self-start">
-              {lastTreatment.vetName}
-            </span>
-          </div>
-        </div>
-        
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center">
-            <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Cost:</span>
-            <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm font-medium self-start">
-              ${lastTreatment.cost}
-            </span>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center">
-            <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Category:</span>
-            <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-sm font-medium self-start">
-              {lastTreatment.visitationCategory}
-            </span>
+          
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Cost:</span>
+              <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm font-medium self-start">
+                ${lastTreatment.cost}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:min-w-[80px]">Category:</span>
+              <span className="mt-1 sm:mt-0 sm:ml-2 px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-sm font-medium self-start">
+                {lastTreatment.visitationCategory}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-        {lastTreatment.notes && lastTreatment.notes !== 'No notes available' && (
-        <div className="mt-4 p-4 bg-gray-50 dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
+
+      {/* Mobile stacked view */}
+      <div className="sm:hidden">
+        <div className="flex justify-between items-center py-2">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Date:</span>
+          <span className="text-xs text-right">
+            {new Date(lastTreatment.visitDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })} at {lastTreatment.visitTime}
+          </span>
+        </div>
+        <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+        
+        <div className="flex justify-between items-center py-2">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Type:</span>
+          <span className="text-xs text-right break-words">{lastTreatment.treatmentType}</span>
+        </div>
+        <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+        
+        <div className="flex justify-between items-center py-2">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Vet:</span>
+          <span className="text-xs text-right break-words">{lastTreatment.vetName}</span>
+        </div>
+        <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+        
+        <div className="flex justify-between items-center py-2">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Cost:</span>
+          <span className="text-xs text-right">${lastTreatment.cost}</span>
+        </div>
+        <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+        
+        <div className="flex justify-between items-center py-2">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Category:</span>
+          <span className="text-xs text-right break-words">{lastTreatment.visitationCategory}</span>
+        </div>
+      </div>
+
+      {lastTreatment.notes && lastTreatment.notes !== 'No notes available' && (
+        <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gray-50 dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
           <div className="flex flex-col sm:flex-row sm:items-start">
-            <span className="font-semibold text-[#664147] dark:text-[#FDF6F0] sm:mr-3 mb-1 sm:mb-0 sm:mt-1">Notes:</span>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere">{lastTreatment.notes}</p>
+            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs sm:text-base sm:mr-3 mb-1 sm:mb-0 sm:mt-1">Notes:</span>
+            <p className="text-xs sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere">{lastTreatment.notes}</p>
           </div>
         </div>
       )}

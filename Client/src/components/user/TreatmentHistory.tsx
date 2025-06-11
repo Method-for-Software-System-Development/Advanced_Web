@@ -213,31 +213,33 @@ const TreatmentHistory: React.FC = () => {
                 className="block w-full px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-base mobile:text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>            {/* Sort Controls */}
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'date' | 'pet' | 'cost')}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="date">Date</option>
-                  <option value="pet">Pet Name</option>
-                  <option value="cost">Cost</option>
-                </select>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Order:</label>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="desc">Newest First</option>
-                  <option value="asc">Oldest First</option>
-                </select>
-              </div>              <button
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div className="flex gap-2 sm:gap-4 w-full sm:w-auto -ml-3 sm:ml-0">
+                <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Sort by:</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'date' | 'pet' | 'cost')}
+                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none"
+                  >
+                    <option value="date">Date</option>
+                    <option value="pet">Pet Name</option>
+                    <option value="cost">Cost</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Order:</label>
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none"
+                  >
+                    <option value="desc">Newest First</option>
+                    <option value="asc">Oldest First</option>
+                  </select>
+                </div>
+              </div><button
                 onClick={() => {
                   setError('');
                   fetchAppointments();
