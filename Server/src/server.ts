@@ -20,6 +20,7 @@ import usersRouter from './routes/users.route';
 import petRouter from './routes/pet.route';
 import treatmentRouter from './routes/treatment.route';
 import prescriptionRouter from './routes/prescription.route';
+import medicineRouter from './routes/medicine.route';
 import staffRouter from './routes/staff.route';
 import appointmentRouter from './routes/appointment.route';
 import statisticsRouter from './routes/statistics.route';
@@ -119,6 +120,9 @@ app.use("/api/pets", petRouter);
 
 /** Prescriptions routes API */
 app.use("/api/prescriptions", prescriptionRouter);
+
+/** Medicine routes API */
+app.use("/api/medicines", medicineRouter);
 
 
 /** Staff routes API */

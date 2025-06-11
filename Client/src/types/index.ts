@@ -16,11 +16,13 @@ export interface Prescription {
   _id: string;
   issueDate: string;
   medicineType: string;
+  medicineName: string;
   quantity: number;
   expirationDate: string;
   fulfilled: boolean;
   referralType: string;
   petId: string;
+  medicineId?: string;
 }
 
 export interface Patient {
@@ -124,4 +126,13 @@ export interface Treatment {
   visitationCategory: string;
   notes: string;
   petId: string;
+}
+
+export interface Medicine {
+  _id: string;
+  Type: string;
+  Referral: string;
+  Name: string;
+  createdAt: string;
+  updatedAt: string;
 }

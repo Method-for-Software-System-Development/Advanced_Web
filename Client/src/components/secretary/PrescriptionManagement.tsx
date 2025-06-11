@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import DashboardButton from './DashboardButton';
 import { prescriptionService } from '../../services/prescriptionService';
 import { patientService } from '../../services/patientService';
-import { Prescription, Patient, Pet } from '../../types';
+import { Prescription, Patient, Pet, Medicine } from '../../types';
 import ClientSearchPrescription from './prescription/ClientSearchPrescription';
 import PetSelectionPrescription from './prescription/PetSelectionPrescription';
+import MedicineSearch from './prescription/MedicineSearch';
 
 interface PrescriptionManagementProps {
   onBack: () => void;
@@ -12,6 +13,7 @@ interface PrescriptionManagementProps {
 
 interface PrescriptionFormData {
   medicineType: string;
+  medicineName: string;
   quantity: number;
   expirationDate: string;
   referralType: string;
@@ -20,6 +22,7 @@ interface PrescriptionFormData {
 
 const initialFormData: PrescriptionFormData = {
   medicineType: '',
+  medicineName: '',
   quantity: 1,
   expirationDate: '',
   referralType: '',
@@ -78,6 +81,22 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
 
     if (!selectedPetId) {
       setError('Please select a pet.');
+      setIsSubmitting(false);
+      return;
+    }    if (!formData.medicineName.trim()) {
+      setError('Please enter a medicine name.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.medicineType.trim()) {
+      setError('Please enter a medicine type.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.referralType.trim()) {
+      setError('Please enter a referral type.');
       setIsSubmitting(false);
       return;
     }
@@ -177,6 +196,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     // Search filter
     const matchesSearch = (
       prescription.medicineType.toLowerCase().includes(searchLower) ||
+      (prescription.medicineName && prescription.medicineName.toLowerCase().includes(searchLower)) ||
       patientName.toLowerCase().includes(searchLower) ||
       petName.toLowerCase().includes(searchLower) ||
       prescription.referralType.toLowerCase().includes(searchLower)
@@ -217,6 +237,15 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
     setFormData({ ...formData, petId });
+  };  const handleMedicineChange = (medicineName: string, medicineType: string, referralType: string) => {
+    const newFormData = {
+      ...formData,
+      medicineName,
+      medicineType,
+      referralType
+    };
+    
+    setFormData(newFormData);
   };
 
   if (isLoading) {
@@ -357,62 +386,49 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                       clientName={`${selectedClient.firstName} ${selectedClient.lastName}`}
                     />
                   </div>
+                )}                {/* Medicine Search Section */}
+                {selectedClient && selectedPetId && (
+                  <div className="space-y-6">
+                    <MedicineSearch
+                      onMedicineChange={handleMedicineChange}
+                      medicineName={formData.medicineName}
+                      medicineType={formData.medicineType}
+                      referralType={formData.referralType}
+                      placeholder="Search for medicine by name, type, or referral..."
+                    />
+
+                    {/* Prescription Details - Always show once medicine section is visible */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Quantity *
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.quantity}
+                          onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
+                          min="1"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Expiration Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.expirationDate}
+                          onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
+                          min={new Date().toISOString().split('T')[0]} // Minimum date is today
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
                 )}
-
-                {/* Medicine and other details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Medicine Type *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.medicineType}
-                    onChange={(e) => setFormData({ ...formData, medicineType: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    placeholder="e.g., Antibiotics, Pain Relief"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.quantity}
-                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    min="1"
-                    required
-                  />
-                </div>                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Expiration Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.expirationDate}
-                    onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    min={new Date().toISOString().split('T')[0]} // Minimum date is today
-                    required
-                  />
-                </div>                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Referral Type *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.referralType}
-                    onChange={(e) => setFormData({ ...formData, referralType: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-600 dark:text-gray-200"
-                    placeholder="e.g., Prescription, Over-the-counter, Emergency"
-                    required                  />
-                </div>
-              </div>
             </div>
 
               {/* Action Buttons */}
@@ -518,7 +534,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h4 className="text-lg font-semibold text-[#4A3F35] dark:text-[#FDF6F0]">
-                            {prescription.medicineType}
+                            {prescription.medicineName || prescription.medicineType}
                           </h4>
                           <span
                             className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -538,8 +554,10 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
                           <p><strong>Patient:</strong> {patientName}</p>
                           <p><strong>Pet:</strong> {petName}</p>
+                          <p><strong>Medicine:</strong> {prescription.medicineName || 'N/A'}</p>
+                          <p><strong>Type:</strong> {prescription.medicineType}</p>
+                          <p><strong>Referral:</strong> {prescription.referralType}</p>
                           <p><strong>Quantity:</strong> {prescription.quantity}</p>
-                          <p><strong>Type:</strong> {prescription.referralType}</p>
                           <p><strong>Expires:</strong> {new Date(prescription.expirationDate).toLocaleDateString()}</p>
                           <p><strong>Issued:</strong> {new Date(prescription.issueDate).toLocaleDateString()}</p>
                         </div>

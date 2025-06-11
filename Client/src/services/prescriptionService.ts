@@ -34,12 +34,14 @@ export const prescriptionService = {
   async createPrescription(prescriptionData: {
     issueDate: string;
     medicineType: string;
+    medicineName: string;
     quantity: number;
     expirationDate: string;
     fulfilled?: boolean;
     referralType: string;
     appointmentId?: string; // Made optional
     petId: string;
+    medicineId?: string;
   }): Promise<Prescription> {
     try {
       const response = await fetch(`${API_BASE_URL}/prescriptions`, {
@@ -61,12 +63,14 @@ export const prescriptionService = {
   async updatePrescription(id: string, updateData: {
     issueDate?: string;
     medicineType?: string;
+    medicineName?: string;
     quantity?: number;
     expirationDate?: string;
     fulfilled?: boolean;
     referralType?: string;
     appointmentId?: string;
     petId?: string;
+    medicineId?: string;
   }): Promise<Prescription> {
     try {
       const response = await fetch(`${API_BASE_URL}/prescriptions/${id}`, {
