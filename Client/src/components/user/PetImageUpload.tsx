@@ -127,14 +127,11 @@ const PetImageUpload: React.FC<PetImageUploadProps> = ({
           title="Change pet image"
         >
           📷
-        </button>
-      ) : (
-        <div 
+        </button>      ) : (        <div 
           ref={uploadRef}
-          className="absolute top-0 right-0 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10"
-        >
-          <div className="flex flex-col gap-2 min-w-[200px]">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          className="absolute md:right-0 md:left-auto md:top-0 -right-48.5 top-0.6 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10"
+        ><div className="flex flex-col gap-1 md:gap-2 min-w-[200px] md:min-w-[200px]">
+            <label className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">
               Choose Image From:
             </label>
             <input
@@ -145,17 +142,16 @@ const PetImageUpload: React.FC<PetImageUploadProps> = ({
               disabled={isUploading}
               className="hidden"
             />
-            <div className="flex flex-col gap-2">
-              <button
+            <div className="flex flex-col gap-1 md:gap-2">              <button
                 onClick={handleUploadFromFolder}
                 disabled={isUploading}
-                className="px-3 py-2 text-sm bg-[var(--color-wine)] hover:bg-[var(--color-wineDark)] dark:bg-[#58383E] dark:hover:bg-[#4A2F33] text-white rounded transition-colors duration-200 flex items-center gap-2"
+                className="px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm bg-[var(--color-wine)] hover:bg-[var(--color-wineDark)] dark:bg-[#58383E] dark:hover:bg-[#4A2F33] text-white rounded transition-colors duration-200 flex items-center gap-1 md:gap-2"
               >
-                📁 Upload Image
-              </button>              <button
+                📁 Upload from Device
+              </button><button
                 onClick={handleDefaultPicture}
                 disabled={isUploading}
-                className="px-3 py-2 text-sm bg-[var(--color-skyDark)] dark:bg-[#4A7C7D] text-[var(--color-wine)] dark:text-[#FDF6F0] rounded transition-colors duration-200 hover:bg-[var(--color-sky)] dark:hover:bg-[#3A6C6D] flex items-center gap-2"
+                className="px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm bg-[var(--color-skyDark)] dark:bg-[#4A7C7D] text-[var(--color-wine)] dark:text-[#FDF6F0] rounded transition-colors duration-200 hover:bg-[var(--color-sky)] dark:hover:bg-[#3A6C6D] flex items-center gap-1 md:gap-2"
               >
                 {(() => {
                   const supportedTypes = ['cat', 'dog', 'goat', 'parrot', 'rabbit', 'snake'];
