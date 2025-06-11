@@ -328,13 +328,15 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                       >
                         Cancel
                       </button>
-                      <button
-                        onClick={() => setEditingAppointmentId(apt._id)}
-                        className="px-3 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-yellow-600 transition-colors duration-150"
-                        disabled={editingAppointmentId === apt._id}
-                      >
-                        Edit
-                      </button>
+                      {editingAppointmentId !== apt._id && (
+                        <button
+                          onClick={() => setEditingAppointmentId(apt._id)}
+                          className="px-3 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-yellow-600 transition-colors duration-150"
+                          disabled={editingAppointmentId === apt._id}
+                        >
+                          Edit
+                        </button>
+                      )}
                     </div>
                   </div>
                   {editingAppointmentId === apt._id ? (
