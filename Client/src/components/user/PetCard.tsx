@@ -85,10 +85,11 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
               <div className="w-20 h-20 bg-gradient-to-br from-[var(--color-sky)] to-[var(--color-skyDark)] dark:from-[#4A7C7D] dark:to-[#3A6C6D] rounded-full shadow-md border-2 border-[var(--color-wine)] dark:border-[#4A7C7D] flex items-center justify-center">
                 <span className="text-3xl">📷</span>
               </div>            )}
-            {/* Image upload overlay */}
-            <div className="absolute bottom-6 left-20">
+            {/* Image upload overlay */}            <div className="absolute bottom-6 left-20">
               <PetImageUpload 
                 petId={currentPet._id} 
+                petType={currentPet.type}
+                petSex={currentPet.sex}
                 onImageUpdate={handleImageUpdate} 
               />
             </div>

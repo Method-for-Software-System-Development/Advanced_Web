@@ -7,8 +7,40 @@ import { Router, Request, Response } from "express";
 import Pet from "../models/petSchema";
 import User from "../models/userSchema"; 
 import mongoose from "mongoose";
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const petRouter = Router();
+
+// Create uploads directory for pets if it doesn't exist
+const petUploadsDir = path.join(__dirname, '../../UserUploads');
+if (!fs.existsSync(petUploadsDir)) {
+  fs.mkdirSync(petUploadsDir, { recursive: true });
+}
+
+// Configure multer for pet image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, petUploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'pet-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 /**
  * GET /api/pets/:id
@@ -113,6 +145,56 @@ petRouter.delete("/:id", async (req: Request, res: Response) => {
     }
     res.send({ message: "Pet deleted" });
   } catch (error) {
+    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+  }
+});
+
+/**
+ * POST /api/pets/upload-image
+ * Upload an image for a pet
+ */
+petRouter.post("/upload-image", upload.single('image'), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).send({ error: "No image file provided" });
+    }
+
+    const { petId } = req.body;
+    if (!petId) {
+      return res.status(400).send({ error: "Pet ID is required" });
+    }
+
+    // Construct the image URL
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    // Update the pet with the new image URL
+    const updatedPet = await Pet.findByIdAndUpdate(
+      petId, 
+      { imageUrl: imageUrl }, 
+      { new: true }
+    );
+
+    if (!updatedPet) {
+      // Clean up uploaded file if pet not found
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error('Error deleting file:', err);
+      });
+      return res.status(404).send({ error: "Pet not found" });
+    }
+
+    res.status(200).send({ 
+      message: "Image uploaded successfully", 
+      imageUrl: imageUrl,
+      pet: updatedPet
+    });
+  } catch (error) {
+    // Clean up uploaded file if there's an error
+    if (req.file) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error('Error deleting file:', err);
+      });
+    }
+    console.error('Error uploading pet image:', error);
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
 });
