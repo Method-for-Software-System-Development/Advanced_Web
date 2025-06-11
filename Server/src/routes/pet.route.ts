@@ -73,7 +73,7 @@ petRouter.get("/user/:userId", async (req: Request, res: Response) => {
 
 /**
  * POST /api/pets/byIds
- * Get pets by an array of IDs (only active pets)
+ * Get pets by an array of IDs
  */
 petRouter.post("/byIds", async (req: Request, res: Response) => {
   try {
@@ -83,14 +83,9 @@ petRouter.post("/byIds", async (req: Request, res: Response) => {
     }
     // Convert all IDs to ObjectId for the query
     ids = ids.map((id: string) => new mongoose.Types.ObjectId(id));
-    const allPets = await Pet.find({ _id: { $in: ids } });
-    
-    // Filter for active pets only
-    const activePets = allPets.filter(pet => 
-      pet.isActive && pet.isActive.toString().toLowerCase() === 'true'
-    );
-    
-    res.send(activePets);
+    const Pets = await Pet.find({ _id: { $in: ids } });  
+
+    res.send(Pets);
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
@@ -103,7 +98,26 @@ petRouter.post("/byIds", async (req: Request, res: Response) => {
 petRouter.post("/", async (req: Request, res: Response) => {
   try {
     const { name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner } = req.body;
-    const pet = new Pet({ name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner });
+
+    // Generate image URL based on pet type and sex
+    const knownTypes = ['cat', 'dog', 'goat', 'parrot', 'rabbit', 'snake'];
+    const lowerType = type?.toLowerCase() || '';
+    const lowerSex = sex?.toLowerCase() || '';
+    
+    let imageUrl = '';
+    
+    // Check if it's a known animal type
+    if (knownTypes.includes(lowerType)) {
+      // For known types, use type_m or type_f based on sex
+      const suffix = lowerSex === 'female' ? 'f' : 'm';
+      imageUrl = `/assets/animals/${lowerType}_${suffix}.png`;
+    } else {
+      // For unknown types, use alien_m or alien_f based on sex
+      const suffix = lowerSex === 'female' ? 'f' : 'm';
+      imageUrl = `/assets/animals/alien_${suffix}.png`;
+    }
+
+    const pet = new Pet({ name, type, breed, birthYear, weight, sex, isActive, prescriptions, treatments, owner, imageUrl });
     await pet.save();
 
     // Add the pet's _id to the user's pets array
