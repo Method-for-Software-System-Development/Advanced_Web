@@ -120,7 +120,7 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
           onClick={() => setShowPrescriptions((v) => !v)}
         >
           <span className="flex items-center justify-center gap-2">
-            💊
+            
             {showPrescriptions ? "Hide Prescriptions" : "View Prescriptions"}
           </span>
         </button>
@@ -129,7 +129,7 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
           onClick={() => setShowLastTreatment((v) => !v)}
         >
           <span className="flex items-center justify-center gap-2">
-            🏥
+            
             {showLastTreatment ? "Hide Treatment" : "Last Treatment"}
           </span>
         </button>
