@@ -124,6 +124,7 @@ export const appointmentService = {
   async updateAppointment(id: string, updateData: {
     date?: string;
     time?: string;
+    staffId?: string; // <-- add this line
     duration?: number;
     type?: AppointmentType;
     status?: AppointmentStatus;
