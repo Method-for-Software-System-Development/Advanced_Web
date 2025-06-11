@@ -305,9 +305,12 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                 <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl shadow bg-[#FDF6F0] dark:bg-[#4A3F35] hover:shadow-lg transition-shadow duration-200 ease-in-out">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
                     <div className="flex items-center gap-3 mb-2 sm:mb-0">
-                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
-                        Scheduled
-                      </span>
+                      {/* Only show Scheduled if not editing this appointment */}
+                      {editingAppointmentId !== apt._id && (
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
+                          Scheduled
+                        </span>
+                      )}
                       <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full">
                         {formatted.service}
                       </span>
@@ -331,7 +334,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                       {editingAppointmentId !== apt._id && (
                         <button
                           onClick={() => setEditingAppointmentId(apt._id)}
-                          className="px-3 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-yellow-600 transition-colors duration-150"
+                          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150"
                           disabled={editingAppointmentId === apt._id}
                         >
                           Edit
