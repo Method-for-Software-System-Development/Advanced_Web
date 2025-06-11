@@ -207,6 +207,17 @@ useEffect(() => {
       return;
     }
 
+    // Validate that the selected date is not in the past
+    const selectedDate = new Date(formData.date as string);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      setError('Cannot schedule appointments in the past. Please select a future date.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // Create appointment data with proper typing
       const appointmentData = {
