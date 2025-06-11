@@ -233,11 +233,14 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     }
       // Update selectedPatientId for backward compatibility if needed
   };
-
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
-    setFormData({ ...formData, petId });
-  };  const handleMedicineChange = (medicineName: string, medicineType: string, referralType: string) => {
+    // Clear form data when changing pets, but keep the selected petId
+    setFormData({
+      ...initialFormData,
+      petId
+    });
+  };const handleMedicineChange = (medicineName: string, medicineType: string, referralType: string) => {
     const newFormData = {
       ...formData,
       medicineName,
@@ -343,12 +346,19 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
             );
           }
           return null;
-        })()}
-
-        {/* Action Buttons */}
+        })()}        {/* Action Buttons */}
         <div className="mb-8 flex flex-col sm:flex-row justify-center gap-4">
           <button
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              if (showAddForm) {
+                // Reset form when canceling
+                setFormData(initialFormData);
+                setSelectedClient(null);
+                setSelectedPetId(null);
+                setClientPets([]);
+              }
+            }}
             className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition-colors duration-200"
           >
             {showAddForm ? 'Cancel' : '+ Add New Prescription'}
@@ -364,9 +374,6 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
             <div className="space-y-6">
                 {/* Client Search Section */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Search Patient *
-                  </label>
                   <ClientSearchPrescription
                     onClientSelect={handleClientSelect}
                     selectedClient={selectedClient}
