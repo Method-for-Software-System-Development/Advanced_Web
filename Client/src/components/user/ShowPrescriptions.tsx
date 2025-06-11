@@ -209,9 +209,7 @@ const ShowPrescriptions: React.FC = () => {
               </div>
             </>
           )}
-        </div>
-
-        {/* Search and Sort Controls */}
+        </div>        {/* Search and Sort Controls */}
         {!isLoading && !error && (
           <div className="mb-8 space-y-4">            {/* Search Input */}
             <div>
@@ -228,13 +226,11 @@ const ShowPrescriptions: React.FC = () => {
               />
             </div>            {/* Sort Controls */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div className="flex gap-2 sm:gap-4 w-full sm:w-auto -ml-3.5 sm:ml-0">
-                <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Sort by:</label>
-                  <select
+              <div className="flex gap-2 sm:gap-4 w-full sm:w-auto -ml-3 sm:ml-0">                <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Sort by:</label>                  <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'date' | 'pet' | 'medicine' | 'expiry')}
-                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none"
+                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none max-w-[100px] sm:max-w-none"
                   >
                     <option value="date">Issue Date</option>
                     <option value="expiry">Expiry Date</option>
@@ -242,19 +238,19 @@ const ShowPrescriptions: React.FC = () => {
                     <option value="medicine">Medicine</option>
                   </select>
                 </div>
-                
-                <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Order:</label>
-                  <select
+                  <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Order:</label>                  <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none"
+                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none max-w-[130px] sm:max-w-none"
                   >
                     <option value="desc">Newest First</option>
                     <option value="asc">Oldest First</option>
                   </select>
                 </div>
-              </div>              {/* Desktop refresh button */}
+              </div>
+
+              {/* DESKTOP ONLY: Refresh button */}
               <button
                 onClick={() => {
                   setError('');
@@ -267,22 +263,24 @@ const ShowPrescriptions: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Refresh
-              </button>              {/* Mobile refresh button */}
-              <div className="block sm:hidden w-full py-1 px-2 mb-4">
-                <UserNavButton
-                  label="Refresh"
-                  onClick={() => {
-                    if (!isLoading) {
-                      setError('');
-                      fetchPrescriptions();
-                    }
-                  }}
-                  className={`w-full mx-auto text-[12px] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                />
-              </div>
+              </button>
+            </div>
+
+            {/* MOBILE ONLY: Refresh button */}
+            <div className="block sm:hidden w-full py-1 px-2 mb-4">
+              <UserNavButton
+                label="Refresh"
+                onClick={() => {
+                  if (!isLoading) {
+                    setError('');
+                    fetchPrescriptions();
+                  }
+                }}
+                className={`w-full mx-auto text-[12px] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              />
             </div>
           </div>
-        )}        {/* Results Count and Prescription List */}
+        )}{/* Results Count and Prescription List */}
         {!isLoading && !error && (
           <>            <div className="mb-4 text-[10px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
               Showing {sortedAndFiltered.length} prescription{sortedAndFiltered.length !== 1 ? 's' : ''}

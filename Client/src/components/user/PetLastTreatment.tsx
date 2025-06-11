@@ -200,13 +200,22 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
           <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Category:</span>
           <span className="text-xs text-right break-words">{lastTreatment.visitationCategory}</span>
         </div>
-      </div>
-
-      {lastTreatment.notes && lastTreatment.notes !== 'No notes available' && (
+      </div>      {lastTreatment.notes && lastTreatment.notes !== 'No notes available' && (
         <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gray-50 dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
-          <div className="flex flex-col sm:flex-row sm:items-start">
-            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs sm:text-base sm:mr-3 mb-1 sm:mb-0 sm:mt-1">Notes:</span>
-            <p className="text-xs sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere">{lastTreatment.notes}</p>
+          {/* Desktop view */}
+          <div className="hidden sm:flex sm:items-start">
+            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] sm:mr-3 mb-1 sm:mb-0 sm:mt-1">📝 Notes:</span>
+            <p className="text-xs sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap">{lastTreatment.notes}</p>
+          </div>
+          
+          {/* Mobile view */}
+          <div className="sm:hidden">
+            <div className="flex justify-between items-start py-2">
+              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">📝 Notes:</span>
+            </div>
+            <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0] mt-1 pt-2">
+              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap">{lastTreatment.notes}</p>
+            </div>
           </div>
         </div>
       )}
