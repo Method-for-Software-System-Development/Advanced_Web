@@ -8,10 +8,11 @@ import LogoutButton from "./auth/LogoutButton";
 
 interface NavbarProps {
   onLoginClick?: () => void;
+  onBackToDashboard?: () => void;
 }
 
 
-const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   // Dummy state to force a re-render when localStorage changes
   const [refresh, setRefresh] = useState(0);
@@ -33,19 +34,25 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
   const role = localStorage.getItem("role");
   // useNavigate hook for programmatic navigation
   const navigate = useNavigate();
-
   /**
    * Handle navigation to the user's dashboard based on role.
    * If the user is a secretary, navigate to /secretary.
    * Otherwise, navigate to /client.
    */
   const handleDashboardClick = () => {
+    // If we have a back to dashboard callback (for secretary subviews), use it
+    if (onBackToDashboard) {
+      onBackToDashboard();
+      return;
+    }
+    
+    // Otherwise, navigate normally based on role
     if (role === "secretary") {
       navigate("/secretary");
     } else {
       navigate("/client");
     }
-  };  return (
+  };return (
     <nav className="bg-gradient-to-r from-[#F7C9D3] to-[#EF92A6] dark:from-[#58383E] dark:to-[#4A2F33] shadow-md fixed top-0 w-full z-50">
       <div className="px-6 md:px-20 py-4 flex justify-between items-center">
 
@@ -55,12 +62,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
             <h1 className="font-[Nunito] text-lg md:text-2xl 2xl:text-4xl font-bold text-[#664147] dark:text-[#FDF6F0]">FurEver Friends - Pet Clinic</h1>
             <p className="text-sm md:text-md 2xl:text-lg italic text-[#664147] dark:text-[#FDF6F0]">Your pet's health. Our FurEver mission.</p>
           </div>
-        </div>        {/* Desktop Nav Links */}
+        </div>        
+        {/* Desktop Nav Links */}
         <div className="hidden lg:flex items-center space-x-6 font-[Nunito] text-md 2xl:text-lg text-[#664147] dark:text-[#FDF6F0] font-bold">
           <a href="/#about" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E] dark:hover:text-[#C7DFF5]">About Us</a>
           <a href="/#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E] dark:hover:text-[#C7DFF5]">Our Team</a>
           <a href="/#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-[#58383E] dark:hover:text-[#C7DFF5]">Contact Us</a>
-          {/* Dashboard button: appears only if user is logged in */}          {isLoggedIn && (
+          {/* Dashboard button: appears only if user is logged in */}          
+          {isLoggedIn && (
             <button
               onClick={handleDashboardClick}
               className="inline-block bg-[#664147] dark:bg-[#58383E] text-white w-40 h-11 rounded-full hover:bg-[#58383E] dark:hover:bg-[#4A2F33] transform transition duration-200 hover:scale-110 cursor-pointer"
@@ -99,7 +108,10 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
             <a href="/#contact" className="w-full text-center transition hover:text-[#58383E] dark:hover:text-[#C7DFF5]" onClick={() => setMenuOpen(false)}>Contact Us</a>
             {/* Dashboard button: appears only if user is logged in */}            {isLoggedIn && (
               <button
-                onClick={handleDashboardClick}
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleDashboardClick();
+                }}
                 className="inline-block bg-[#664147] dark:bg-[#58383E] text-white px-10 py-2 rounded-full hover:bg-[#58383E] dark:hover:bg-[#4A2F33] transition duration-200 hover:scale-110 cursor-pointer"
               >
                 Dashboard
