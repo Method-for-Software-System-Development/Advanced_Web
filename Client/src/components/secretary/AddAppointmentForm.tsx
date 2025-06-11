@@ -55,7 +55,9 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
 
   useEffect(() => {
     if (selectedClient && selectedClient.pets) {
-      setClientPets(selectedClient.pets);
+      // Filter to show only active pets
+      const activePets = selectedClient.pets.filter(pet => pet.isActive === true);
+      setClientPets(activePets);
       setSelectedPetId(null);
     } else {
       setClientPets([]);
