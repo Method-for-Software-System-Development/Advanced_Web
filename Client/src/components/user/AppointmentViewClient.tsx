@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import AddAppointmentFormToClient from './AddAppointmentFormToClient.tsx';
+import EditAppointmentForm from './EditAppointmentForm';
 import appointmentService from '../../services/appointmentService';
 import { Appointment } from '../../types';
 import UserNavButton from './UserNavButton';
@@ -29,7 +30,8 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
   };
 };
 
-const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  const [appointments, setAppointments] = useState<Appointment[]>([]);
+const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -37,6 +39,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [sortField, setSortField] = useState<'date' | 'petName' | 'staffName' | 'service'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
 
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
@@ -80,7 +83,9 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
             continue;
           }
           
+          console.log("Fetching appointments for pet ID:", petId);
           const petAppointments = await appointmentService.getAppointmentsByPet(petId);
+          console.log(`Received ${petAppointments.length} appointments for pet ${petId}`);
           
           const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
           allAppointments = [...allAppointments, ...futurePetAppointments];
@@ -96,6 +101,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
         new Map(allAppointments.map(appt => [appt._id, appt])).values()
       ) as Appointment[];
       
+      console.log(`Final appointments list: ${dedupedAppointments.length} items`);
       setAppointments(dedupedAppointments);
     } catch (err: any) {
       let errorMsg = 'Failed to load appointments. Please try again.';
@@ -162,10 +168,33 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
   // Handler for when a new appointment is added
   const handleAppointmentAdded = (newAppointment: Appointment) => {
     setShowAddForm(false);
+    console.log("New appointment added:", newAppointment);
     
     // Reload all appointments to ensure consistency
     loadAppointments();
   };
+
+  // Handler for saving appointment edits
+  const handleEditSave = async (updated: { staffId: string; date: string; time: string }) => {
+    if (!editingAppointmentId) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      await appointmentService.updateAppointment(editingAppointmentId, {
+        staffId: updated.staffId,
+        date: updated.date,
+        time: updated.time,
+      });
+      setEditingAppointmentId(null);
+      showSuccessMessage('Appointment updated successfully!');
+      loadAppointments();
+    } catch (err) {
+      setError('Failed to update appointment.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
     return (
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
       {/* Success Message Banner */}
@@ -276,48 +305,72 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {  con
                 <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl shadow bg-[#FDF6F0] dark:bg-[#4A3F35] hover:shadow-lg transition-shadow duration-200 ease-in-out">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
                     <div className="flex items-center gap-3 mb-2 sm:mb-0">
-                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
-                        Scheduled
-                      </span>
+                      {/* Only show Scheduled if not editing this appointment */}
+                      {editingAppointmentId !== apt._id && (
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
+                          Scheduled
+                        </span>
+                      )}
                       <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full">
                         {formatted.service}
                       </span>
                     </div>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await appointmentService.cancelAppointment(apt._id);
-                          loadAppointments();
-                          showSuccessMessage('Appointment cancelled successfully!');
-                        } catch (err) {
-                          setError('Failed to cancel appointment.');
-                        }
-                      }}
-                      className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                      disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
-                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
-                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
-                      <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
-                      {formatted.cost && (
-                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await appointmentService.cancelAppointment(apt._id);
+                            loadAppointments();
+                            showSuccessMessage('Appointment cancelled successfully!');
+                          } catch (err) {
+                            setError('Failed to cancel appointment.');
+                          }
+                        }}
+                        className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                        disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
+                      >
+                        Cancel
+                      </button>
+                      {editingAppointmentId !== apt._id && (
+                        <button
+                          onClick={() => setEditingAppointmentId(apt._id)}
+                          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150"
+                          disabled={editingAppointmentId === apt._id}
+                        >
+                          Edit
+                        </button>
                       )}
                     </div>
                   </div>
-                  {formatted.description && (
-                    <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Description:</strong> {formatted.description}</p>
-                  )}
-                  {formatted.notes && (
-                    <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
+                  {editingAppointmentId === apt._id ? (
+                    <EditAppointmentForm
+                      appointment={apt}
+                      onSave={handleEditSave}
+                      onCancel={() => setEditingAppointmentId(null)}
+                    />
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
+                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
+                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
+                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
+                          {formatted.cost && (
+                            <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
+                          )}
+                        </div>
+                      </div>
+                      {formatted.description && (
+                        <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Description:</strong> {formatted.description}</p>
+                      )}
+                      {formatted.notes && (
+                        <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
+                      )}
+                    </>
                   )}
                 </li>
               );
