@@ -310,9 +310,18 @@ useEffect(() => {
         </div>
       )}
 
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
-        <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
+          <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
+        </div>
+        <button
+          type="button"
+          onClick={() => window.location.href = '/client/appointments'}
+          className="px-4 py-2 border border-[var(--color-wine)] rounded-md text-sm font-medium text-[var(--color-wine)] hover:bg-[var(--color-cream)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-wine)] transition-colors duration-150"
+        >
+          Return to My Upcoming Appointments
+        </button>
       </div>
 
       {error && (

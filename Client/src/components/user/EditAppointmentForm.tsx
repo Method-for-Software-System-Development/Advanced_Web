@@ -68,6 +68,13 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Pet Name Display - inline */}
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-md font-semibold text-gray-800 dark:text-gray-100">Pet Name:</span>
+        <span className="text-gray-700 dark:text-gray-300">
+          {typeof appointment.petId === 'object' ? appointment.petId.name : appointment.petId}
+        </span>
+      </div>
       {error && <div className="text-red-600">{error}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
