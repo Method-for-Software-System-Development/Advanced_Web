@@ -241,7 +241,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
       return;
     }
     setIsLoading(true);
-    setError(null);
+    setError('');
     try {
       await appointmentService.createEmergencyAppointment({
         userId: client._id,
@@ -451,15 +451,17 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
       )}
 
       {/* Emergency Modal */}
-      <EmergencyAppointmentModal
-        open={showEmergencyModal}
-        onClose={() => setShowEmergencyModal(false)}
-        isSubmitting={isLoading}
-        onConfirm={async (reason: string) => {
-          setShowEmergencyModal(false);
-          await handleEmergencyAppointmentClient(reason);
-        }}
-      />
+      {showEmergencyModal && (
+        <EmergencyAppointmentModal
+          open={showEmergencyModal}
+          onClose={() => setShowEmergencyModal(false)}
+          isSubmitting={isLoading}
+          onConfirm={async (reason: string) => {
+            setShowEmergencyModal(false);
+            await handleEmergencyAppointmentClient(reason);
+          }}
+        />
+      )}
     </div>
   );
 };
