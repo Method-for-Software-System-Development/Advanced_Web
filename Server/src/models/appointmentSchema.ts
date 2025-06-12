@@ -43,6 +43,9 @@ export interface IAppointment extends Document {
   reminderSent: boolean; // Whether reminder was sent
   createdAt: Date;
   updatedAt: Date;
+  isEmergency?: boolean;
+  emergencyReason?: string;
+
 }
 
 const AppointmentSchema: Schema = new Schema({
@@ -102,7 +105,17 @@ const AppointmentSchema: Schema = new Schema({
   reminderSent: { 
     type: Boolean, 
     default: false 
-  }
+  },
+  isEmergency: { 
+  type: Boolean, 
+  default: false 
+},
+emergencyReason: { 
+  type: String,
+  required: false,
+  maxLength: 500
+}
+
 }, {
   timestamps: true
 });

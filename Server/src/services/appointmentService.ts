@@ -1,19 +1,26 @@
-// services/appointmentService.ts
+/**
+ * Appointment service layer.
+ * Business logic for creating, cancelling and fetching appointments,
+ * plus helper for allocating a veterinarian for emergency cases.
+ *
+ * All comments/documentation are in English, as requested.
+ */
 
-import Appointment, { IAppointment, AppointmentStatus } from "../models/appointmentSchema";
+import { Types } from "mongoose";
+import Appointment, {
+  IAppointment,
+  AppointmentStatus,
+} from "../models/appointmentSchema";
+import Staff, { IStaff, StaffRole } from "../models/staffSchema";
+
+/* -------------------------------------------------------------------------- */
+/* CRUD helpers                                                               */
+/* -------------------------------------------------------------------------- */
 
 /**
- * Creates a new appointment for the given user and pet.
- * @param userId      - User's ObjectId
- * @param petId       - Pet's ObjectId
- * @param staffId     - Staff member (vet) ObjectId
- * @param date        - Appointment date (as Date)
- * @param time        - Appointment time (string, e.g. "10:30 AM")
- * @param type        - Appointment type
- * @param description - Reason for the visit
- * @returns The created Appointment document
+ * Creates a new appointment.
  */
-export async function createAppointment(
+async function createAppointment(
   userId: string,
   petId: string,
   staffId: string | null,
@@ -30,41 +37,133 @@ export async function createAppointment(
     time,
     type,
     description,
-    status: AppointmentStatus.SCHEDULED
+    status: AppointmentStatus.SCHEDULED,
   });
+
   await appt.save();
   return appt;
 }
 
-/**
- * Cancels an appointment by setting its status to "cancelled".
- * @param userId        - User's ObjectId (for security: can only cancel own appointments)
- * @param appointmentId - Appointment's ObjectId
- * @returns True if the appointment was updated, false otherwise
- */
-export async function cancelAppointment(userId: string, appointmentId: string): Promise<boolean> {
-  const result = await Appointment.updateOne(
+/** Soft-cancels an appointment (status → CANCELLED). */
+async function cancelAppointment(
+  userId: string,
+  appointmentId: string
+): Promise<boolean> {
+  const { modifiedCount } = await Appointment.updateOne(
     { _id: appointmentId, userId },
     { $set: { status: AppointmentStatus.CANCELLED } }
   );
-  return result.modifiedCount > 0;
+  return modifiedCount > 0;
 }
 
-/**
- * Returns all future appointments for the given user.
- * @param userId - User's ObjectId
- * @returns List of Appointment documents
- */
-export async function getFutureAppointments(userId: string): Promise<IAppointment[]> {
+/** Returns all future appointments for a specific user. */
+async function getFutureAppointments(
+  userId: string
+): Promise<IAppointment[]> {
   const now = new Date();
-  return Appointment.find({ userId, date: { $gte: now }, status: { $ne: AppointmentStatus.CANCELLED } }).sort({ date: 1, time: 1 });
+  return Appointment.find({
+    userId,
+    date: { $gte: now },
+    status: { $ne: AppointmentStatus.CANCELLED },
+  }).sort({ date: 1, time: 1 });
 }
 
-/**
- * Returns all appointments for a given pet (by petId)
- * @param petId - Pet's ObjectId
- * @returns List of Appointment documents
- */
-export async function getAppointmentsByPet(petId: string): Promise<IAppointment[]> {
+/** Returns the full appointment history for a specific pet. */
+async function getAppointmentsByPet(petId: string): Promise<IAppointment[]> {
   return Appointment.find({ petId }).sort({ date: -1, time: -1 });
 }
+
+/* -------------------------------------------------------------------------- */
+/* Emergency helper                                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Finds the best veterinarian for an emergency case.
+ *
+ * 1. Returns a vet who is completely free right now, if one exists.
+ * 2. Otherwise returns the vet with the fewest appointments that **start**
+ *    in the next 4 hours, together with the list of those appointments
+ *    (so they can be cancelled).
+ *
+ * @param now Current timestamp (mainly for tests; defaults to `new Date()`).
+ */
+async function findAvailableVetForEmergency(
+  now: Date = new Date()
+): Promise<{ vet: IStaff; toCancel: IAppointment[] }> {
+  /* 1. all active vets */
+  const activeVets = await Staff.find({
+  role: { $regex: /^veterinarian$/i },   // i   =  ignore case
+  isActive: true
+});
+  if (activeVets.length === 0) {
+    throw new Error("No active veterinarians found.");
+  }
+
+  /* 2. four-hour window */
+  const windowEnd = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+
+  /* 3. build map { vetId -> appointmentsStartingWithin4h } */
+  const vetIds: string[] = activeVets.map((v) =>
+    (v._id as Types.ObjectId).toString()
+  );
+  const appointmentsByVet: Record<string, IAppointment[]> = {};
+  vetIds.forEach((id) => (appointmentsByVet[id] = []));
+
+  const upcomingAppointments = await Appointment.find({
+    staffId: { $in: vetIds },
+    date: { $gte: now, $lte: windowEnd },
+    status: { $nin: [AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW] },
+  });
+
+  upcomingAppointments.forEach((appt) => {
+    const key = (appt.staffId as Types.ObjectId).toString();
+    appointmentsByVet[key].push(appt);
+  });
+
+  /* 4. vet who is completely free right now */
+  for (const vet of activeVets) {
+    const key = (vet._id as Types.ObjectId).toString();
+    const vetAppointments = appointmentsByVet[key];
+
+    const isFree = vetAppointments.every((appt) => {
+      const start = new Date(appt.date);
+      const end = new Date(start.getTime() + (appt.duration || 30) * 60000);
+      return now < start || now >= end;
+    });
+
+    if (isFree) {
+      return { vet, toCancel: [] };
+    }
+  }
+
+  /* 5. vet with fewest upcoming appointments */
+  let selectedVet: IStaff | null = null;
+  let minCount = Infinity;
+
+  for (const vet of activeVets) {
+    const key = (vet._id as Types.ObjectId).toString();
+    const count = appointmentsByVet[key].length;
+    if (count < minCount) {
+      minCount = count;
+      selectedVet = vet;
+    }
+  }
+
+  if (!selectedVet) {
+    throw new Error("No available vet found.");
+  }
+
+  const vetKey = (selectedVet._id as Types.ObjectId).toString();
+  const toCancel = appointmentsByVet[vetKey];
+
+  return { vet: selectedVet, toCancel };
+}
+
+/* -------------------------------------------------------------------------- */
+export {
+  createAppointment,
+  cancelAppointment,
+  getFutureAppointments,
+  getAppointmentsByPet,
+  findAvailableVetForEmergency,
+};

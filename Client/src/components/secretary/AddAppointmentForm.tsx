@@ -11,6 +11,7 @@ interface AddAppointmentFormProps {
   onAppointmentAdded: (newAppointment: Appointment) => void;
   selectedDate: Date;
 }
+console.log("DEBUG >> AddAppointmentForm (client) loaded");
 
 const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({ 
   onClose, 
@@ -129,7 +130,41 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
 
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
-  };  const handleSubmit = async (e: React.FormEvent) => {
+  }; 
+      /**
+ * Handles the Emergency Appointment button click.
+ * Sends a POST request to the emergency appointment API endpoint
+ * with minimal required details (user, pet, description).
+ * On success, shows an alert and optionally closes the form.
+ * On error, shows the returned error message.
+ */
+const handleEmergencyAppointment = async () => {
+  // Validation: must select client & pet
+  if (!selectedClient || !selectedPetId || !formData.description?.trim()) {
+    setError("Please select a client, pet, and provide a description for the emergency.");
+    return;
+  }
+  try {
+    // Optionally: set loading spinner here
+
+    const response = await appointmentService.createEmergencyAppointment({
+      userId: selectedClient._id,
+      petId: selectedPetId,
+      description: formData.description,
+      emergencyReason: "EMERGENCY" // You may allow to input or pick reason
+    });
+
+    // Show confirmation (replace with nicer modal if you want)
+    alert("Emergency appointment request sent! Please come to the clinic immediately. Our staff will contact you soon.");
+    // Optionally, close the form/modal:
+    onClose();
+
+  } catch (err: any) {
+    setError(err?.message || "Failed to schedule emergency appointment.");
+  }
+};
+
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedClient || !selectedPetId || !selectedStaff) {
@@ -187,6 +222,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
       }
       setError(errorMessage);
     }
+
   };
   return (
     <div className="w-full">      <div className="mb-6">
@@ -254,6 +290,15 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
               >
                 Create Appointment
               </button>
+              <button
+              type="button"
+              className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 shadow-md"
+              onClick={handleEmergencyAppointment}
+              title="For emergencies only! A staff member will contact you immediately."
+            >
+              🚨 Emergency Appointment
+            </button>
+
             </div>
           </form>
     </div>  );

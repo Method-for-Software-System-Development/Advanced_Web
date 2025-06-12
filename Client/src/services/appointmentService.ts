@@ -3,6 +3,7 @@
  */
 import { Appointment, AppointmentStatus, AppointmentType } from '../types';
 import { API_URL } from '../config/api';
+console.log("DEBUG-SERVICE-LOAD", "version",  Date.now());
 
 const API_BASE_URL = API_URL;
 
@@ -119,6 +120,44 @@ export const appointmentService = {
       throw error;
     }
   },
+     /**
+   * Create an emergency appointment (server allocates vet & handles conflict logic)
+   * @param emergencyData { userId, petId, description, emergencyReason? }
+   * @returns { message, vet, cancelledAppointments, newAppointment }
+   */
+
+  async createEmergencyAppointment(emergencyData: {
+    userId: string;
+    petId: string;
+    description: string;
+    emergencyReason?: string;
+  }): Promise<{
+    message: string;
+    vet: any; 
+    cancelledAppointments: any[];
+    newAppointment: Appointment;
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/appointments/emergency`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emergencyData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating emergency appointment:', error);
+      throw error;
+    }
+  },
+
 
   // Update appointment
   async updateAppointment(id: string, updateData: {

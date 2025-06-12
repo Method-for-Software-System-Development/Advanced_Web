@@ -4,9 +4,11 @@
 
 import { Router, Request, Response } from "express";
 import Appointment, { AppointmentStatus, AppointmentType } from "../models/appointmentSchema";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import * as ExcelJS from 'exceljs';
-
+import { sendEmergencyCancelEmail, sendEmergencyVetAlertEmail } from "../services/emailService";
+import User from "../models/userSchema";
+import { findAvailableVetForEmergency, createAppointment } from "../services/appointmentService";
 const appointmentRouter = Router();
 
 /**
@@ -58,6 +60,122 @@ appointmentRouter.get("/", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to fetch appointments" });
   }
 });
+/**
+ * POST /api/appointments/emergency
+ * ---------------------------------------------------------------
+ * • Chooses the most available veterinarian for an emergency.
+ * • Cancels that vet’s appointments **starting within the next
+ *   4 hours** and emails the affected clients.
+ * • Sends an alert email to the veterinarian.
+ * • Creates a new emergency appointment (flat cost: ₪1000).
+ * • Responds with:
+ *      – the veterinarian’s details
+ *      – the list of cancelled appointments
+ *      – the newly created emergency appointment
+ * ---------------------------------------------------------------
+ * Request-body JSON
+ * {
+ *   userId:          string,   // pet owner’s Mongo ObjectId
+ *   petId:           string,   // pet’s Mongo ObjectId
+ *   description:     string,   // what happened
+ *   emergencyReason: string    // optional tag for statistics
+ * }
+ * ---------------------------------------------------------------
+ */
+appointmentRouter.post(
+  "/emergency",
+  async (
+    req: Request,
+    res: Response
+  ): Promise<Response>  => {
+    try {
+      /* ---------- 0) Validate input ---------- */
+      const { userId, petId, description, emergencyReason } = req.body;
+      if (!userId || !petId || !description) {
+        return res.status(400).json({
+          error: "Missing required fields (userId, petId, description)."
+        });
+      }
+
+      /* ---------- 1) Pick the best-available vet ---------- */
+      const now = new Date();
+      const { vet, toCancel } = await findAvailableVetForEmergency(now);
+
+      /* ---------- 2) Cancel & notify clients ---------- */
+      const cancelledAppointments: typeof toCancel = [];
+
+      for (const appt of toCancel) {
+        appt.status = AppointmentStatus.CANCELLED;
+        await appt.save();
+        cancelledAppointments.push(appt);
+
+        const user = await User.findById(appt.userId);
+        if (user?.email) {
+          await sendEmergencyCancelEmail(
+            user.email,
+            appt.date,
+            `${vet.firstName} ${vet.lastName}`
+          );
+        }
+      }
+
+      /* ---------- 3) Notify the vet ---------- */
+      if (vet.email) {
+        await sendEmergencyVetAlertEmail(
+          vet.email,
+          now,
+          description,
+          emergencyReason
+        );
+      }
+      function formatTimeTo12h(date: Date): string {
+      let h = date.getHours();
+      const m = date.getMinutes().toString().padStart(2, "0");
+      const period = h >= 12 ? "PM" : "AM";
+      h = h % 12;
+      if (h === 0) h = 12;
+      return `${h}:${m} ${period}`;
+}
+
+      /* ---------- 4) Create the emergency appointment ---------- */
+      const vetId = (vet._id as Types.ObjectId).toString(); // safe cast
+      const timeStr = formatTimeTo12h(now)
+      const emergencyAppt = await createAppointment(
+        userId,
+        petId,
+        vetId,
+        now,
+        timeStr,            // display-only time string
+        "emergency_care", // AppointmentType value
+        description
+      );
+
+      emergencyAppt.isEmergency = true;
+      emergencyAppt.emergencyReason = emergencyReason ?? "";
+      emergencyAppt.cost = 1000;
+      await emergencyAppt.save();
+
+      /* ---------- 5) Success response ---------- */
+      return res.status(201).json({
+        message: "Emergency appointment scheduled.",
+        vet: {
+          _id: vetId,
+          firstName: vet.firstName,
+          lastName: vet.lastName,
+          email: vet.email
+        },
+        cancelledAppointments,
+        newAppointment: emergencyAppt
+      });
+    } catch (err) {
+      console.error("Error scheduling emergency appointment:", err);
+      return res.status(500).json({
+        error: err instanceof Error ? err.message : "Unknown error"
+      });
+    }
+  }
+);
+
 
 /**
  * GET /api/appointments/export-excel

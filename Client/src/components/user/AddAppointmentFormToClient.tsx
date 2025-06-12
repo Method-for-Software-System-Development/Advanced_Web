@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Appointment, AppointmentStatus, AppointmentType, Staff, Patient, Pet } from '../../types';
 import appointmentService from '../../services/appointmentService';
+console.log("DEBUG-IMPORT", appointmentService);
 import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
@@ -179,7 +180,39 @@ useEffect(() => {
 
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
-  };  const handleSubmit = async (e: React.FormEvent) => {
+  };
+  /**
+ * Sends an emergency-appointment request to the backend.
+ * Uses minimal fields: userId (client), petId, description.
+ * Shows a success banner and closes the form on success.
+ */
+  const handleEmergencyAppointmentClient = async () => {
+    if (!client || !selectedPetId || !formData.description?.trim()) {
+      setError("Please select a pet and provide a short description for the emergency.");
+      return;
+    }
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await appointmentService.createEmergencyAppointment({
+        userId: client._id,
+        petId: selectedPetId,
+        description: formData.description.trim(),
+        emergencyReason: "CLIENT_BUTTON"
+      });
+
+      showSuccessMessage("Emergency request sent! Please come to the clinic ASAP—our staff will contact you shortly.");
+      // close form after 2 s so user can see the banner
+      setTimeout(onClose, 2000);
+    } catch (err: any) {
+      setError(err?.message || "Failed to create emergency appointment.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
@@ -356,6 +389,21 @@ useEffect(() => {
               'Create Appointment'
             )}
           </button>
+          <button
+    type="button"
+    onClick={handleEmergencyAppointmentClient}
+    disabled={
+      !client ||
+      !selectedPetId ||
+      !formData.description?.trim() ||
+      isSubmitting
+    }
+    className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 shadow-md disabled:opacity-50"
+    title="For emergencies only! Our staff will contact you immediately."
+  >
+    🚨 Emergency Appointment
+  </button>
+
         </div>
       </form>
     </div>  );
