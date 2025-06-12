@@ -4,6 +4,7 @@ import EditAppointmentForm from './EditAppointmentForm';
 import appointmentService from '../../services/appointmentService';
 import { Appointment } from '../../types';
 import UserNavButton from './UserNavButton';
+import { CancelReasonModal } from './CancelReasonModal';
 
 interface AppointmentViewClientProps {
   onBack?: () => void; // Make this optional since it's not being used
@@ -40,6 +41,9 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   const [sortField, setSortField] = useState<'date' | 'petName' | 'staffName' | 'service'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelingAppointmentId, setCancelingAppointmentId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState<string | null>(null);
 
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
@@ -195,6 +199,31 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     }
   };
 
+  const handleCancelClick = (appointmentId: string) => {
+    setCancelingAppointmentId(appointmentId);
+    setShowCancelModal(true);
+  };
+
+  const handleCancelModalClose = () => {
+    setShowCancelModal(false);
+    setCancelingAppointmentId(null);
+  };
+
+  const handleCancelSubmit = async (reason: string) => {
+    if (!cancelingAppointmentId) return;
+    setCancelReason(reason);
+    setShowCancelModal(false);
+    try {
+      await appointmentService.cancelAppointment(cancelingAppointmentId);
+      showSuccessMessage('Appointment cancelled successfully!');
+      loadAppointments();
+    } catch (err) {
+      setError('Failed to cancel appointment.');
+    } finally {
+      setCancelingAppointmentId(null);
+    }
+  };
+
     return (
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
       {/* Success Message Banner */}
@@ -317,15 +346,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={async () => {
-                          try {
-                            await appointmentService.cancelAppointment(apt._id);
-                            loadAppointments();
-                            showSuccessMessage('Appointment cancelled successfully!');
-                          } catch (err) {
-                            setError('Failed to cancel appointment.');
-                          }
-                        }}
+                        onClick={() => handleCancelClick(apt._id)}
                         className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                         disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
                       >
@@ -347,6 +368,12 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                       appointment={apt}
                       onSave={handleEditSave}
                       onCancel={() => setEditingAppointmentId(null)}
+                    />
+                  ) : showCancelModal && cancelingAppointmentId === apt._id ? (
+                    <CancelReasonModal
+                      isOpen={true}
+                      onClose={handleCancelModalClose}
+                      onSubmit={handleCancelSubmit}
                     />
                   ) : (
                     <>

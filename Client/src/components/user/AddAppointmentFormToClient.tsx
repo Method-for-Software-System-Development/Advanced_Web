@@ -342,7 +342,7 @@ useEffect(() => {
           <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
         </div>
         <UserNavButton
-          label="\u2190 Return to My Upcoming Appointments"
+          label="Return to My Upcoming Appointments"
           onClick={onClose}
           className="!bg-[var(--color-wine)] !text-white !border !border-[var(--color-wine)] !hover:bg-[var(--color-cream)] !hover:text-[var(--color-wine)] !focus:ring-2 !focus:ring-offset-2 !focus:ring-[var(--color-wine)]"
         />
