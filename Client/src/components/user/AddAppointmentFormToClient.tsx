@@ -277,7 +277,13 @@ useEffect(() => {
         type: formData.type as AppointmentType,
         description: formData.description?.trim() || 'No description provided',
         notes: formData.notes || '',
-        cost: formData.cost || 0
+        cost: formData.cost || 0,
+        // Add cancellationReason if status is CANCELLED
+        ...(formData.status === AppointmentStatus.CANCELLED && {
+          cancellationReason: formData.cancellationReason === 'Other'
+            ? (formData.cancellationReasonOther || '')
+            : (formData.cancellationReason || '')
+        })
       };
       
       const response = await appointmentService.createAppointment(appointmentData);
