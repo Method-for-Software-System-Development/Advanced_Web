@@ -6,6 +6,8 @@ import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
 import { API_URL } from '../../config/api';
+import UserNavButton from './UserNavButton';
+import { useNavigate } from 'react-router-dom';
 
 interface AddAppointmentFormToClientProps {
   onClose: () => void;
@@ -18,6 +20,8 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
   onAppointmentAdded, 
   selectedDate 
 }) => {
+  const navigate = useNavigate();
+
   const formatDateToYYYYMMDD = (date: Date): string => {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -325,13 +329,11 @@ useEffect(() => {
           <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
           <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
         </div>
-        <button
-          type="button"
-          onClick={() => window.location.href = '/client/appointments'}
-          className="px-4 py-2 border border-[var(--color-wine)] rounded-md text-sm font-medium text-[var(--color-wine)] hover:bg-[var(--color-cream)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-wine)] transition-colors duration-150"
-        >
-          Return to My Upcoming Appointments
-        </button>
+        <UserNavButton
+          label="Return to My Upcoming Appointments"
+          onClick={onClose}
+          className="!bg-[var(--color-wine)] !text-white !border !border-[var(--color-wine)] !hover:bg-[var(--color-cream)] !hover:text-[var(--color-wine)] !focus:ring-2 !focus:ring-offset-2 !focus:ring-[var(--color-wine)]"
+        />
       </div>
 
       {error && (
@@ -362,6 +364,7 @@ useEffect(() => {
               time: formData.time || '',
               type: formData.type || AppointmentType.WELLNESS_EXAM,
               duration: formData.duration || 30,
+              // Only one description property
               description: formData.description || '',
               notes: formData.notes || '',
               cost: formData.cost || 0
@@ -380,7 +383,7 @@ useEffect(() => {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF92A6] dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors duration-150"
+            className="px-4 py-2 border border-[var(--color-redButton)] rounded-md text-sm font-medium text-[var(--color-redButton)] hover:bg-[var(--color-redButton)] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-redButton)] transition-colors duration-150"
           >
             Cancel
           </button>          <button
