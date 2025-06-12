@@ -7,6 +7,9 @@ import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
 import { API_URL } from '../../config/api';
 import EmergencyAppointmentModal from './appointments/EmergencyAppointmentModal';
+import UserNavButton from './UserNavButton';
+import { useNavigate } from 'react-router-dom';
+
 interface AddAppointmentFormToClientProps {
   onClose: () => void;
   onAppointmentAdded: (newAppointment: Appointment) => void;
@@ -18,6 +21,8 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
   onAppointmentAdded, 
   selectedDate 
 }) => {
+  const navigate = useNavigate();
+
   const formatDateToYYYYMMDD = (date: Date): string => {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -81,12 +86,13 @@ useEffect(() => {
     const parsedClient = JSON.parse(clientRaw);
     setClient(parsedClient);
     if (parsedClient.pets && parsedClient.pets.length > 0) {
+      let petsArr = parsedClient.pets;
       // If pets are strings (IDs), fetch full pet objects
-      if (typeof parsedClient.pets[0] === 'string') {
+      if (typeof petsArr[0] === 'string') {
         // Only send valid 24-char ObjectID strings
-        const validPetIds = parsedClient.pets.filter((id: string) => typeof id === 'string' && id.length === 24);
+        const validPetIds = petsArr.filter((id: string) => typeof id === 'string' && id.length === 24);
         if (validPetIds.length === 0) {
-          setClientPets([]);        setSelectedPetId(null);
+          setClientPets([]); setSelectedPetId(null);
           return;
         }
         fetch(`${API_URL}/pets/byIds`, {
@@ -96,21 +102,30 @@ useEffect(() => {
         })
           .then((res) => res.json())
           .then((data) => {
-            setClientPets(Array.isArray(data) ? data : []);
-            if (Array.isArray(data) && data.length > 0) {
-              setSelectedPetId(data[0]._id);
+            // Filter only active pets
+            const activePets = Array.isArray(data) ? data.filter((pet: any) => pet.isActive !== false) : [];
+            setClientPets(activePets);
+            if (activePets.length > 0) {
+              setSelectedPetId(activePets[0]._id);
             } else {
               setSelectedPetId(null);
             }
-          })          .catch(() => {
+          })
+          .catch(() => {
             setClientPets([]);
             setSelectedPetId(null);
             setError('Failed to fetch pets.');
           });
       } else {
         // Already full pet objects
-        setClientPets(parsedClient.pets);
-        setSelectedPetId(parsedClient.pets[0]._id);
+        // Filter only active pets
+        const activePets = petsArr.filter((pet: any) => pet.isActive !== false);
+        setClientPets(activePets);
+        if (activePets.length > 0) {
+          setSelectedPetId(activePets[0]._id);
+        } else {
+          setSelectedPetId(null);
+        }
       }
     } else {
       setClientPets([]);
@@ -321,9 +336,24 @@ useEffect(() => {
         </div>
       )}
 
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
-        <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
+          <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
+        </div>
+        <UserNavButton
+          label={
+            <span className="flex items-center">
+              {/* Back arrow SVG */}
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Return to My Upcoming Appointments
+            </span>
+          }
+          onClick={onClose}
+          className="!bg-[var(--color-wine)] !text-white !border !border-[var(--color-wine)] !hover:bg-[var(--color-cream)] !hover:text-[var(--color-wine)] !focus:ring-2 !focus:ring-offset-2 !focus:ring-[var(--color-wine)]"
+        />
       </div>
 
       {error && (
@@ -354,6 +384,7 @@ useEffect(() => {
               time: formData.time || '',
               type: formData.type || AppointmentType.WELLNESS_EXAM,
               duration: formData.duration || 30,
+              // Only one description property
               description: formData.description || '',
               notes: formData.notes || '',
               cost: formData.cost || 0
@@ -372,7 +403,7 @@ useEffect(() => {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF92A6] dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors duration-150"
+            className="px-4 py-2 border border-[var(--color-redButton)] rounded-md text-sm font-medium text-[var(--color-redButton)] hover:bg-[var(--color-redButton)] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-redButton)] transition-colors duration-150"
           >
             Cancel
           </button>          <button
