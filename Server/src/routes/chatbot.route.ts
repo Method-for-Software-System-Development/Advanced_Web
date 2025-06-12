@@ -13,6 +13,15 @@ import User from "../models/userSchema";
 import Pet from "../models/petSchema";
 import { IPet } from "../models/petSchema"
 import Staff from "../models/staffSchema"; 
+
+// Helper function to format a Date object to YYYY-MM-DD string in local time
+function formatDateToYYYYMMDD(date: Date): string {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 const router = express.Router();
 
 const GEMINI_API_URL =
@@ -109,19 +118,21 @@ if (helpKeywords.some(kw => normalizedMessage.toLowerCase().includes(kw))) {
       normalizedMessage = NUMBERED_MENU[idx].label;
     }
   }
+
   if (userId && sessionMap.has(userId)) {
     const session = sessionMap.get(userId);
         /* ------------------------------------------------------------
  *  STEP 2: user typed a date  ➜  show free time-slots
  * ---------------------------------------------------------- */
-if (session?.step === "chooseDate") {
-  // --- Parse date:  YYYY-MM-DD  |  DD/MM  |  MM/DD  ---
-let pickedDate: Date | null = null;
+    if (session?.step === "chooseDate") {
+      // --- Parse date:  YYYY-MM-DD  |  DD/MM  |  MM/DD  ---
+      let pickedDate: Date | null = null;
 
-// YYYY-MM-DD
-if (/^\d{4}-\d{2}-\d{2}$/.test(normalizedMessage)) {
-  pickedDate = new Date(normalizedMessage);
-}
+      // YYYY-MM-DD
+      if (/^\d{4}-\d{2}-\d{2}$/.test(normalizedMessage)) {
+        const [year, month, day] = normalizedMessage.split('-').map(Number);
+        pickedDate = new Date(year, month - 1, day); // Parses as local midnight
+      }
 
 // DD/MM  or  MM/DD  
 if (!pickedDate || isNaN(pickedDate.getTime())) {
@@ -167,7 +178,8 @@ if (!pickedDate || isNaN(pickedDate.getTime())) {
   sessionMap.set(userId, { ...session, step: "chooseTime", date: pickedDate, freeSlots });
   return res.json({
     reply:
-      `Available times on ${pickedDate.toISOString().slice(0, 10)}:\n` +
+      `Available times on ${formatDateToYYYYMMDD(pickedDate!)}:
+` +
       freeSlots.map((t, i) => `${i + 1}. ${t}`).join("\n") +
       "\n(Type the number of your preferred time)",
     menu: [],
@@ -177,72 +189,113 @@ if (!pickedDate || isNaN(pickedDate.getTime())) {
 /* ------------------------------------------------------------
  *  STEP 3: user picked a time  ➜  choose vet
  * ---------------------------------------------------------- */
-if (session?.step === "chooseTime") {
-  const idx = parseInt(normalizedMessage, 10) - 1;
-  const { freeSlots, date, petId, petName } = session;
+    if (session?.step === "chooseTime") {
+      const idx = parseInt(normalizedMessage, 10) - 1;
+      const { freeSlots, date, petId, petName } = session;
 
-  if (isNaN(idx) || idx < 0 || idx >= freeSlots.length) {
-    return res.json({
-      reply: "Invalid choice. Please type the number of the desired time from the list.",
-      menu: [],
-    });
-  }
+      if (isNaN(idx) || idx < 0 || idx >= freeSlots.length) {
+        return res.json({
+          reply: "Invalid choice. Please type the number of the desired time from the list.",
+          menu: [],
+        });
+      }
 
-  const timeChosen = freeSlots[idx];
+      const timeChosen = freeSlots[idx];
 
-  // Fetch active vets for selection
-  const vets = await getActiveVets();
-  if (!vets.length) {
-    return res.json({ reply: "No veterinarians available.", menu: [] });
-  }
+      // Fetch active vets for selection
+      const vets = await getActiveVets();
+      if (!vets.length) {
+        return res.json({ reply: "No veterinarians available.", menu: [] });
+      }
 
-  // Update session and ask user to select vet
-  sessionMap.set(userId, { ...session, step: "chooseVet", time: timeChosen, vets });
+      // Update session and ask user to select vet
+      sessionMap.set(userId, { ...session, step: "chooseVet", time: timeChosen, vets });
 
-  return res.json({
-    reply: `Please choose a veterinarian:\n` +
-      vets.map((v: any, i: number) => `${i + 1}. ${v.firstName} ${v.lastName}`).join("\n") +
-      "\n(Type the number of the vet you prefer)",
-    menu: [],
-  });
-}
+      return res.json({
+        reply: `Please choose a veterinarian:\n` +
+          vets.map((v: any, i: number) => `${i + 1}. ${v.firstName} ${v.lastName}`).join("\n") +
+          "\n(Type the number of the vet you prefer)",
+        menu: [],
+      });
+    }
 /* ------------------------------------------------------------
  *  STEP 4: user picked a vet  ➜  ask for reason
  * ---------------------------------------------------------- */
-if (session?.step === "chooseVet") {
-  const idx = parseInt(normalizedMessage, 10) - 1;
-  const { vets } = session;
+    if (session?.step === "chooseVet") {
+      const idx = parseInt(normalizedMessage, 10) - 1;
+      const { vets } = session;
 
-  if (isNaN(idx) || idx < 0 || idx >= vets.length) {
-    return res.json({ reply: "Invalid choice. Please type the vet number from the list.", menu: [] });
-  }
+      if (isNaN(idx) || idx < 0 || idx >= vets.length) {
+        return res.json({ reply: "Invalid choice. Please type the vet number from the list.", menu: [] });
+      }
 
-  const vet = vets[idx];
-  sessionMap.set(userId, { ...session, step: "chooseReason", vetId: vet._id });
-  return res.json({
-    reply: "Please provide a brief reason for the appointment:",
-    menu: [],
-  });
-}
+      const vet = vets[idx];
+      sessionMap.set(userId, { ...session, step: "chooseReason", vetId: vet._id });
+      return res.json({
+        reply: "Please provide a brief reason for the appointment:",
+        menu: [],
+      });
+    }
 /* ------------------------------------------------------------
- *  STEP 5: user entered reason  ➜  create appointment
+ *  STEP 5: user entered reason  ➜  ask for confirmation
  * ---------------------------------------------------------- */
-if (session?.step === "chooseReason") {
-  const { petId, date, time, vetId, pets } = session;
-  const petName = pets?.find((p: any) => p._id.toString() === petId.toString())?.name || "your pet";
-  const reason = normalizedMessage?.trim();
-  if (!reason) {
-    return res.json({ reply: "Please provide a reason for the appointment.", menu: [] });
-  }
+    if (session?.step === "chooseReason") {
+      const { petId, date, time, vetId, pets } = session;
+      const petName = pets?.find((p: any) => p._id.toString() === petId.toString())?.name || "your pet";
+      const reason = normalizedMessage?.trim();
+      if (!reason) {
+        return res.json({ reply: "Please provide a reason for the appointment.", menu: [] });
+      }
 
-  await createAppointment(userId, petId, vetId, date, time, "wellness_exam", reason);
-  sessionMap.delete(userId);
+      // Store details in session and ask for confirmation
+      sessionMap.set(userId, { 
+        ...session, 
+        step: "confirmBooking", 
+        appointmentDetails: { userId, petId, vetId, date, time, type: "wellness_exam", description: reason, petName }
+      });
 
-  return res.json({
-    reply: `✅ Appointment booked for ${petName} on ${date.toISOString().slice(0, 10)} at ${time}.`,
-    menu: [],
-  });
-}
+      return res.json({
+        reply: `You are about to book an appointment for ${petName} on ${formatDateToYYYYMMDD(date)} at ${time} for: ${reason}.\nAre you sure? Type 'accept' to confirm or 'exit' to cancel.`,
+        menu: [],
+      });
+    }
+
+/* ------------------------------------------------------------
+ *  STEP 6: user confirms booking  ➜  create appointment
+ * ---------------------------------------------------------- */
+    if (session?.step === "confirmBooking") {
+      const { appointmentDetails } = session;
+
+      if (!appointmentDetails) {
+        sessionMap.delete(userId);
+        return res.json({
+            reply: "Session error: Could not retrieve appointment details. Please start over.",
+            menu: [],
+        });
+      }
+      
+      const { userId: storedUserId, petId, vetId, date, time, type, description, petName } = appointmentDetails;
+
+      if (normalizedMessage.toLowerCase() === "accept") {
+        await createAppointment(storedUserId, petId, vetId, date, time, type, description);
+        sessionMap.delete(userId);
+        return res.json({
+          reply: `✅ Appointment booked for ${petName} on ${formatDateToYYYYMMDD(date)} at ${time}.`,
+          menu: [],
+        });
+      } else if (normalizedMessage.toLowerCase() === "exit") {
+        sessionMap.delete(userId);
+        return res.json({
+          reply: "Booking process aborted.",
+          menu: [],
+        });
+      } else {
+        return res.json({
+          reply: "Please type 'accept' to confirm or 'exit' to cancel.",
+          menu: [],
+        });
+      }
+    }
 
 
     // If user is currently in pet selection step
@@ -272,8 +325,72 @@ if (session?.step === "chooseReason") {
         reply: `Great! You selected ${chosenPet.name}. Please enter a date for the appointment (MM/DD or YYYY-MM-DD):`,
         menu: [],
       });
+    } // End of original content for this if block
+
+    // MOVED AND MODIFIED CANCELLATION STEPS
+    //step 2: user chose an appointment to cancel
+    if (session?.step === "chooseAppointmentToCancel") {
+        const idx = parseInt(normalizedMessage, 10) - 1;
+        const { appts } = session;
+        if (isNaN(idx) || idx < 0 || !appts || idx >= appts.length) { // Added !appts check
+            return res.json({
+                reply: "Invalid choice. Please type the number of the appointment to cancel.",
+                menu: [],
+            });
+        }
+        const selectedAppt = appts[idx];
+        sessionMap.set(userId, {
+            ...session, // Preserve other session data
+            step: "confirmCancelAppointment",
+            selectedAppt
+        });
+        return res.json({
+            reply:
+                `You chose to cancel the appointment on ${formatDateToYYYYMMDD(selectedAppt.date)} at ${selectedAppt.time}.\n` +
+                "Are you sure? Type 'accept' to confirm or 'exit' to cancel.",
+            menu: [],
+        });
     }
-  }
+
+    //step 3: user confirmed cancellation
+    if (session?.step === "confirmCancelAppointment") {
+        const { selectedAppt } = session; 
+
+        if (!selectedAppt || !selectedAppt._id) { // Added check for selectedAppt and selectedAppt._id
+            sessionMap.delete(userId);
+            return res.json({
+                reply: "Session error: Could not identify the appointment to cancel. Please start over.",
+                menu: [],
+            });
+        }
+
+        if (normalizedMessage.toLowerCase() === "accept") {
+            const ok = await cancelAppointment(userId, selectedAppt._id);
+            sessionMap.delete(userId);
+            return res.json({
+                reply: ok
+                    ? "Appointment cancelled."
+                    : "Could not cancel the appointment (please try again).",
+                menu: [],
+            });
+        } else if (normalizedMessage.toLowerCase() === "exit") {
+            sessionMap.delete(userId);
+            return res.json({
+                reply: "Cancellation process aborted.",
+                menu: [],
+            });
+        } else {
+            return res.json({
+                reply: "Please type 'accept' to confirm or 'exit' to cancel.",
+                menu: [],
+            });
+        }
+    }
+  } // End of if (userId && sessionMap.has(userId))
+
+  // The original blocks for chooseAppointmentToCancel and confirmCancelAppointment (previously around here) are now moved above.
+  // Continue with the code that followed them.
+
   // Exit command
   if (normalizedMessage.toLowerCase() === "exit") {
     return res.json({
@@ -346,36 +463,27 @@ if (normalizedMessage === "Book appointment") {
   });
 }
 
-    // Cancel appointment
-    if (normalizedMessage === "Cancel appointment") {
-      const appts = await getFutureAppointments(userId);
-      if (!appts.length) {
+  //setp 1: user wants to cancel an appointment
+if (normalizedMessage === "Cancel appointment") {
+    const appts = await getFutureAppointments(userId);
+    if (!appts.length) {
         return res.json({
-          reply: "You have no upcoming appointments to cancel.",
-          menu: [],
+            reply: "You have no upcoming appointments to cancel.",
+            menu: [],
         });
-      }
-      const menu = appts.map(
-        (a) => `${a._id} – ${a.date.toISOString().slice(0, 10)} ${a.time}`
-      );
-      return res.json({
-        reply: "Which appointment do you want to cancel? Reply with the ID.",
-        menu,
-      });
     }
+    // when there are multiple appointments, ask user to choose one
+    sessionMap.set(userId, { step: "chooseAppointmentToCancel", appts });
+    const menuText = appts.map( // Renamed 'menu' to 'menuText' to avoid conflict with res.json({ menu: [] })
+        (a, idx) =>
+            `${idx + 1}. ${formatDateToYYYYMMDD(a.date)} at ${a.time}` // استخدم formatDateToYYYYMMDD
+    ).join("\n"); // Ensure this is a single backslash for newline
 
-    // Cancel by ID
-    if (normalizedMessage.startsWith("Cancel ")) {
-      const id = normalizedMessage.replace("Cancel ", "");
-      const ok = await cancelAppointment(userId, id);
-      return res.json({
-        reply: ok
-          ? "Appointment cancelled."
-          : "Could not cancel (check the ID).",
-        menu: [] ,
-      });
-    }
-
+    return res.json({
+        reply: `Please choose an appointment to cancel:\n${menuText}\n(Type the number)`,
+        menu: [],
+    });
+}
     // Show pet history
     if (normalizedMessage === "Show history") {
       if (!petId) {
@@ -396,10 +504,10 @@ if (normalizedMessage === "Book appointment") {
           .slice(0, 3)
           .map(
             (t) =>
-              `${t.visitDate.toISOString().slice(0, 10)}: ` +
+              `${formatDateToYYYYMMDD(t.visitDate)}: ` + // استخدم formatDateToYYYYMMDD
               `${t.treatmentType} – ${t.notes}`
           )
-          .join("\n"),
+          .join("\n"), // Ensure this is a single backslash for newline
         menu: [],
       });
     }
