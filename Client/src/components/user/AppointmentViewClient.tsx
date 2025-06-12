@@ -216,7 +216,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     setCancelReason(reason);
     setShowCancelModal(false);
     try {
-      await appointmentService.cancelAppointment(cancelingAppointmentId);
+      await appointmentService.cancelAppointment(cancelingAppointmentId, reason);
       showSuccessMessage('Appointment cancelled successfully!');
       loadAppointments();
     } catch (err) {
