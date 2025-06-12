@@ -55,6 +55,17 @@ async function cancelAppointment(
   );
   return modifiedCount > 0;
 }
+/**
+ * Returns all active veterinarians.
+ *
+ * This function fetches all staff members who are currently active
+ * and have the role of "veterinarian". It returns their names.
+ */
+async function getActiveVets() {
+  // Fetch all active staff members with the role of veterinarian
+  return Staff.find({ isActive: true, role: /veterinarian/i }).select("firstName lastName").lean();
+}
+
 
 /** Returns all future appointments for a specific user. */
 async function getFutureAppointments(
@@ -66,6 +77,17 @@ async function getFutureAppointments(
     date: { $gte: now },
     status: { $ne: AppointmentStatus.CANCELLED },
   }).sort({ date: 1, time: 1 });
+}
+async function getTakenTimesForDay(date: Date): Promise<string[]> {
+  const start = new Date(date); start.setHours(0,0,0,0);
+  const end   = new Date(start); end.setDate(end.getDate() + 1);
+
+  const appts = await Appointment.find({
+    date: { $gte: start, $lt: end },
+    status: { $ne: AppointmentStatus.CANCELLED },
+  });
+
+  return appts.map(a => a.time);   // e.g. ["09:30", "14:00"]
 }
 
 /** Returns the full appointment history for a specific pet. */
@@ -166,4 +188,6 @@ export {
   getFutureAppointments,
   getAppointmentsByPet,
   findAvailableVetForEmergency,
+  getTakenTimesForDay,
+  getActiveVets
 };
