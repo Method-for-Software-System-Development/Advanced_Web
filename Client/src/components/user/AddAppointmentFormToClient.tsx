@@ -330,7 +330,15 @@ useEffect(() => {
           <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
         </div>
         <UserNavButton
-          label="Return to My Upcoming Appointments"
+          label={
+            <span className="flex items-center">
+              {/* Back arrow SVG */}
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Return to My Upcoming Appointments
+            </span>
+          }
           onClick={onClose}
           className="!bg-[var(--color-wine)] !text-white !border !border-[var(--color-wine)] !hover:bg-[var(--color-cream)] !hover:text-[var(--color-wine)] !focus:ring-2 !focus:ring-offset-2 !focus:ring-[var(--color-wine)]"
         />
