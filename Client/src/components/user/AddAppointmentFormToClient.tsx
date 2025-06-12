@@ -6,7 +6,7 @@ import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
 import { API_URL } from '../../config/api';
-
+import EmergencyAppointmentModal from './appointments/EmergencyAppointmentModal';
 interface AddAppointmentFormToClientProps {
   onClose: () => void;
   onAppointmentAdded: (newAppointment: Appointment) => void;
@@ -24,6 +24,7 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+const [modalOpen, setModalOpen] = useState(false);
 
   const [formData, setFormData] = useState<Partial<Appointment>>({
     date: formatDateToYYYYMMDD(selectedDate),
@@ -186,31 +187,31 @@ useEffect(() => {
  * Uses minimal fields: userId (client), petId, description.
  * Shows a success banner and closes the form on success.
  */
-  const handleEmergencyAppointmentClient = async () => {
-    if (!client || !selectedPetId || !formData.description?.trim()) {
-      setError("Please select a pet and provide a short description for the emergency.");
-      return;
-    }
-    setIsSubmitting(true);
-    setError(null);
+  const handleEmergencyAppointmentClient = async (reasonFromModal?: string) => {
+  if (!client || !selectedPetId) {
+    setError("Please select a pet.");
+    return;
+  }
+  setIsSubmitting(true);
+  setError(null);
 
-    try {
-      await appointmentService.createEmergencyAppointment({
-        userId: client._id,
-        petId: selectedPetId,
-        description: formData.description.trim(),
-        emergencyReason: "CLIENT_BUTTON"
-      });
+  try {
+    await appointmentService.createEmergencyAppointment({
+      userId: client._id,
+      petId: selectedPetId,
+      description: formData.description?.trim() || '',
+      emergencyReason: reasonFromModal?.trim() || "No reason provided"
+    });
 
-      showSuccessMessage("Emergency request sent! Please come to the clinic ASAP—our staff will contact you shortly.");
-      // close form after 2 s so user can see the banner
-      setTimeout(onClose, 2000);
-    } catch (err: any) {
-      setError(err?.message || "Failed to create emergency appointment.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    showSuccessMessage("Emergency request sent! Please come to the clinic ASAP—our staff will contact you shortly.");
+    setTimeout(onClose, 2000);
+  } catch (err: any) {
+    setError(err?.message || "Failed to create emergency appointment.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
   
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -298,6 +299,16 @@ useEffect(() => {
   }, []);
   return (
     <div className="w-full">
+      {/* Emergency Modal */}
+    <EmergencyAppointmentModal
+      open={modalOpen}
+      onClose={() => setModalOpen(false)}
+      isSubmitting={isSubmitting}
+      onConfirm={async (reason: string) => {
+        setModalOpen(false);
+        await handleEmergencyAppointmentClient(reason);
+      }}
+    />
       {/* Success Message Banner */}
       {successMessage && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
@@ -390,19 +401,20 @@ useEffect(() => {
             )}
           </button>
           <button
-    type="button"
-    onClick={handleEmergencyAppointmentClient}
-    disabled={
-      !client ||
-      !selectedPetId ||
-      !formData.description?.trim() ||
-      isSubmitting
-    }
-    className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 shadow-md disabled:opacity-50"
-    title="For emergencies only! Our staff will contact you immediately."
-  >
-    🚨 Emergency Appointment
-  </button>
+          type="button"
+          onClick={() => setModalOpen(true)}
+          disabled={
+            !client ||
+            !selectedPetId ||
+            !formData.description?.trim() ||
+            isSubmitting
+          }
+          className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 shadow-md disabled:opacity-50"
+          title="For emergencies only! Our staff will contact you immediately."
+        >
+          🚨 Emergency Appointment
+        </button>
+
 
         </div>
       </form>
