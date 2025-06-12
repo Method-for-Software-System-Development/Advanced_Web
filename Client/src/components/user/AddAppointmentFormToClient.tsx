@@ -423,22 +423,6 @@ useEffect(() => {
               'Create Appointment'
             )}
           </button>
-          <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          disabled={
-            !client ||
-            !selectedPetId ||
-            !formData.description?.trim() ||
-            isSubmitting
-          }
-          className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 shadow-md disabled:opacity-50"
-          title="For emergencies only! Our staff will contact you immediately."
-        >
-          🚨 Emergency Appointment
-        </button>
-
-
         </div>
       </form>
     </div>  );
