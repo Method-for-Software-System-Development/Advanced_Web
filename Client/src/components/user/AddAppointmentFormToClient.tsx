@@ -80,12 +80,13 @@ useEffect(() => {
     const parsedClient = JSON.parse(clientRaw);
     setClient(parsedClient);
     if (parsedClient.pets && parsedClient.pets.length > 0) {
+      let petsArr = parsedClient.pets;
       // If pets are strings (IDs), fetch full pet objects
-      if (typeof parsedClient.pets[0] === 'string') {
+      if (typeof petsArr[0] === 'string') {
         // Only send valid 24-char ObjectID strings
-        const validPetIds = parsedClient.pets.filter((id: string) => typeof id === 'string' && id.length === 24);
+        const validPetIds = petsArr.filter((id: string) => typeof id === 'string' && id.length === 24);
         if (validPetIds.length === 0) {
-          setClientPets([]);        setSelectedPetId(null);
+          setClientPets([]); setSelectedPetId(null);
           return;
         }
         fetch(`${API_URL}/pets/byIds`, {
@@ -95,21 +96,30 @@ useEffect(() => {
         })
           .then((res) => res.json())
           .then((data) => {
-            setClientPets(Array.isArray(data) ? data : []);
-            if (Array.isArray(data) && data.length > 0) {
-              setSelectedPetId(data[0]._id);
+            // Filter only active pets
+            const activePets = Array.isArray(data) ? data.filter((pet: any) => pet.isActive !== false) : [];
+            setClientPets(activePets);
+            if (activePets.length > 0) {
+              setSelectedPetId(activePets[0]._id);
             } else {
               setSelectedPetId(null);
             }
-          })          .catch(() => {
+          })
+          .catch(() => {
             setClientPets([]);
             setSelectedPetId(null);
             setError('Failed to fetch pets.');
           });
       } else {
         // Already full pet objects
-        setClientPets(parsedClient.pets);
-        setSelectedPetId(parsedClient.pets[0]._id);
+        // Filter only active pets
+        const activePets = petsArr.filter((pet: any) => pet.isActive !== false);
+        setClientPets(activePets);
+        if (activePets.length > 0) {
+          setSelectedPetId(activePets[0]._id);
+        } else {
+          setSelectedPetId(null);
+        }
       }
     } else {
       setClientPets([]);
