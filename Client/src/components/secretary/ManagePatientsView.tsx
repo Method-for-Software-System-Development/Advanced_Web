@@ -156,22 +156,29 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
       alert("Failed to update pet. Please try again.");
     }
   };
-  
   // Memoized filtered patients list
   const filteredPatients = useMemo(() => {
     if (!searchTerm) {
       return patients;
     }
-    return patients.filter(patient =>
-      patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.street.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.postalCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.pets.some(pet => pet.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    
+    const searchTermLower = searchTerm.toLowerCase().trim();
+    
+    return patients.filter(patient => {
+      // Create a full name string for better name matching
+      const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+      
+      // Check if the search term matches any of the searchable fields
+      return fullName.includes(searchTermLower) ||
+             patient.firstName.toLowerCase().includes(searchTermLower) ||
+             patient.lastName.toLowerCase().includes(searchTermLower) ||
+             patient.email.toLowerCase().includes(searchTermLower) ||
+             patient.phone.toLowerCase().includes(searchTermLower) ||
+             patient.street.toLowerCase().includes(searchTermLower) ||
+             patient.city.toLowerCase().includes(searchTermLower) ||
+             patient.postalCode?.toLowerCase().includes(searchTermLower) ||
+             patient.pets.some(pet => pet.name.toLowerCase().includes(searchTermLower));
+    });
   }, [patients, searchTerm]);
   if (loading) return <div className="dark:text-gray-300">Loading patients...</div>;
   if (error) return <div className="text-red-600 dark:text-red-400">Error: {error}</div>;
