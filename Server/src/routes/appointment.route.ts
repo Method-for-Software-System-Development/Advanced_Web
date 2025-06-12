@@ -711,14 +711,18 @@ appointmentRouter.put("/:id", async (req: Request, res: Response) => {
 appointmentRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const { cancelReason } = req.body;
     
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid appointment ID" });
     }
 
+    const update: any = { status: AppointmentStatus.CANCELLED };
+    if (cancelReason) update.cancelReason = cancelReason;
+
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       id,
-      { status: AppointmentStatus.CANCELLED },
+      update,
       { new: true }
     ).populate('userId', 'firstName lastName email phone')
      .populate('petId', 'name type breed')

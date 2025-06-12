@@ -193,10 +193,14 @@ export const appointmentService = {
   },
 
   // Cancel appointment
-  async cancelAppointment(id: string): Promise<{ message: string; appointment: Appointment }> {
+  async cancelAppointment(id: string, cancelReason?: string): Promise<{ message: string; appointment: Appointment }> {
     try {
       const response = await fetch(`${API_BASE_URL}/appointments/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cancelReason ? { cancelReason } : {}),
       });
 
       if (!response.ok) {

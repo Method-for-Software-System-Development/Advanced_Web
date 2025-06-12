@@ -45,7 +45,7 @@ export interface IAppointment extends Document {
   updatedAt: Date;
   isEmergency?: boolean;
   emergencyReason?: string;
-
+  cancelReason?: string; // Reason for cancellation
 }
 
 const AppointmentSchema: Schema = new Schema({
@@ -111,6 +111,11 @@ const AppointmentSchema: Schema = new Schema({
   default: false 
 },
 emergencyReason: { 
+  type: String,
+  required: false,
+  maxLength: 500
+},
+cancelReason: {
   type: String,
   required: false,
   maxLength: 500
