@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Pet, Patient } from '../../../types';
+import { API_URL } from '../../../config/api';
 
 interface EmergencyAppointmentModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (emergencyReason: string) => void;
+  onConfirm: (emergencyReason: string, petId: string) => void;
   isSubmitting: boolean;
 }
 
@@ -15,6 +17,59 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
 }) => {
   const [reason, setReason] = useState("");
   const [checked, setChecked] = useState(false);
+  const [clientPets, setClientPets] = useState<Pet[]>([]);
+  const [client, setClient] = useState<Patient | null>(null);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    try {
+      const clientRaw = localStorage.getItem("client");
+      if (!clientRaw) return;
+      const parsedClient = JSON.parse(clientRaw);
+      setClient(parsedClient);
+      if (parsedClient.pets && parsedClient.pets.length > 0) {
+        let petsArr = parsedClient.pets;
+        if (typeof petsArr[0] === 'string') {
+          const validPetIds = petsArr.filter((id: string) => typeof id === 'string' && id.length === 24);
+          if (validPetIds.length === 0) {
+            setClientPets([]); setSelectedPetId(null);
+            return;
+          }
+          fetch(`${API_URL}/pets/byIds`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: validPetIds }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              const activePets = Array.isArray(data) ? data.filter((pet: any) => pet.isActive !== false) : [];
+              setClientPets(activePets);
+              if (activePets.length > 0) {
+                setSelectedPetId(activePets[0]._id);
+              } else {
+                setSelectedPetId(null);
+              }
+            })
+            .catch(() => {
+              setClientPets([]);
+              setSelectedPetId(null);
+            });
+        } else {
+          const activePets = petsArr.filter((pet: any) => pet.isActive !== false);
+          setClientPets(activePets);
+          if (activePets.length > 0) {
+            setSelectedPetId(activePets[0]._id);
+          } else {
+            setSelectedPetId(null);
+          }
+        }
+      } else {
+        setClientPets([]);
+        setSelectedPetId(null);
+      }
+    } catch {}
+  }, [open]);
 
   if (!open) return null;
 
@@ -37,7 +92,23 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
             Please arrive at the clinic immediately. Our staff will contact you right away.
           </p>
         </div>
-        <form onSubmit={e => { e.preventDefault(); onConfirm(reason); }} className="space-y-6">
+        {client && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Select Pet:</label>
+            <select
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              value={selectedPetId || ''}
+              onChange={e => setSelectedPetId(e.target.value)}
+              disabled={isSubmitting || clientPets.length === 0}
+            >
+              <option value="" disabled>Select a pet...</option>
+              {clientPets.map(pet => (
+                <option key={pet._id} value={pet._id}>{pet.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <form onSubmit={e => { e.preventDefault(); if(selectedPetId) onConfirm(reason, selectedPetId); }} className="space-y-6">
           <div>
             <textarea
               placeholder="Briefly describe what happened (optional)"
@@ -74,7 +145,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
             <button
               type="submit"
               className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
-              disabled={!checked || isSubmitting}
+              disabled={!checked || isSubmitting || !selectedPetId}
             >
               {isSubmitting ? "Sending..." : "Confirm Emergency"}
             </button>

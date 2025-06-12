@@ -227,15 +227,15 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   };
 
   // Add handleEmergencyAppointmentClient function
-  const handleEmergencyAppointmentClient = async (reasonFromModal?: string) => {
+  const handleEmergencyAppointmentClient = async (reasonFromModal?: string, petIdFromModal?: string) => {
     const clientRaw = localStorage.getItem("client");
     if (!clientRaw) {
       setError("No client info found.");
       return;
     }
     const client = JSON.parse(clientRaw);
-    // Use the first pet as default for emergency, or prompt user for pet selection if needed
-    const petId = client.pets && client.pets.length > 0 ? (typeof client.pets[0] === 'string' ? client.pets[0] : client.pets[0]._id) : null;
+    // Use selected pet from modal
+    const petId = petIdFromModal || (client.pets && client.pets.length > 0 ? (typeof client.pets[0] === 'string' ? client.pets[0] : client.pets[0]._id) : null);
     if (!petId) {
       setError("Please select a pet.");
       return;
@@ -456,9 +456,9 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
           open={showEmergencyModal}
           onClose={() => setShowEmergencyModal(false)}
           isSubmitting={isLoading}
-          onConfirm={async (reason: string) => {
+          onConfirm={async (reason, petId) => {
             setShowEmergencyModal(false);
-            await handleEmergencyAppointmentClient(reason);
+            await handleEmergencyAppointmentClient(reason, petId);
           }}
         />
       )}
