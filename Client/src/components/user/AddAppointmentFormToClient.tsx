@@ -277,13 +277,7 @@ useEffect(() => {
         type: formData.type as AppointmentType,
         description: formData.description?.trim() || 'No description provided',
         notes: formData.notes || '',
-        cost: formData.cost || 0,
-        // Add cancellationReason if status is CANCELLED
-        ...(formData.status === AppointmentStatus.CANCELLED && {
-          cancellationReason: formData.cancellationReason === 'Other'
-            ? (formData.cancellationReasonOther || '')
-            : (formData.cancellationReason || '')
-        })
+        cost: formData.cost || 0
       };
       
       const response = await appointmentService.createAppointment(appointmentData);
@@ -336,15 +330,7 @@ useEffect(() => {
           <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
         </div>
         <UserNavButton
-          label={
-            <span className="flex items-center">
-              {/* Back arrow SVG */}
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-              Return to My Upcoming Appointments
-            </span>
-          }
+          label="\u2190 Return to My Upcoming Appointments"
           onClick={onClose}
           className="!bg-[var(--color-wine)] !text-white !border !border-[var(--color-wine)] !hover:bg-[var(--color-cream)] !hover:text-[var(--color-wine)] !focus:ring-2 !focus:ring-offset-2 !focus:ring-[var(--color-wine)]"
         />
