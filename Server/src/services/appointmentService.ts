@@ -66,7 +66,12 @@ async function getActiveVets() {
   return Staff.find({ isActive: true, role: /veterinarian/i }).select("firstName lastName").lean();
 }
 
-
+/**
+ * Returns the appointment history for a specific pet.
+ */
+async function getAppointmentHistoryByPet(petId: string): Promise<IAppointment[]> {
+  return Appointment.find({ petId }).sort({ date: -1, time: -1 }).lean();
+}
 /** Returns all future appointments for a specific user. */
 async function getFutureAppointments(
   userId: string
@@ -189,5 +194,6 @@ export {
   getAppointmentsByPet,
   findAvailableVetForEmergency,
   getTakenTimesForDay,
-  getActiveVets
+  getActiveVets,
+  getAppointmentHistoryByPet
 };

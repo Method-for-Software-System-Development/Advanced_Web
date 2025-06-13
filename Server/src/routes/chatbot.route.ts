@@ -1,565 +1,441 @@
-import express from "express";
+/* ────────────────────────────────────────────────────────────────────────────
+   FurEver Friends  - Chatbot Route  (TypeScript, fully documented in English)
+──────────────────────────────────────────────────────────────────────────── */
+
+import express, { Request, Response } from "express";
 import axios from "axios";
-import { authMiddleware, AuthRequest } from "../services/authMiddleware";
+
 import {
   createAppointment,
   cancelAppointment,
   getFutureAppointments,
   getTakenTimesForDay,
   getActiveVets,
+  getAppointmentHistoryByPet,
 } from "../services/appointmentService";
-import { getPetHistory } from "../services/treatmentService";
-import User from "../models/userSchema";
-import Pet from "../models/petSchema";
-import { IPet } from "../models/petSchema"
-import Staff from "../models/staffSchema"; 
-
-// Helper function to format a Date object to YYYY-MM-DD string in local time
-function formatDateToYYYYMMDD(date: Date): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
+import { authMiddleware, AuthRequest } from "../services/authMiddleware";
+import User  from "../models/userSchema";
+import { IPet }                 from "../models/petSchema";
+import Staff from "../models/staffSchema";
+import { parseUserDate } from "../utils/dateParse";  
 const router = express.Router();
+
+/* ─────────────────────────── 1. Utility helpers ─────────────────────────── */
+
+/** Format a Date as local-time YYYY-MM-DD (no UTC shift). */
+const fmtDate = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+/** Runtime guard for populated pets. */
+const isPet = (x: unknown): x is IPet =>
+  typeof x === "object" && x !== null && "name" in x;
+
+/* ─────────────────────────── 2. Gemini helper ───────────────────────────── */
 
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || "").trim();
 
-
-const NUMBERED_MENU = [
-  { label: "Book appointment", display: "Book appointment" },
-  { label: "Cancel appointment", display: "Cancel appointment" },
-  { label: "Show history", display: "Show history" },
-  { label: "Show clinic hours", display: "Show clinic hours" },
-  { label: "Show contact details", display: "Show contact details" },
-  { label: "Emergency", display: "Emergency" },
-];
-
-async function callGemini(prompt: string, retries = 3): Promise<string> {
-  const systemPrompt =
-    "You are Kayo, the friendly virtual assistant for FurEver Friends – Pet Clinic in Karmiel, Israel.\n" +
-    "Always answer as Kayo, in a warm and welcoming way, and never mention that you are an AI model.\n" +
-    "Here is some background about the clinic:\n" +
-    "At FurEver Friends, we care for your pets as if they were our own. With years of experience and a deep love for animals, our expert team of veterinarians and caregivers is dedicated to delivering compassionate, personalized care tailored to each pet’s unique needs. Whether it’s a routine check-up, preventive care, or specialized treatment, we strive to create a calm, welcoming environment where both pets and their owners feel safe and understood. We believe in building long-term relationships based on trust, empathy, and medical excellence—because your pet deserves nothing less. Schedule a free introductory consultation or your first appointment today.\n" +
-    "The user asked: \"" + prompt + "\"\n" +
-    "Please answer as Kayo, in a brief, clear, and friendly way (maximum 3 sentences).";
-
+/** Minimal wrapper around Gemini Flash with 503 retry. */
+async function askGemini(prompt: string, retries = 3): Promise<string> {
+  const system = `You are Kayo, the friendly assistant for FurEver Friends.`
+               + ` Answer briefly and warmly.\nUser: "${prompt}"`;
   try {
     const { data } = await axios.post(
       `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text: systemPrompt }] }] }
+      { contents: [{ parts: [{ text: system }] }] }
     );
-    return (
-      data.candidates?.[0]?.content?.parts?.[0]?.text ??
-      "Sorry, I didn't understand."
-    );
+    return data.candidates?.[0]?.content?.parts?.[0]?.text
+        ?? "Sorry, I didn't understand.";
   } catch (err: any) {
-    if (retries > 0 && err.response?.status === 503) {
-      await new Promise((r) => setTimeout(r, 1000));
-      return callGemini(prompt, retries - 1);
-    }
+    if (retries && err.response?.status === 503) return askGemini(prompt, retries - 1);
     throw err;
   }
 }
 
+/* ─────────────────────────── 3. Main-menu helpers ───────────────────────── */
 
-function getNumberedMenuText() {
-  return (
-    "Please choose an option by typing the corresponding number:\n" +
-    NUMBERED_MENU.map((opt, i) => `${i + 1}. ${opt.display}`).join("\n") +
-    "\n\nTo exit, type 'exit'.\nFor any other question, just ask."
-  );
-}
-const sessionMap = new Map<string, any>();
-/**
- * Chatbot main endpoint.
- * Supports both guests and logged-in users (JWT optional).
- * Some actions (appointments/history) require authentication; others don't.
- */
-router.post("/", async (req, res, next) => {
-  // Parse menu numbers
-  let { message, petId, date, time, type, description } = req.body;
-  let normalizedMessage = message;
- 
-// --- Handle "help" requests globally ---
-const helpKeywords = [
-  "help", "support", "i need help", "assistance"
+const MENU = [
+  { label: "Book appointment",   display: "Book appointment" },
+  { label: "Cancel appointment", display: "Cancel appointment" },
+  { label: "Show history",       display: "Show history" },
+  { label: "Show clinic hours",  display: "Show clinic hours" },
+  { label: "Show contact details", display: "Show contact details" },
+  { label: "Emergency",          display: "Emergency" },
 ];
-if (helpKeywords.some(kw => normalizedMessage.toLowerCase().includes(kw))) {
-  return res.json({
-    reply:
-      "Of course! Here’s what I can help you with:\n" +
-      getNumberedMenuText() +
-      "\nTo perform any of these actions, simply type the number, select from the menu, or type 'menu' at any time to see your options. For any other question, just ask!",
-    menu: [],
-  });
+
+const numberedMenu = () =>
+  "Please choose an option by typing the corresponding number:\n" +
+  MENU.map((o, i) => `${i + 1}. ${o.display}`).join("\n") +
+  "\n\nTo exit, type 'exit'.\nFor any other question, just ask.";
+
+/** In-memory per-user wizard state. */
+const sessions = new Map<string, any>();
+
+/* ─────────────────────────── 4. Lightweight JWT parse ───────────────────── */
+
+async function parseJwt(req: Request, res: Response): Promise<string | undefined> {
+  if (!req.headers.authorization?.startsWith("Bearer")) return undefined;
+  await new Promise<void>((resolve) =>
+    authMiddleware(req as AuthRequest, res, () => resolve())
+  );
+  return (req as AuthRequest).user?.userId;
 }
 
-  // Always parse JWT if exists
-  let userId: string | undefined = undefined;
-  if (req.headers.authorization?.startsWith("Bearer ")) {
-    // Reuse your existing middleware as a function
-    await new Promise<void>((resolve) => {
-      authMiddleware(req as AuthRequest, res, (result: any) => {
-        if ((req as AuthRequest).user) userId = (req as AuthRequest).user?.userId;
-        resolve();
-      });
-    });
-  }
-  const session = userId ? sessionMap.get(userId) : undefined;
+/* ─────────────────────────── 5. Router handler ──────────────────────────── */
 
-  // Only map 1-6 to menu if not in a session flow
-  if (!session || session.step === "idle") {
-    const idx = parseInt(message, 10) - 1;
-    if (!isNaN(idx) && idx >= 0 && idx < NUMBERED_MENU.length) {
-      normalizedMessage = NUMBERED_MENU[idx].label;
+router.post("/", async (req, res) => {
+  /* 5.1  Basic message retrieval */
+  let text = String(req.body?.message ?? "").trim();
+  if (!text) return res.json({ reply: numberedMenu(), menu: [] });
+
+  /* 5.2  Identify user (optional) + current session */
+  const uid = await parseJwt(req, res);
+  const s   = uid ? sessions.get(uid) : undefined;
+
+  /* 5.3  Global commands – valid at ANY point */
+  const lower = text.toLowerCase();
+  if (["menu", "main menu"].includes(lower)) {
+    if (uid) sessions.delete(uid);
+    return res.json({ reply: numberedMenu(), menu: [] });
+  }
+  if (lower === "exit") {
+    if (uid) sessions.delete(uid);
+    return res.json({ reply: "You have exited the menu. Type a number to begin.", menu: [] });
+  }
+  if (["help", "support", "assistance"].some((kw) => lower.includes(kw)))
+    return res.json({ reply: numberedMenu(), menu: [] });
+
+  /* ─────────────────────── 6. ACTIVE WIZARDS  ─────────────────────────── */
+
+  /* ===== HISTORY WIZARD – Step choosePet ===== */
+  if (s?.step === "choosePetForHistory") {
+    const idx  = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+    const pets = s.pets as IPet[];
+    if (idx < 0 || idx >= pets.length)
+      return res.json({ reply: "Invalid number. Try again:", menu: [] });
+
+    const pet  = pets[idx];
+    const past = (await getAppointmentHistoryByPet(String(pet._id)))
+                   .filter((a) => a.date < new Date());
+    if (!past.length) {
+      sessions.delete(uid!);
+      return res.json({ reply: `No past appointments for ${pet.name}.`, menu: [] });
     }
-  }
 
-  if (userId && sessionMap.has(userId)) {
-    const session = sessionMap.get(userId);
-        /* ------------------------------------------------------------
- *  STEP 2: user typed a date  ➜  show free time-slots
- * ---------------------------------------------------------- */
-    if (session?.step === "chooseDate") {
-      // --- Parse date:  YYYY-MM-DD  |  DD/MM  |  MM/DD  ---
-      let pickedDate: Date | null = null;
-
-      // YYYY-MM-DD
-      if (/^\d{4}-\d{2}-\d{2}$/.test(normalizedMessage)) {
-        const [year, month, day] = normalizedMessage.split('-').map(Number);
-        pickedDate = new Date(year, month - 1, day); // Parses as local midnight
-      }
-
-// DD/MM  or  MM/DD  
-if (!pickedDate || isNaN(pickedDate.getTime())) {
-  const m = normalizedMessage.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
-  if (m) {
-    const [ , a, b ] = m.map(Number);
-    const yyyy = new Date().getFullYear();
-    pickedDate = new Date(yyyy, a - 1, b); // DD/MM
-    if (isNaN(pickedDate.getTime())) {
-      pickedDate = new Date(yyyy, b - 1, a); // MM/DD
-    }
-  }
-}
-
-if (!pickedDate || isNaN(pickedDate.getTime())) {
-  return res.json({
-    reply: "Date format not recognised. Try MM/DD, DD/MM or YYYY-MM-DD:",
-    menu: [],
-  });
-}
-
-
-  // 2. build list of free 30-min slots (08:00–19:30)
-  const takenTimes = await getTakenTimesForDay(pickedDate);        // ← add helper in appointmentService
-  const allSlots = Array.from({ length: 24 }, (_, i) => {
-    const hour = 8 + Math.floor(i / 2); // 08..19
-    const minute = i % 2 === 0 ? "00" : "30";
-    let h = hour % 12 === 0 ? 12 : hour % 12;
-    const ampm = hour < 12 ? "AM" : "PM";
-    return `${h.toString().padStart(2, "0")}:${minute} ${ampm}`;
-  });
-
-  const freeSlots = allSlots.filter(t => !takenTimes.includes(t));
-
-  if (!freeSlots.length) {
+    sessions.set(uid!, { step: "chooseAppointmentForDetails", appointments: past, pet });
     return res.json({
-      reply: "No available times that day, please choose another date:",
+      reply:
+        `Recent appointments for ${pet.name}:\n` +
+        past
+          .slice(0, 5)
+          .map((a, i) => `${i + 1}. ${fmtDate(a.date)}: ${a.type} (${a.status})`)
+          .join("\n") +
+        "\n(Type the number for details)",
       menu: [],
     });
   }
 
-  // 3. save state + reply
-  sessionMap.set(userId, { ...session, step: "chooseTime", date: pickedDate, freeSlots });
-  return res.json({
-    reply:
-      `Available times on ${formatDateToYYYYMMDD(pickedDate!)}:
-` +
-      freeSlots.map((t, i) => `${i + 1}. ${t}`).join("\n") +
-      "\n(Type the number of your preferred time)",
-    menu: [],
-  });
-}
+  /* ===== HISTORY WIZARD – Step chooseAppointment ===== */
+  if (s?.step === "chooseAppointmentForDetails") {
+    const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+    const { appointments, pet } = s as {
+      appointments: Awaited<ReturnType<typeof getAppointmentHistoryByPet>>;
+      pet: IPet;
+    };
+    if (idx < 0 || idx >= appointments.length)
+      return res.json({ reply: "Invalid number. Try again:", menu: [] });
 
-/* ------------------------------------------------------------
- *  STEP 3: user picked a time  ➜  choose vet
- * ---------------------------------------------------------- */
-    if (session?.step === "chooseTime") {
-      const idx = parseInt(normalizedMessage, 10) - 1;
-      const { freeSlots, date, petId, petName } = session;
+    const appt = appointments[idx];
+    const vet  = await Staff.findById(appt.staffId);
+    sessions.delete(uid!);
 
-      if (isNaN(idx) || idx < 0 || idx >= freeSlots.length) {
-        return res.json({
-          reply: "Invalid choice. Please type the number of the desired time from the list.",
-          menu: [],
-        });
-      }
-
-      const timeChosen = freeSlots[idx];
-
-      // Fetch active vets for selection
-      const vets = await getActiveVets();
-      if (!vets.length) {
-        return res.json({ reply: "No veterinarians available.", menu: [] });
-      }
-
-      // Update session and ask user to select vet
-      sessionMap.set(userId, { ...session, step: "chooseVet", time: timeChosen, vets });
-
-      return res.json({
-        reply: `Please choose a veterinarian:\n` +
-          vets.map((v: any, i: number) => `${i + 1}. ${v.firstName} ${v.lastName}`).join("\n") +
-          "\n(Type the number of the vet you prefer)",
-        menu: [],
-      });
-    }
-/* ------------------------------------------------------------
- *  STEP 4: user picked a vet  ➜  ask for reason
- * ---------------------------------------------------------- */
-    if (session?.step === "chooseVet") {
-      const idx = parseInt(normalizedMessage, 10) - 1;
-      const { vets } = session;
-
-      if (isNaN(idx) || idx < 0 || idx >= vets.length) {
-        return res.json({ reply: "Invalid choice. Please type the vet number from the list.", menu: [] });
-      }
-
-      const vet = vets[idx];
-      sessionMap.set(userId, { ...session, step: "chooseReason", vetId: vet._id });
-      return res.json({
-        reply: "Please provide a brief reason for the appointment:",
-        menu: [],
-      });
-    }
-/* ------------------------------------------------------------
- *  STEP 5: user entered reason  ➜  ask for confirmation
- * ---------------------------------------------------------- */
-    if (session?.step === "chooseReason") {
-      const { petId, date, time, vetId, pets } = session;
-      const petName = pets?.find((p: any) => p._id.toString() === petId.toString())?.name || "your pet";
-      const reason = normalizedMessage?.trim();
-      if (!reason) {
-        return res.json({ reply: "Please provide a reason for the appointment.", menu: [] });
-      }
-
-      // Store details in session and ask for confirmation
-      sessionMap.set(userId, { 
-        ...session, 
-        step: "confirmBooking", 
-        appointmentDetails: { userId, petId, vetId, date, time, type: "wellness_exam", description: reason, petName }
-      });
-
-      return res.json({
-        reply: `You are about to book an appointment for ${petName} on ${formatDateToYYYYMMDD(date)} at ${time} for: ${reason}.\nAre you sure? Type 'accept' to confirm or 'exit' to cancel.`,
-        menu: [],
-      });
-    }
-
-/* ------------------------------------------------------------
- *  STEP 6: user confirms booking  ➜  create appointment
- * ---------------------------------------------------------- */
-    if (session?.step === "confirmBooking") {
-      const { appointmentDetails } = session;
-
-      if (!appointmentDetails) {
-        sessionMap.delete(userId);
-        return res.json({
-            reply: "Session error: Could not retrieve appointment details. Please start over.",
-            menu: [],
-        });
-      }
-      
-      const { userId: storedUserId, petId, vetId, date, time, type, description, petName } = appointmentDetails;
-
-      if (normalizedMessage.toLowerCase() === "accept") {
-        await createAppointment(storedUserId, petId, vetId, date, time, type, description);
-        sessionMap.delete(userId);
-        return res.json({
-          reply: `✅ Appointment booked for ${petName} on ${formatDateToYYYYMMDD(date)} at ${time}.`,
-          menu: [],
-        });
-      } else if (normalizedMessage.toLowerCase() === "exit") {
-        sessionMap.delete(userId);
-        return res.json({
-          reply: "Booking process aborted.",
-          menu: [],
-        });
-      } else {
-        return res.json({
-          reply: "Please type 'accept' to confirm or 'exit' to cancel.",
-          menu: [],
-        });
-      }
-    }
-
-
-    // If user is currently in pet selection step
-    if (session.step === "choosePet") {
-      const selectedIdx = parseInt(normalizedMessage, 10) - 1;
-      // Validate input
-      if (isNaN(selectedIdx) || selectedIdx < 0 || selectedIdx >= session.pets.length) {
-        return res.json({
-          reply: "Invalid choice. Please type the number of your pet from the list.",
-          menu: [],
-        });
-      }
-  
-
-      // Get selected pet
-      const chosenPet = session.pets[selectedIdx];
-
-      // Update session for next step
-      sessionMap.set(userId, {
-        ...session,
-        step: "chooseDate",
-        petId: chosenPet._id,
-        petName: chosenPet.name,
-      });
-
-      return res.json({
-        reply: `Great! You selected ${chosenPet.name}. Please enter a date for the appointment (MM/DD or YYYY-MM-DD):`,
-        menu: [],
-      });
-    } // End of original content for this if block
-
-    // MOVED AND MODIFIED CANCELLATION STEPS
-    //step 2: user chose an appointment to cancel
-    if (session?.step === "chooseAppointmentToCancel") {
-        const idx = parseInt(normalizedMessage, 10) - 1;
-        const { appts } = session;
-        if (isNaN(idx) || idx < 0 || !appts || idx >= appts.length) { // Added !appts check
-            return res.json({
-                reply: "Invalid choice. Please type the number of the appointment to cancel.",
-                menu: [],
-            });
-        }
-        const selectedAppt = appts[idx];
-        sessionMap.set(userId, {
-            ...session, // Preserve other session data
-            step: "confirmCancelAppointment",
-            selectedAppt
-        });
-        return res.json({
-            reply:
-                `You chose to cancel the appointment on ${formatDateToYYYYMMDD(selectedAppt.date)} at ${selectedAppt.time}.\n` +
-                "Are you sure? Type 'accept' to confirm or 'exit' to cancel.",
-            menu: [],
-        });
-    }
-
-    //step 3: user confirmed cancellation
-    if (session?.step === "confirmCancelAppointment") {
-        const { selectedAppt } = session; 
-
-        if (!selectedAppt || !selectedAppt._id) { // Added check for selectedAppt and selectedAppt._id
-            sessionMap.delete(userId);
-            return res.json({
-                reply: "Session error: Could not identify the appointment to cancel. Please start over.",
-                menu: [],
-            });
-        }
-
-        if (normalizedMessage.toLowerCase() === "accept") {
-            const ok = await cancelAppointment(userId, selectedAppt._id);
-            sessionMap.delete(userId);
-            return res.json({
-                reply: ok
-                    ? "Appointment cancelled."
-                    : "Could not cancel the appointment (please try again).",
-                menu: [],
-            });
-        } else if (normalizedMessage.toLowerCase() === "exit") {
-            sessionMap.delete(userId);
-            return res.json({
-                reply: "Cancellation process aborted.",
-                menu: [],
-            });
-        } else {
-            return res.json({
-                reply: "Please type 'accept' to confirm or 'exit' to cancel.",
-                menu: [],
-            });
-        }
-    }
-  } // End of if (userId && sessionMap.has(userId))
-
-  // The original blocks for chooseAppointmentToCancel and confirmCancelAppointment (previously around here) are now moved above.
-  // Continue with the code that followed them.
-
-  // Exit command
-  if (normalizedMessage.toLowerCase() === "exit") {
     return res.json({
-      reply: "You have exited the menu. To start over, type 'menu'.",
+      reply:
+        `Appointment details for ${pet.name}:\n` +
+        `Treating Vet: ${vet ? `${vet.firstName} ${vet.lastName}` : "Unknown"}\n` +
+        `Visit Type:   ${appt.type}\n` +
+        `Cost:        $${appt.cost ?? "-"}\n` +
+        `Date:         ${fmtDate(appt.date)}\n` +
+        `Description:  ${appt.description || "-"}\n` +
+        `Notes:        ${appt.notes || "-"}`,
       menu: [],
     });
   }
 
-  // ================== Actions that require login ==================
-  if (
-    normalizedMessage === "Book appointment" ||
-    (normalizedMessage === "Book now" && petId && date && time && type) ||
-    normalizedMessage === "Cancel appointment" ||
-    normalizedMessage.startsWith("Cancel ") ||
-    normalizedMessage === "Show history"
-  ) {
-    if (!userId) {
+  /* ─────────────────── 7. MAP MAIN-MENU NUMBERS (1-6) ──────────────────── */
+  if (!s) {
+    const n = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+    if (n >= 0 && n < MENU.length) text = MENU[n].label;
+  }
+
+  /* ────────────────── 8. One-shot informational commands ───────────────── */
+  if (text === "Show clinic hours")
+    return res.json({ reply: "Opening hours:\nSun-Thu 08:00–20:00\nFriday 08:00–13:00\nSaturday Closed", menu: [] });
+
+  if (text === "Show contact details")
+    return res.json({
+      reply:
+        "FurEver Friends – 51 Snunit St, Karmiel 🇮🇱\n" +
+        "Phone: +972 4-123-4567\n" +
+        "Email: info@fureverfriends.com",
+      menu: [],
+    });
+
+  if (text === "Emergency")
+    return res.json({
+      reply: "🚑  For emergencies call +972 4-123-4567 immediately!",
+      menu: [],
+    });
+
+  /* ────────────────────── 9. HISTORY ENTRY POINT ───────────────────────── */
+  if (text === "Show history") {
+    if (!uid) return res.json({ reply: "Please log in to view history.", menu: [] });
+
+    const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
+    const pets = (user?.pets ?? []).filter(isPet);
+    if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
+
+    /* Single pet → skip choosePet step. */
+    if (pets.length === 1) {
+      const pet  = pets[0];
+      const past = (await getAppointmentHistoryByPet(String(pet._id)))
+                     .filter((a) => a.date < new Date());
+      if (!past.length)
+        return res.json({ reply: `No past appointments for ${pet.name}.`, menu: [] });
+
+      sessions.set(uid, { step: "chooseAppointmentForDetails", appointments: past, pet });
       return res.json({
-        reply: "Please log in to perform this action.",
+        reply:
+          `Recent appointments for ${pet.name}:\n` +
+          past
+            .slice(0, 5)
+            .map((a, i) => `${i + 1}. ${fmtDate(a.date)}: ${a.type} (${a.status})`)
+            .join("\n") +
+          "\n(Type the number for details)",
         menu: [],
       });
     }
 
-   /** runtime guard – narrows unknown  IPet */
-function isPopulatedPet(p: unknown): p is IPet {
-  return typeof p === "object" && p !== null && "name" in p;
-}
-
-/* ---------- Book-appointment – step 1 ---------- */
-if (normalizedMessage === "Book appointment") {
-  if (!userId) {
-    return res.json({ reply: "Please log in to book an appointment.", menu: [] });
-  }
-
-  // pull user with typed, populated pets
-  const user = await User
-    .findById(userId)
-    .populate<{ pets: IPet[] }>("pets");
-
-  const pets = (user?.pets ?? []).filter(isPopulatedPet);
-
-  if (!pets.length) {
+    /* Multiple pets → ask user. */
+    sessions.set(uid, { step: "choosePetForHistory", pets });
     return res.json({
-      reply: "You have no registered pets. Please add one first.",
+      reply:
+        "Which pet's history would you like?\n" +
+        pets.map((p, i) => `${i + 1}. ${p.name}`).join("\n") +
+        "\n(Type the number)",
       menu: [],
     });
   }
 
-  /* one pet → skip selection */
-  if (pets.length === 1) {
-    const [pet] = pets;
-    sessionMap.set(userId, {
-      step: "chooseDate",
-      petId: pet._id,
-      petName: pet.name,
-      pets,
-    });
-    return res.json({
-      reply: `Pet selected (${pet.name}). Enter a date (MM/DD or YYYY-MM-DD):`,
-      menu: [],
-    });
-  }
+  /* ───────────────── 10. BOOK & CANCEL WIZARDS (FULL CODE) ─────────────── */
 
-  /* multiple pets → ask user */
-  const options = pets.map((p, i) => `${i + 1}. ${p.name}`).join("\n");
-  sessionMap.set(userId, { step: "choosePet", pets });
-  return res.json({
-    reply: `Choose a pet:\n${options}\n(Type the number)`,
-    menu: [],
-  });
-}
+  /* ==========================  BOOK WIZARD  ========================== */
+  if (text === "Book appointment") {
+    if (!uid) return res.json({ reply: "Please log in to book an appointment.", menu: [] });
 
-  //setp 1: user wants to cancel an appointment
-if (normalizedMessage === "Cancel appointment") {
-    const appts = await getFutureAppointments(userId);
-    if (!appts.length) {
-        return res.json({
-            reply: "You have no upcoming appointments to cancel.",
-            menu: [],
-        });
-    }
-    // when there are multiple appointments, ask user to choose one
-    sessionMap.set(userId, { step: "chooseAppointmentToCancel", appts });
-    const menuText = appts.map( // Renamed 'menu' to 'menuText' to avoid conflict with res.json({ menu: [] })
-        (a, idx) =>
-            `${idx + 1}. ${formatDateToYYYYMMDD(a.date)} at ${a.time}` // استخدم formatDateToYYYYMMDD
-    ).join("\n"); // Ensure this is a single backslash for newline
+    const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
+    const pets = (user?.pets ?? []).filter(isPet);
+    if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
 
-    return res.json({
-        reply: `Please choose an appointment to cancel:\n${menuText}\n(Type the number)`,
-        menu: [],
-    });
-}
-    // Show pet history
-    if (normalizedMessage === "Show history") {
-      if (!petId) {
-        return res.json({
-          reply: "Please provide your Pet ID.",
-          menu: [],
-        });
-      }
-      const treatments = await getPetHistory(petId);
-      if (!treatments.length) {
-        return res.json({
-          reply: "No treatment history found for this pet.",
-          menu: [],
-        });
-      }
+    /* one pet → skip choosePet */
+    if (pets.length === 1) {
+      const [pet] = pets;
+      sessions.set(uid, { step: "chooseDate", petId: pet._id, petName: pet.name, pets });
       return res.json({
-        reply: treatments
-          .slice(0, 3)
-          .map(
-            (t) =>
-              `${formatDateToYYYYMMDD(t.visitDate)}: ` + // استخدم formatDateToYYYYMMDD
-              `${t.treatmentType} – ${t.notes}`
-          )
-          .join("\n"), // Ensure this is a single backslash for newline
+        reply: `Pet selected (${pet.name}). Enter a date (MM/DD or YYYY-MM-DD):`,
         menu: [],
       });
     }
+
+    /* multiple pets */
+    sessions.set(uid, { step: "choosePet", pets });
+    return res.json({
+      reply: "Choose a pet:\n" +
+             pets.map((p, i) => `${i + 1}. ${p.name}`).join("\n") +
+             "\n(Type the number)",
+      menu: [],
+    });
   }
 
-  // ================== Actions open for all ==================
- // 4. Static answers (hours / contact / emergency)
-if (normalizedMessage === "Show clinic hours") {
-  return res.json({
-    reply:
-      "Opening hours:\n" +
-      "Sun-Thu 08:00–20:00\n" +
-      "Friday 08:00–13:00\n" +
-      "Saturday Closed",
-    menu: []               // ← no quick-reply buttons
-  });
-}
+  /* choosePet → chooseDate */
+  if (s?.step === "choosePet") {
+    const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+    const pets: IPet[] = s.pets;
+    if (idx < 0 || idx >= pets.length)
+      return res.json({ reply: "Invalid number. Try again:", menu: [] });
 
-if (normalizedMessage === "Show contact details") {
-  return res.json({
-    reply:
-      "FurEver Friends – 51 Snonit St, Karmiel 🇮🇱\n" +
-      "Phone: +972 4-123-4567\n" +
-      "Email: info@fureverfriends.com",
-    menu: []               // ← no quick-reply buttons
-  });
-}
-
-if (normalizedMessage === "Emergency") {
-  return res.json({
-    reply: "🚑  For emergencies call +972 4-123-4567 immediately!",
-    menu: []               // ← no quick-reply buttons
-  });
-}
-
-  if (normalizedMessage === "Main menu" || normalizedMessage === "menu") {
-    return res.json({ reply: getNumberedMenuText(), menu: [] });
+    const pet = pets[idx];
+    sessions.set(uid!, { step: "chooseDate", petId: pet._id, petName: pet.name, pets });
+    return res.json({
+      reply: `Great! You selected ${pet.name}. Please enter a date (MM/DD or YYYY-MM-DD):`,
+      menu: [],
+    });
   }
 
-  // ================== Fallback to Gemini AI ==================
-  try {
-    const aiReply = await callGemini(normalizedMessage);
-    res.json({ reply: aiReply, menu: [] });
-  } catch (err: any) {
-    console.error(
-      "Gemini API error:",
-      err.response?.data || err.message || err
-    );
-    res
-      .status(500)
-      .json({ reply: "Service busy – please try again shortly." });
+  /* chooseDate → chooseTime */
+  if (s?.step === "chooseDate") {
+    const pickedDate = parseUserDate(text);
+
+  if (!pickedDate) {
+    return res.json({
+      reply: "Date format not recognised. Try MM/DD, DD/MM, or YYYY-MM-DD:",
+      menu: [],
+    });
   }
+   const today = new Date();                     // now
+  today.setHours(0, 0, 0, 0);                   // strip time
+  if (pickedDate < today) {
+    return res.json({
+      reply: "Please choose a date from today onwards (no past dates).",
+      menu: [],
+    });
+  }
+    const taken = await getTakenTimesForDay(pickedDate);
+    const all   = Array.from({ length: 24 }, (_, i) => {
+      const hr = 8 + Math.floor(i / 2);         // 08-19
+      const mn = i % 2 ? "30" : "00";
+      const hh = hr % 12 === 0 ? 12 : hr % 12;
+      const am = hr < 12 ? "AM" : "PM";
+      return `${String(hh).padStart(2, "0")}:${mn} ${am}`;
+    });
+    const free = all.filter((t) => !taken.includes(t));
+    if (!free.length)
+      return res.json({ reply: "No available times that day. Choose another date:", menu: [] });
+
+    sessions.set(uid!, { ...s, step: "chooseTime", date: pickedDate, freeSlots: free });
+    return res.json({
+      reply:
+        `Available times on ${fmtDate(pickedDate)}:\n` +
+        free.map((t, i) => `${i + 1}. ${t}`).join("\n") +
+        "\n(Type the number)",
+      menu: [],
+    });
+  }
+
+  /* chooseTime → chooseVet */
+  if (s?.step === "chooseTime") {
+    const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+    const { freeSlots, date, petId, petName, pets } = s;
+    if (idx < 0 || idx >= freeSlots.length)
+      return res.json({ reply: "Invalid number. Try again:", menu: [] });
+
+    const time = freeSlots[idx];
+    const vets = await getActiveVets();
+    if (!vets.length) return res.json({ reply: "No veterinarians available.", menu: [] });
+
+    sessions.set(uid!, { step: "chooseVet", date, time, petId, petName, vets, pets });
+    return res.json({
+      reply:
+        "Choose a veterinarian:\n" +
+        vets.map((v: any, i: number) => `${i + 1}. ${v.firstName} ${v.lastName}`).join("\n") +
+        "\n(Type the number)",
+      menu: [],
+    });
+  }
+
+  /* chooseVet → chooseReason */
+  if (s?.step === "chooseVet") {
+    const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+    const { vets } = s;
+    if (idx < 0 || idx >= vets.length)
+      return res.json({ reply: "Invalid number. Try again:", menu: [] });
+
+    const vet = vets[idx];
+    sessions.set(uid!, { ...s, step: "chooseReason", vetId: vet._id });
+    return res.json({ reply: "Briefly describe the reason for the visit:", menu: [] });
+  }
+
+  /* chooseReason → confirmBooking */
+  if (s?.step === "chooseReason") {
+    const reason = text.trim();
+    if (!reason) return res.json({ reply: "Please enter a reason:", menu: [] });
+
+    sessions.set(uid!, { ...s, step: "confirmBooking", description: reason });
+    const { petName, date, time } = s;
+    return res.json({
+      reply:
+        `You are about to book an appointment for ${petName} on ${fmtDate(date)} at ${time}.\n` +
+        `Reason: ${reason}\nType 'accept' to confirm or 'exit' to cancel.`,
+      menu: [],
+    });
+  }
+
+  /* confirmBooking → create appointment */
+  if (s?.step === "confirmBooking") {
+    if (lower === "accept") {
+      const { petId, vetId, date, time, description } = s;
+      await createAppointment(uid!, petId, vetId, date, time, "wellness_exam", description);
+      sessions.delete(uid!);
+      return res.json({ reply: "✅ Appointment booked.", menu: [] });
+    }
+    if (lower === "exit") {
+      sessions.delete(uid!);
+      return res.json({ reply: "Booking process aborted.", menu: [] });
+    }
+    return res.json({ reply: "Type 'accept' to confirm or 'exit' to cancel.", menu: [] });
+  }
+
+  /* ======================== CANCEL WIZARD ========================= */
+
+  /* entry-point */
+  if (text === "Cancel appointment") {
+    if (!uid) return res.json({ reply: "Please log in first.", menu: [] });
+
+    const upcoming = await getFutureAppointments(uid);
+    if (!upcoming.length)
+      return res.json({ reply: "You have no upcoming appointments to cancel.", menu: [] });
+
+    sessions.set(uid, { step: "chooseAppointmentToCancel", appts: upcoming });
+    return res.json({
+      reply:
+        "Which appointment would you like to cancel?\n" +
+        upcoming
+          .map((a, i) => `${i + 1}. ${fmtDate(a.date)} at ${a.time}`)
+          .join("\n") +
+        "\n(Type the number)",
+      menu: [],
+    });
+  }
+
+  /* chooseAppointmentToCancel → confirmCancelAppointment */
+  if (s?.step === "chooseAppointmentToCancel") {
+    const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+    const { appts } = s;
+    if (idx < 0 || idx >= appts.length)
+      return res.json({ reply: "Invalid number. Try again:", menu: [] });
+
+    const appt = appts[idx];
+    sessions.set(uid!, { step: "confirmCancelAppointment", selectedAppt: appt });
+    return res.json({
+      reply:
+        `You chose to cancel the appointment on ${fmtDate(appt.date)} at ${appt.time}.\n` +
+        "Type 'accept' to confirm or 'exit' to abort.",
+      menu: [],
+    });
+  }
+
+  /* confirmCancelAppointment → update DB */
+  if (s?.step === "confirmCancelAppointment") {
+    if (lower === "accept") {
+      const ok = await cancelAppointment(uid!, s.selectedAppt._id);
+      sessions.delete(uid!);
+      return res.json({ reply: ok ? "Appointment cancelled." : "Could not cancel.", menu: [] });
+    }
+    if (lower === "exit") {
+      sessions.delete(uid!);
+      return res.json({ reply: "Cancellation aborted.", menu: [] });
+    }
+    return res.json({ reply: "Type 'accept' to confirm or 'exit' to abort.", menu: [] });
+  }
+
+  /* ───────────────────────── 11. GEMINI FALLBACK ───────────────────────── */
+  const ai = await askGemini(text);
+  return res.json({ reply: ai, menu: [] });
 });
 
 export default router;
