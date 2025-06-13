@@ -285,7 +285,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
               onClick={() => setShowAddForm(true)}
               className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
             >
-              Add New Appointment
+              + Add New Appointment
             </button>
             <button
               type="button"
