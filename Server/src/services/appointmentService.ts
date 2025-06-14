@@ -9,10 +9,26 @@
 import { Types } from "mongoose";
 import Appointment, {
   IAppointment,
-  AppointmentStatus,
+  AppointmentStatus,AppointmentType
 } from "../models/appointmentSchema";
 import Staff, { IStaff, StaffRole } from "../models/staffSchema";
-
+/**
+ * Appointment types that must not be cancelled under any circumstance.
+ * Currently, only surgeries are considered uncancellable.
+ */
+const UNCANCELLABLE_TYPES = [
+  AppointmentType.SURGERY,
+  AppointmentType.EMERGENCY_CARE
+];
+/**
+ * List of staff roles who are eligible to receive appointments.
+ * Add or remove roles here as the clinic's structure changes.
+ */
+const APPOINTMENT_ROLES = [
+  "Veterinarian",
+  "Chief Veterinarian & Clinic Director"
+  
+];
 /* -------------------------------------------------------------------------- */
 /* CRUD helpers                                                               */
 /* -------------------------------------------------------------------------- */
@@ -55,6 +71,19 @@ async function cancelAppointment(
   );
   return modifiedCount > 0;
 }
+/**
+ * Checks if two time intervals overlap.
+ * Returns true if [startA, endA) overlaps with [startB, endB).
+ */
+function isOverlapping(
+  startA: Date,
+  endA: Date,
+  startB: Date,
+  endB: Date
+): boolean {
+  return startA < endB && endA > startB;
+}
+
 /**
  * Returns all active veterinarians.
  *
@@ -105,86 +134,128 @@ async function getAppointmentsByPet(petId: string): Promise<IAppointment[]> {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Finds the best veterinarian for an emergency case.
- *
- * 1. Returns a vet who is completely free right now, if one exists.
- * 2. Otherwise returns the vet with the fewest appointments that **start**
- *    in the next 4 hours, together with the list of those appointments
- *    (so they can be cancelled).
- *
- * @param now Current timestamp (mainly for tests; defaults to `new Date()`).
+ * Finds the best veterinarian for an emergency appointment of 2 hours.
+ * - Will never cancel or overlap a SURGERY appointment.
+ * - If no vet can be found, throws an error.
+ * 
+ * @param now The starting time for the emergency appointment (defaults to current time)
+ * @returns { vet, toCancel } The selected vet and list of appointments to cancel
  */
 async function findAvailableVetForEmergency(
   now: Date = new Date()
 ): Promise<{ vet: IStaff; toCancel: IAppointment[] }> {
-  /* 1. all active vets */
+  // 1. Get all active staff eligible for appointments (e.g., veterinarians)
   const activeVets = await Staff.find({
-  role: { $regex: /^veterinarian$/i },   // i   =  ignore case
-  isActive: true
-});
+    role: { $in: APPOINTMENT_ROLES },
+    isActive: true
+  });
   if (activeVets.length === 0) {
     throw new Error("No active veterinarians found.");
   }
 
-  /* 2. four-hour window */
-  const windowEnd = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+  // 2. Define emergency appointment window (2 hours)
+  const EMERGENCY_DURATION_MINUTES = 120;
+  const emergencyEnd = new Date(now.getTime() + EMERGENCY_DURATION_MINUTES * 60000);
 
-  /* 3. build map { vetId -> appointmentsStartingWithin4h } */
-  const vetIds: string[] = activeVets.map((v) =>
-    (v._id as Types.ObjectId).toString()
-  );
+  // 3. For each vet, collect all appointments in the emergency window
+  const vetIds: string[] = activeVets.map((v) => (v._id as Types.ObjectId).toString());
   const appointmentsByVet: Record<string, IAppointment[]> = {};
   vetIds.forEach((id) => (appointmentsByVet[id] = []));
 
-  const upcomingAppointments = await Appointment.find({
+  const overlappingAppointments = await Appointment.find({
     staffId: { $in: vetIds },
-    date: { $gte: now, $lte: windowEnd },
-    status: { $nin: [AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW] },
+    // Match any appointment that overlaps the [now, emergencyEnd) window
+    $expr: {
+      $and: [
+        { $lt: ["$date", emergencyEnd] },
+        {
+          $gt: [
+            { $add: ["$date", { $multiply: ["$duration", 60000] }] },
+            now
+          ]
+        }
+      ]
+    },
+    status: { $nin: [AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW] }
   });
 
-  upcomingAppointments.forEach((appt) => {
+  overlappingAppointments.forEach((appt) => {
     const key = (appt.staffId as Types.ObjectId).toString();
     appointmentsByVet[key].push(appt);
   });
 
-  /* 4. vet who is completely free right now */
+  // 4. Look for a vet who is completely free during the emergency window (no overlapping appointments)
   for (const vet of activeVets) {
-    const key = (vet._id as Types.ObjectId).toString();
-    const vetAppointments = appointmentsByVet[key];
-
-    const isFree = vetAppointments.every((appt) => {
-      const start = new Date(appt.date);
-      const end = new Date(start.getTime() + (appt.duration || 30) * 60000);
-      return now < start || now >= end;
+    const vetKey = (vet._id as Types.ObjectId).toString();
+    const vetAppointments = appointmentsByVet[vetKey];
+    const hasUncancellableOverlap = vetAppointments.some((appt) => {
+      const apptStart = new Date(appt.date);
+      const apptEnd = new Date(apptStart.getTime() + (appt.duration || 30) * 60000);
+      // Only check for overlap with uncancellable types
+      return isOverlapping(now, emergencyEnd, apptStart, apptEnd) &&
+        UNCANCELLABLE_TYPES.includes(appt.type);
     });
-
-    if (isFree) {
-      return { vet, toCancel: [] };
+    if (vetAppointments.length === 0 || !hasUncancellableOverlap) {
+      // Vet is either fully available or only has cancellable appointments in the window
+      const toCancel = vetAppointments.filter(
+        (appt) =>
+          isOverlapping(now, emergencyEnd, new Date(appt.date), new Date(new Date(appt.date).getTime() + (appt.duration || 30) * 60000)) &&
+          !UNCANCELLABLE_TYPES.includes(appt.type)
+      );
+      // If there are any overlapping uncancellable appointments, skip this vet
+      if (
+        vetAppointments.some(
+          (appt) =>
+            isOverlapping(now, emergencyEnd, new Date(appt.date), new Date(new Date(appt.date).getTime() + (appt.duration || 30) * 60000)) &&
+            UNCANCELLABLE_TYPES.includes(appt.type)
+        )
+      ) {
+        continue;
+      }
+      return { vet, toCancel };
     }
   }
 
-  /* 5. vet with fewest upcoming appointments */
+  // 5. If no vet is fully available, select vet with the least amount of cancellable overlapping appointments
   let selectedVet: IStaff | null = null;
-  let minCount = Infinity;
+  let minCancelable = Infinity;
+  let selectedToCancel: IAppointment[] = [];
 
   for (const vet of activeVets) {
-    const key = (vet._id as Types.ObjectId).toString();
-    const count = appointmentsByVet[key].length;
-    if (count < minCount) {
-      minCount = count;
+    const vetKey = (vet._id as Types.ObjectId).toString();
+    const vetAppointments = appointmentsByVet[vetKey];
+
+    // If any uncancellable (e.g., SURGERY) appointment overlaps the window, skip this vet
+    if (
+      vetAppointments.some(
+        (appt) =>
+          isOverlapping(now, emergencyEnd, new Date(appt.date), new Date(new Date(appt.date).getTime() + (appt.duration || 30) * 60000)) &&
+          UNCANCELLABLE_TYPES.includes(appt.type)
+      )
+    ) {
+      continue;
+    }
+    // Count the number of cancellable appointments to be removed
+    const toCancel = vetAppointments.filter(
+      (appt) =>
+        isOverlapping(now, emergencyEnd, new Date(appt.date), new Date(new Date(appt.date).getTime() + (appt.duration || 30) * 60000)) &&
+        !UNCANCELLABLE_TYPES.includes(appt.type)
+    );
+    if (toCancel.length < minCancelable) {
+      minCancelable = toCancel.length;
       selectedVet = vet;
+      selectedToCancel = toCancel;
     }
   }
 
   if (!selectedVet) {
-    throw new Error("No available vet found.");
+    // No suitable vet found — all have uncancellable appointments during the window
+    throw new Error("No available vet found for the emergency window.");
   }
 
-  const vetKey = (selectedVet._id as Types.ObjectId).toString();
-  const toCancel = appointmentsByVet[vetKey];
-
-  return { vet: selectedVet, toCancel };
+  return { vet: selectedVet, toCancel: selectedToCancel };
 }
+
 
 /* -------------------------------------------------------------------------- */
 export {
