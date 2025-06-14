@@ -155,7 +155,7 @@ const handleEmergencyAppointment = async () => {
     });
 
     // Show confirmation (replace with nicer modal if you want)
-    alert("Emergency appointment request sent! Please come to the clinic immediately. Our staff will contact you soon.");
+    alert("Emergency appointment request sent!");
     // Optionally, close the form/modal:
     onClose();
 
@@ -294,7 +294,7 @@ const handleEmergencyAppointment = async () => {
               type="button"
               className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 shadow-md"
               onClick={handleEmergencyAppointment}
-              title="For emergencies only! A staff member will contact you immediately."
+              title="For emergencies only!"
             >
               🚨 Emergency Appointment
             </button>
