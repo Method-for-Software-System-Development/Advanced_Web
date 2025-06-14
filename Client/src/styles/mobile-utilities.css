@@ -42,6 +42,7 @@
     left: 70px;
   }
 
+  /* Pet badge styles for mobile - keep them on same row and smaller */
   .pet-badges-container {
     flex-wrap: nowrap !important;
     gap: 0.375rem !important; 
@@ -52,5 +53,32 @@
     font-size: 0.75rem !important; 
     white-space: nowrap !important;
     flex-shrink: 0 !important;
+  }
+  
+  /* User info mobile layout */
+  .mobile-user-info-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+  
+  .mobile-phone-city-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex-wrap: nowrap !important;
+  }
+  
+  .mobile-label {
+    font-size: 0.875rem !important; /* text-sm */
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mobile-value {
+    font-size: 0.875rem !important; /* text-sm */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 }
