@@ -170,6 +170,30 @@ appointmentRouter.post(
         console.error("Failed to notify secretary about emergency appointment:", err);
       }
 
+      /* ---------- 4.6) Notify the pet owner (user) ---------- */
+      try {
+        // Fetch user, pet, and vet details for the email
+        const [user, pet, vetObj] = await Promise.all([
+          User.findById(userId),
+          require("../models/petSchema").default.findById(petId),
+          require("../models/staffSchema").default.findById(vetId)
+        ]);
+        if (user?.email && pet && vetObj) {
+          const vetName = `${vetObj.firstName} ${vetObj.lastName}`;
+          await require("../services/emailService").sendEmergencyOwnerConfirmationEmail({
+            to: user.email,
+            petName: pet.name,
+            vetName,
+            date: now,
+            time: timeStr,
+            description,
+            emergencyReason: emergencyReason ?? ""
+          });
+        }
+      } catch (err) {
+        console.error("Failed to notify pet owner about emergency appointment:", err);
+      }
+
       /* ---------- 5) Success response ---------- */
       return res.status(201).json({
         message: "Emergency appointment scheduled.",

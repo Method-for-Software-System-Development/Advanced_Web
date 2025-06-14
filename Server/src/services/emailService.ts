@@ -183,9 +183,65 @@ async function sendEmergencySecretaryAlertEmail({
   }
 }
 
+/**
+ * Sends an emergency appointment confirmation email to the pet owner (user).
+ * @param to The recipient's email address.
+ * @param petName The name of the pet.
+ * @param vetName The assigned veterinarian's name.
+ * @param date The appointment date.
+ * @param time The appointment time (string, e.g., '10:30 AM').
+ * @param description The emergency description.
+ * @param emergencyReason The reason for the emergency (optional).
+ */
+async function sendEmergencyOwnerConfirmationEmail({
+  to,
+  petName,
+  vetName,
+  date,
+  time,
+  description,
+  emergencyReason
+}: {
+  to: string;
+  petName: string;
+  vetName: string;
+  date: Date;
+  time: string;
+  description: string;
+  emergencyReason?: string;
+}) {
+  const dateStr = new Date(date).toLocaleString("en-GB", { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+  const subject = "FurEver Friends: Emergency Appointment Confirmation";
+  const html = `
+    <div style="max-width: 480px; margin: auto; background: #fff6ee; border-radius: 16px; box-shadow: 0 2px 10px #c9c9c9; padding: 36px; font-family: 'Segoe UI', Arial, sans-serif; color: #684A36;">
+      <div style="text-align: center;">
+        <h2 style="color: #DC2626; margin-bottom: 8px;">EMERGENCY APPOINTMENT CONFIRMATION</h2>
+      </div>
+      <hr style="border: none; border-top: 1px solid #b97e65; margin: 18px 0;">
+      <p>Dear Client,</p>
+      <p>Your emergency appointment for <b>${petName}</b> has been scheduled.</p>
+      <ul style="font-size: 1.05rem; margin-bottom: 18px;">
+        <li><b>Date & Time:</b> ${dateStr} (${time})</li>
+        <li><b>Assigned Veterinarian:</b> ${vetName}</li>
+        <li><b>Description:</b> ${description || 'No description provided.'}</li>
+        ${emergencyReason ? `<li><b>Emergency Reason:</b> ${emergencyReason}</li>` : ""}
+      </ul>
+      <p style="color: #b97e65; font-weight: bold;">Please come to the clinic immediately. Our staff will contact you if needed.</p>
+      <p>Thank you for trusting us.<br><b>FurEver Friends Clinic</b></p>
+    </div>
+  `;
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    html
+  });
+}
+
 export {
   sendPasswordResetEmail,
   sendEmergencyCancelEmail,
   sendEmergencyVetAlertEmail,
-  sendEmergencySecretaryAlertEmail
+  sendEmergencySecretaryAlertEmail,
+  sendEmergencyOwnerConfirmationEmail
 };
