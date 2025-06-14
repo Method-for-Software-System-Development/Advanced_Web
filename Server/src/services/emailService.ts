@@ -184,6 +184,7 @@ async function sendEmergencySecretaryAlertEmail({
 }
 
 /**
+ *
  * Sends an emergency appointment confirmation email to the pet owner (user).
  * @param to The recipient's email address.
  * @param petName The name of the pet.
@@ -227,6 +228,7 @@ async function sendEmergencyOwnerConfirmationEmail({
         ${emergencyReason ? `<li><b>Emergency Reason:</b> ${emergencyReason}</li>` : ""}
       </ul>
       <p style="color: #b97e65; font-weight: bold;">Please come to the clinic immediately. Our staff will contact you if needed.</p>
+      <p style="color: #DC2626; font-weight: bold;">Note: This is an emergency request and a $1000 charge will apply.</p>
       <p>Thank you for trusting us.<br><b>FurEver Friends Clinic</b></p>
     </div>
   `;
