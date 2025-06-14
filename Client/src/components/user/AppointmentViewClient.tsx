@@ -347,13 +347,15 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                       </span>
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => handleCancelClick(apt._id)}
-                        className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                        disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
-                      >
-                        Cancel
-                      </button>
+                      {editingAppointmentId !== apt._id && (
+                        <button
+                          onClick={() => handleCancelClick(apt._id)}
+                          className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                          disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
+                        >
+                          Cancel
+                        </button>
+                      )}
                       {editingAppointmentId !== apt._id && (
                         <button
                           onClick={() => setEditingAppointmentId(apt._id)}

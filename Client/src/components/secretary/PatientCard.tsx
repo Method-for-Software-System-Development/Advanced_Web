@@ -67,7 +67,8 @@ const PatientCard: React.FC<PatientCardProps> = ({
       </div>
         {patient.pets && patient.pets.length > 0 ? (
         (() => {
-          const filteredPets = patient.pets.filter(pet => showInactivePets || pet.isActive);
+          const filteredPets = patient.pets.filter(pet => showInactivePets || pet.isActive)
+            .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
           return filteredPets.length > 0 ? (
             <ul className="list-disc list-inside pl-4 space-y-3 text-sm text-gray-700 dark:text-gray-300">
               {filteredPets.map(pet => (

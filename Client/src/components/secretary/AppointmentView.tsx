@@ -425,18 +425,22 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                         {formattedApt.service}
                       </span>
                     </div>                    <div className="flex gap-2">
-                      <select
-                        value={formattedApt.status}
-                        onChange={(e) => handleUpdateStatus(apt._id, e.target.value as AppointmentStatus)}
-                        className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200"
-                        disabled={formattedApt.status === AppointmentStatus.CANCELLED}
-                      >
-                        <option value={AppointmentStatus.SCHEDULED}>Scheduled</option>
-                        <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
-                        <option value={AppointmentStatus.IN_PROGRESS}>In Progress</option>
-                        <option value={AppointmentStatus.COMPLETED}>Completed</option>
-                        <option value={AppointmentStatus.NO_SHOW}>No Show</option>
-                      </select>                      {formattedApt.status === AppointmentStatus.COMPLETED && (
+                      {/* Hide status dropdown for cancelled appointments */}
+                      {formattedApt.status !== AppointmentStatus.CANCELLED && (
+                        <select
+                          value={formattedApt.status}
+                          onChange={(e) => handleUpdateStatus(apt._id, e.target.value as AppointmentStatus)}
+                          className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200"
+                        >
+                          <option value={AppointmentStatus.SCHEDULED}>Scheduled</option>
+                          <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
+                          <option value={AppointmentStatus.IN_PROGRESS}>In Progress</option>
+                          <option value={AppointmentStatus.COMPLETED}>Completed</option>
+                          <option value={AppointmentStatus.NO_SHOW}>No Show</option>
+                        </select>
+                      )}
+
+                      {formattedApt.status === AppointmentStatus.COMPLETED && (
                         <button
                           onClick={() => handleEditNotes(apt._id)}
                           className="px-3 py-1 bg-[#EF92A6] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-[#E57D98] transition-colors duration-150"
@@ -445,13 +449,16 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                           {formattedApt.notes ? 'Edit Notes' : 'Add Notes'}
                         </button>
                       )}
-                      <button
-                        onClick={() => handleCancelAppointment(apt._id)}
-                        className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
-                        disabled={formattedApt.status === AppointmentStatus.CANCELLED}
-                      >
-                        Cancel
-                      </button>
+                      
+                      {/* Hide cancel button for cancelled appointments */}
+                      {formattedApt.status !== AppointmentStatus.CANCELLED && (
+                        <button
+                          onClick={() => handleCancelAppointment(apt._id)}
+                          className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </div>
                   </div>                  
                   <p className="mt-2 text-sm text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formattedApt.time}</p>
