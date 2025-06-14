@@ -155,29 +155,37 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
       console.error("Failed to update pet:", error);
       alert("Failed to update pet. Please try again.");
     }
-  };
-  // Memoized filtered patients list
+  };  
+  // Memoized filtered and sorted patients list
   const filteredPatients = useMemo(() => {
-    if (!searchTerm) {
-      return patients;
+    let result = patients;
+    
+    // Filter patients based on search term
+    if (searchTerm) {
+      const searchTermLower = searchTerm.toLowerCase().trim();
+      
+      result = patients.filter(patient => {
+        // Create a full name string for better name matching
+        const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+        
+        // Check if the search term matches any of the searchable fields
+        return fullName.includes(searchTermLower) ||
+               patient.firstName.toLowerCase().includes(searchTermLower) ||
+               patient.lastName.toLowerCase().includes(searchTermLower) ||
+               patient.email.toLowerCase().includes(searchTermLower) ||
+               patient.phone.toLowerCase().includes(searchTermLower) ||
+               patient.street.toLowerCase().includes(searchTermLower) ||
+               patient.city.toLowerCase().includes(searchTermLower) ||
+               patient.postalCode?.toLowerCase().includes(searchTermLower) ||
+               patient.pets.some(pet => pet.name.toLowerCase().includes(searchTermLower));
+      });
     }
     
-    const searchTermLower = searchTerm.toLowerCase().trim();
-    
-    return patients.filter(patient => {
-      // Create a full name string for better name matching
-      const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
-      
-      // Check if the search term matches any of the searchable fields
-      return fullName.includes(searchTermLower) ||
-             patient.firstName.toLowerCase().includes(searchTermLower) ||
-             patient.lastName.toLowerCase().includes(searchTermLower) ||
-             patient.email.toLowerCase().includes(searchTermLower) ||
-             patient.phone.toLowerCase().includes(searchTermLower) ||
-             patient.street.toLowerCase().includes(searchTermLower) ||
-             patient.city.toLowerCase().includes(searchTermLower) ||
-             patient.postalCode?.toLowerCase().includes(searchTermLower) ||
-             patient.pets.some(pet => pet.name.toLowerCase().includes(searchTermLower));
+    // Sort patients alphabetically by full name (first name + last name)
+    return result.sort((a, b) => {
+      const fullNameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+      const fullNameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+      return fullNameA.localeCompare(fullNameB);
     });
   }, [patients, searchTerm]);
   if (loading) return <div className="dark:text-gray-300">Loading patients...</div>;
