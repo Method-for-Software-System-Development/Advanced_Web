@@ -121,11 +121,25 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
         </div>
       </div>
       <div className="flex gap-2 mt-4">
-        <button type="submit" className="bg-[#664147] hover:bg-[#58383E] text-white px-4 py-2 rounded shadow transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2" disabled={loading}>Save</button>
-        <button type="button" onClick={onCancel} className="bg-[#664147] hover:bg-[#58383E] text-white px-4 py-2 rounded shadow transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2" disabled={loading}>Return</button>
+        <button
+          type="submit"
+          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2"
+          disabled={loading}
+        >
+          Save
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2"
+          disabled={loading}
+        >
+          Return
+        </button>
       </div>
     </form>
   );
 };
 
 export default EditAppointmentForm;
+
