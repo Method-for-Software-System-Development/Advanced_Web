@@ -188,35 +188,41 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown Patient';
 
     return { patientName, petName };
-  };
-  const filteredPrescriptions = prescriptions.filter(prescription => {
-    const { patientName, petName } = getPatientInfo(prescription);
-    const searchLower = searchTerm.toLowerCase();
-    
-    // Search filter
-    const matchesSearch = (
-      prescription.medicineType.toLowerCase().includes(searchLower) ||
-      (prescription.medicineName && prescription.medicineName.toLowerCase().includes(searchLower)) ||
-      patientName.toLowerCase().includes(searchLower) ||
-      petName.toLowerCase().includes(searchLower) ||
-      prescription.referralType.toLowerCase().includes(searchLower)
-    );
-    
-    // Status filter
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'fulfilled' && prescription.fulfilled) ||
-                         (statusFilter === 'pending' && !prescription.fulfilled);
-      // Expired filter
-    const today = new Date();
-    const expirationDate = new Date(prescription.expirationDate);
-    const isExpired = expirationDate <= today && !prescription.fulfilled;
-    const matchesExpiredFilter = 
-      expiredFilter === 'all' || 
-      (expiredFilter === 'expired' && isExpired) ||
-      (expiredFilter === 'not-expired' && !isExpired);
-    
-    return matchesSearch && matchesStatus && matchesExpiredFilter;
-  });
+  };  const filteredPrescriptions = prescriptions
+    .filter(prescription => {
+      const { patientName, petName } = getPatientInfo(prescription);
+      const searchLower = searchTerm.toLowerCase();
+      
+      // Search filter
+      const matchesSearch = (
+        prescription.medicineType.toLowerCase().includes(searchLower) ||
+        (prescription.medicineName && prescription.medicineName.toLowerCase().includes(searchLower)) ||
+        patientName.toLowerCase().includes(searchLower) ||
+        petName.toLowerCase().includes(searchLower) ||
+        prescription.referralType.toLowerCase().includes(searchLower)
+      );
+      
+      // Status filter
+      const matchesStatus = statusFilter === 'all' || 
+                           (statusFilter === 'fulfilled' && prescription.fulfilled) ||
+                           (statusFilter === 'pending' && !prescription.fulfilled);
+        // Expired filter
+      const today = new Date();
+      const expirationDate = new Date(prescription.expirationDate);
+      const isExpired = expirationDate <= today && !prescription.fulfilled;
+      const matchesExpiredFilter = 
+        expiredFilter === 'all' || 
+        (expiredFilter === 'expired' && isExpired) ||
+        (expiredFilter === 'not-expired' && !isExpired);
+      
+      return matchesSearch && matchesStatus && matchesExpiredFilter;
+    })
+    .sort((a, b) => {
+      // Sort by issue date - most recent first (descending order)
+      const dateA = new Date(a.issueDate).getTime();
+      const dateB = new Date(b.issueDate).getTime();
+      return dateB - dateA;
+    });
   const handleClientSelect = (client: Patient) => {
     setSelectedClient(client);
     setSelectedPetId(null);
@@ -525,8 +531,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                 const { patientName, petName } = getPatientInfo(prescription);                const expirationDate = new Date(prescription.expirationDate);
                 const today = new Date();
                 const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                const isExpiringSoon = daysUntilExpiration <= 15 && daysUntilExpiration > 0;
-                const isExpired = daysUntilExpiration <= 0;
+                const isExpiringSoon = daysUntilExpiration <= 15 && daysUntilExpiration > 0 && !prescription.fulfilled;
+                const isExpired = daysUntilExpiration <= 0 && !prescription.fulfilled;
                 
                 return (    
                     <div
