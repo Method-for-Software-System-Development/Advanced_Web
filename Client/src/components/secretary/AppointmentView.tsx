@@ -395,14 +395,34 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
         <EmergencyAppointmentModal
           open={showEmergencyModal}
           onClose={() => setShowEmergencyModal(false)}
-          onConfirm={async (reason) => {
+          onConfirm={async (reason, petId, patientId) => {
             setIsSubmittingEmergency(true);
-            // TODO: Implement emergency appointment creation logic here
-            setTimeout(() => {
-              setIsSubmittingEmergency(false);
+            setError("");
+            try {
+              if (!patientId || !petId || !reason.trim()) {
+                setError("Please select a patient, pet, and provide a description for the emergency.");
+                setIsSubmittingEmergency(false);
+                return;
+              }
+              await appointmentService.createEmergencyAppointment({
+                userId: patientId,
+                petId,
+                description: reason,
+                emergencyReason: reason || "EMERGENCY"
+              });
+              alert("Emergency appointment request sent! Please come to the clinic immediately. Our staff will contact you soon.");
               setShowEmergencyModal(false);
-              showSuccessMessage('Emergency appointment submitted!');
-            }, 1000);
+            } catch (err: any) {
+              if (err instanceof Error) {
+                setError(err.message);
+              } else if (typeof err === 'object' && err !== null && 'message' in err) {
+                setError((err as any).message);
+              } else {
+                setError('Failed to schedule emergency appointment.');
+              }
+            } finally {
+              setIsSubmittingEmergency(false);
+            }
           }}
           isSubmitting={isSubmittingEmergency}
         />
