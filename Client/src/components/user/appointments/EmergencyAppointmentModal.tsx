@@ -71,6 +71,10 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
     } catch {}
   }, [open]);
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(e.target.checked);
+  };
+
   if (!open) return null;
 
   return (
@@ -125,7 +129,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
               type="checkbox"
               id="emergency-confirm"
               checked={checked}
-              onChange={e => setChecked(e.target.checked)}
+              onChange={handleCheckboxChange}
               className="mr-2"
               disabled={isSubmitting}
             />

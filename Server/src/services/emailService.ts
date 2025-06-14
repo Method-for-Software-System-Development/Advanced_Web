@@ -4,6 +4,9 @@
  */
 
 import nodemailer from "nodemailer";
+import User from "../models/userSchema";
+import Pet from "../models/petSchema";
+import Staff from "../models/staffSchema";
 
 // Create a Nodemailer transporter using Gmail SMTP.
 // Credentials are stored in environment variables for security.
@@ -107,8 +110,82 @@ import nodemailer from "nodemailer";
   });
 }
 
+/**
+ * Sends an alert email to all secretaries about a new emergency appointment.
+ * @param details Object containing userId, petId, vetId, date, time, description, emergencyReason
+ */
+async function sendEmergencySecretaryAlertEmail({
+  userId,
+  petId,
+  vetId,
+  date,
+  time,
+  description,
+  emergencyReason
+}: {
+  userId: string;
+  petId: string;
+  vetId: string;
+  date: Date;
+  time: string;
+  description: string;
+  emergencyReason?: string;
+}) {
+  // Fetch all secretaries
+  const secretaries = await User.find({ role: "secretary" });
+  if (!secretaries.length) return;
+
+  // Fetch client, pet, and vet details
+  const [client, pet, vet] = await Promise.all([
+    User.findById(userId),
+    Pet.findById(petId),
+    Staff.findById(vetId)
+  ]);
+
+  const clientName = client ? `${client.firstName} ${client.lastName}` : "Unknown";
+  const clientPhone = client?.phone || "N/A";
+  const clientEmail = client?.email || "N/A";
+  const petName = pet?.name || "Unknown";
+  const vetName = vet ? `${vet.firstName} ${vet.lastName}` : "Unknown";
+
+  const dateStr = new Date(date).toLocaleString("en-GB", { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+  const subject = "EMERGENCY: New Emergency Appointment Scheduled!";
+  const html = `
+    <div style="max-width: 520px; margin: auto; background: #fff6ee; border-radius: 16px; box-shadow: 0 2px 10px #c9c9c9; padding: 36px; font-family: 'Segoe UI', Arial, sans-serif; color: #684A36;">
+      <div style="text-align: center;">
+        <h2 style="color: #DC2626; margin-bottom: 8px;">EMERGENCY APPOINTMENT ALERT</h2>
+      </div>
+      <hr style="border: none; border-top: 1px solid #b97e65; margin: 18px 0;">
+      <p><b>A new emergency appointment has been scheduled:</b></p>
+      <ul style="font-size: 1.05rem; margin-bottom: 18px;">
+        <li><b>Date & Time:</b> ${dateStr} (${time})</li>
+        <li><b>Client:</b> ${clientName} (${clientPhone}, ${clientEmail})</li>
+        <li><b>Pet:</b> ${petName}</li>
+        <li><b>Assigned Vet:</b> ${vetName}</li>
+        <li><b>Description:</b> ${description || 'No description provided.'}</li>
+        ${emergencyReason ? `<li><b>Emergency Reason:</b> ${emergencyReason}</li>` : ""}
+      </ul>
+      <p style="color: #b97e65; font-weight: bold;">Please prepare for immediate client arrival and coordinate with the assigned veterinarian.</p>
+      <p>Thank you for your attention.<br><b>FurEver Friends Clinic</b></p>
+    </div>
+  `;
+
+  // Send to all secretaries
+  for (const sec of secretaries) {
+    if (sec.email) {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: sec.email,
+        subject,
+        html
+      });
+    }
+  }
+}
+
 export {
   sendPasswordResetEmail,
   sendEmergencyCancelEmail,
-  sendEmergencyVetAlertEmail
+  sendEmergencyVetAlertEmail,
+  sendEmergencySecretaryAlertEmail
 };

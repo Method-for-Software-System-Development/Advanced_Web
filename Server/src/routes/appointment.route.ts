@@ -6,7 +6,7 @@ import { Router, Request, Response } from "express";
 import Appointment, { AppointmentStatus, AppointmentType } from "../models/appointmentSchema";
 import mongoose, { Types } from "mongoose";
 import * as ExcelJS from 'exceljs';
-import { sendEmergencyCancelEmail, sendEmergencyVetAlertEmail } from "../services/emailService";
+import { sendEmergencyCancelEmail, sendEmergencyVetAlertEmail, sendEmergencySecretaryAlertEmail } from "../services/emailService";
 import User from "../models/userSchema";
 import { findAvailableVetForEmergency, createAppointment } from "../services/appointmentService";
 const appointmentRouter = Router();
@@ -154,6 +154,21 @@ appointmentRouter.post(
       emergencyAppt.emergencyReason = emergencyReason ?? "";
       emergencyAppt.cost = 1000;
       await emergencyAppt.save();
+
+      /* ---------- 4.5) Notify the secretary ---------- */
+      try {
+        await sendEmergencySecretaryAlertEmail({
+          userId,
+          petId,
+          vetId,
+          date: now,
+          time: timeStr,
+          description,
+          emergencyReason: emergencyReason ?? ""
+        });
+      } catch (err) {
+        console.error("Failed to notify secretary about emergency appointment:", err);
+      }
 
       /* ---------- 5) Success response ---------- */
       return res.status(201).json({
