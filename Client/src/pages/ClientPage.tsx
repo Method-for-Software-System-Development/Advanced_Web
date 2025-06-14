@@ -29,6 +29,8 @@ const viewLabels: Record<ClientView, string> = {
   history: "📖 Treatment History",
 };
 
+const CLINIC_PHONE = "+97241234567"; // Sourced from ContactSection for consistency
+
 const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
@@ -84,6 +86,13 @@ const ClientPage: React.FC = () => {
             onClick={() => setShowEmergencyModal(true)}
             className="w-full sm:w-auto"
           />
+          <a
+            href={`tel:${CLINIC_PHONE}`}
+            className="px-4 py-2 bg-[#664147] text-white rounded-md font-semibold shadow hover:bg-[#58383E] transition w-full sm:w-auto text-base"
+            style={{ textDecoration: 'none' }}
+          >
+            📞 Contact us
+          </a>
         </div>
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}
