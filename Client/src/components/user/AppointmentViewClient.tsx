@@ -5,7 +5,6 @@ import appointmentService from '../../services/appointmentService';
 import { Appointment } from '../../types';
 import UserNavButton from './UserNavButton';
 import { CancelReasonModal } from './CancelReasonModal';
-import EmergencyAppointmentModal from './appointments/EmergencyAppointmentModal';
 
 interface AppointmentViewClientProps {
   onBack?: () => void; // Make this optional since it's not being used
@@ -45,7 +44,6 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelingAppointmentId, setCancelingAppointmentId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState<string | null>(null);
-  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
@@ -226,38 +224,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     }
   };
 
-  // Add handleEmergencyAppointmentClient function
-  const handleEmergencyAppointmentClient = async (reasonFromModal?: string, petIdFromModal?: string) => {
-    const clientRaw = localStorage.getItem("client");
-    if (!clientRaw) {
-      setError("No client info found.");
-      return;
-    }
-    const client = JSON.parse(clientRaw);
-    // Use selected pet from modal
-    const petId = petIdFromModal || (client.pets && client.pets.length > 0 ? (typeof client.pets[0] === 'string' ? client.pets[0] : client.pets[0]._id) : null);
-    if (!petId) {
-      setError("Please select a pet.");
-      return;
-    }
-    setIsLoading(true);
-    setError('');
-    try {
-      await appointmentService.createEmergencyAppointment({
-        userId: client._id,
-        petId,
-        description: reasonFromModal?.trim() || 'No description provided',
-        emergencyReason: reasonFromModal?.trim() || 'No reason provided',
-      });
-      showSuccessMessage("Emergency request sent! Please come to the clinic ASAP—our staff will contact you shortly.");
-    } catch (err: any) {
-      setError(err?.message || "Failed to create emergency appointment.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-    return (
+  return (
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
       {/* Success Message Banner */}
       {successMessage && (
@@ -283,22 +250,14 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setShowAddForm(true)}
-              className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
+              className="px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
             >
               + Add New Appointment
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowEmergencyModal(true)}
-              className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 shadow-md disabled:opacity-50"
-              title="For emergencies only! Our staff will contact you immediately."
-            >
-              🚨 Emergency Appointment
             </button>
           </div>
         </div>
       )}
-      {/* Search row, like in treatment history */}
+      {/* Search row*/}
       {!showAddForm && (
         <div className="flex items-center gap-2 mb-4">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Search by Pet Name:</span>
@@ -313,7 +272,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
           />
         </div>
       )}
-      {/* Sort controls row with label, like in treatment history */}
+      {/* Sort controls row with label */}
       {!showAddForm && (
         <div className="flex items-center gap-2 mb-4">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Sort by:</span>
@@ -448,19 +407,6 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
         </ul>
       ) : (
         <p className="text-gray-500 dark:text-gray-400 text-center">No upcoming appointments.</p>
-      )}
-
-      {/* Emergency Modal */}
-      {showEmergencyModal && (
-        <EmergencyAppointmentModal
-          open={showEmergencyModal}
-          onClose={() => setShowEmergencyModal(false)}
-          isSubmitting={isLoading}
-          onConfirm={async (reason, petId) => {
-            setShowEmergencyModal(false);
-            await handleEmergencyAppointmentClient(reason, petId);
-          }}
-        />
       )}
     </div>
   );

@@ -6,7 +6,7 @@ import TreatmentHistory from "../components/user/TreatmentHistory";
 import UserNavButton from "../components/user/UserNavButton";
 import ShowPrescriptions from "../components/user/ShowPrescriptions";
 import AppointmentViewClient from "../components/user/AppointmentViewClient";
-
+import EmergencyAppointmentModal from "../components/user/appointments/EmergencyAppointmentModal";
 
 // Define all 5 views (combine makeAppointment and showAppointments into 'appointments')
 export type ClientView =
@@ -23,17 +23,44 @@ const allViews: ClientView[] = [
 ];
 
 const viewLabels: Record<ClientView, string> = {
-  profile: "Profile",
-  appointments: "Appointments",
-  prescriptions: "Show Prescriptions",
+  profile: "My Profile",
+  appointments: "My Appointments",
+  prescriptions: "My Prescriptions",
   history: "Treatment History",
 };
 
 const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
 
   const handleBackToDashboard = () => {
     setCurrentView("profile");
+  };
+
+  const handleEmergencyAppointmentClient = async (reasonFromModal?: string, petIdFromModal?: string) => {
+    const clientRaw = localStorage.getItem("client");
+    if (!clientRaw) return;
+    const client = JSON.parse(clientRaw);
+    const petId = petIdFromModal || (client.pets && client.pets.length > 0 ? (typeof client.pets[0] === 'string' ? client.pets[0] : client.pets[0]._id) : null);
+    if (!petId) return;
+    setIsSubmittingEmergency(true);
+    try {
+      await import("../services/appointmentService").then(({ default: appointmentService }) =>
+        appointmentService.createEmergencyAppointment({
+          userId: client._id,
+          petId,
+          description: reasonFromModal?.trim() || 'No description provided',
+          emergencyReason: reasonFromModal?.trim() || 'No reason provided',
+        })
+      );
+      setShowEmergencyModal(false);
+      // Optionally show a toast/notification here
+    } catch (err) {
+      // Optionally handle error
+    } finally {
+      setIsSubmittingEmergency(false);
+    }
   };
 
   // Show navigation buttons for all views except the current one
@@ -43,7 +70,6 @@ const ClientPage: React.FC = () => {
       <Navbar onBackToDashboard={currentView !== "profile" ? handleBackToDashboard : undefined} />
 
       <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">
-        {/* Button Navigation */}
         <div className="flex flex-wrap gap-4 justify-center mb-10">
           {visibleViews.map((view) => (
             <UserNavButton
@@ -53,12 +79,27 @@ const ClientPage: React.FC = () => {
               className="w-full sm:w-auto"
             />
           ))}
+          <UserNavButton
+            label="🚨 Emergency Appointment"
+            onClick={() => setShowEmergencyModal(true)}
+            className="w-full sm:w-auto"
+          />
         </div>
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}
         {currentView === "appointments" && <AppointmentViewClient onBack={() => setCurrentView("profile")} />}
         {currentView === "prescriptions" && <ShowPrescriptions />}
         {currentView === "history" && <TreatmentHistory />}
+        {showEmergencyModal && (
+          <EmergencyAppointmentModal
+            open={showEmergencyModal}
+            onClose={() => setShowEmergencyModal(false)}
+            isSubmitting={isSubmittingEmergency}
+            onConfirm={async (reason, petId) => {
+              await handleEmergencyAppointmentClient(reason, petId);
+            }}
+          />
+        )}
       </main>
 
       <FooterSection />
