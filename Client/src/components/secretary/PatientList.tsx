@@ -1,13 +1,13 @@
 import React from 'react';
 import PatientCard from './PatientCard';
 import EditPatientForm from './EditPatientForm';
-import { Patient } from '../../types';
+import { Patient, Pet } from '../../types';
 
 interface PatientListProps {
   patients: Patient[];
   onSaveEdit: (updatedPatient: Patient) => void;
   onAddPet: (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, sex: string, isActive: boolean) => void;
-  onEditPet: (petId: string, petData: any) => void;
+  onEditPet: (petId: string, petData: Partial<Omit<Pet, '_id' | 'prescriptions' | 'treatments'>>) => void;
   openAddPetForId: string | null;
   setOpenAddPetForId: (id: string | null) => void;
   openEditPetForId: string | null;

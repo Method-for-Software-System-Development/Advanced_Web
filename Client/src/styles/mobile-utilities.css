@@ -23,9 +23,34 @@
   .mobile-error-text {
     font-size: 10px !important;
     line-height: 0.75;
-  }
-  .mobile-toast-text {
+  }  .mobile-toast-text {
     font-size: 11px !important;
     line-height: 2.25;
+  }
+  
+  /* Pet image styles for mobile */
+  .pet-image {
+    width: 70px !important;
+    height: 70px !important;
+    min-width: 70px !important;
+    min-height: 70px !important;
+  }
+  
+  .pet-image-overlay {
+    position: absolute;
+    bottom: 15px; 
+    left: 70px;
+  }
+
+  .pet-badges-container {
+    flex-wrap: nowrap !important;
+    gap: 0.375rem !important; 
+  }
+  
+  .pet-badge {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important; 
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 }

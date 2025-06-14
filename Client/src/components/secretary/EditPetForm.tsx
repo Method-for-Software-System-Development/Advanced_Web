@@ -4,7 +4,7 @@ import { Pet } from '../../types';
 interface EditPetFormProps {
   patientName: string;
   pets: Pet[];
-  onEditPet: (petId: string, petData: Omit<Pet, '_id' | 'prescriptions' | 'treatments'>) => void;
+  onEditPet: (petId: string, petData: Partial<Omit<Pet, '_id' | 'prescriptions' | 'treatments'>>) => void;
   onCancel: () => void;
 }
 
@@ -74,16 +74,14 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
     if (birthYearValue < 1995) {
       alert('Birth year must be 1995 or later.');
       return;
-    }
-        const petData = {
+    }        const petData = {
       name: petName,
       type: petType,
       breed: petBreed,
       birthYear: Number(petBirthYear),
       weight: weightValue,
       sex: petSex,
-      isActive: isActive,
-      imageUrl: '' // Add required imageUrl property
+      isActive: isActive
     };
     
     onEditPet(selectedPetId, petData);
