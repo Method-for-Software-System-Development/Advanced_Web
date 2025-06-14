@@ -123,7 +123,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard }) => {
               </button>
             )}
             {isLoggedIn ? (
-              <LogoutButton onLogout={() => setRefresh(r => r + 1)} />) : (
+              <LogoutButton variant="mobile" onLogout={() => setRefresh(r => r + 1)} />) : (
               onLoginClick && (
                 <button
                   onClick={() => { setMenuOpen(false); onLoginClick(); }}
