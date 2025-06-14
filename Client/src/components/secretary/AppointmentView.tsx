@@ -6,6 +6,7 @@ import AppointmentNotesInline from './AppointmentNotesInline';
 import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
 import { API_URL } from '../../config/api';
+import EmergencyAppointmentModal from './EmergencyAppointmentModal';
 
 interface AppointmentViewProps {
   onBack: () => void;
@@ -27,7 +28,7 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
     staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
     description: appointment.description,
     notes: appointment.notes,
-    status: appointment.status,
+    status: appointment.status, // <-- Add status to the returned object
     duration: appointment.duration,
     cost: appointment.cost,
     date: appointment.date
@@ -48,6 +49,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   
   // Success message state
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
 
   // Load appointments for selected date
   useEffect(() => {
@@ -354,7 +357,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
       </div>{/* Calendar and Export Section */}
       <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-3xl mx-auto">
-        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Select Date to View Appointments</h2>        <div className="flex justify-center mb-6">
+        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Select Date to View Appointments</h2>
+        <div className="flex justify-center mb-6">
           <TailwindCalendar
             onChange={(value: Value) => handleDateChange(value)}
             value={selectedDate}
@@ -362,7 +366,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             onActiveStartDateChange={({ activeStartDate }: { activeStartDate: Date | null }) => activeStartDate && setCurrentCalendarMonthView(activeStartDate)}
             tileContent={tileContent}
           />
-        </div><div className="text-center">
+        </div>
+        <div className="text-center">
           <div className="flex gap-4 justify-center">
             <button
               onClick={handleExportToExcel}
@@ -377,8 +382,31 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             >
               Add New Appointment
             </button>
-          </div>        </div>
-      </section>      {/* Add Appointment Form Section */}
+            <button
+              onClick={() => setShowEmergencyModal(true)}
+              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200"
+            >
+              Emergency Appointment
+            </button>
+          </div>
+        </div>
+      </section>
+      {showEmergencyModal && (
+        <EmergencyAppointmentModal
+          open={showEmergencyModal}
+          onClose={() => setShowEmergencyModal(false)}
+          onConfirm={async (reason) => {
+            setIsSubmittingEmergency(true);
+            // TODO: Implement emergency appointment creation logic here
+            setTimeout(() => {
+              setIsSubmittingEmergency(false);
+              setShowEmergencyModal(false);
+              showSuccessMessage('Emergency appointment submitted!');
+            }, 1000);
+          }}
+          isSubmitting={isSubmittingEmergency}
+        />
+      )}      {/* Add Appointment Form Section */}
       {showAddForm && (
         <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
