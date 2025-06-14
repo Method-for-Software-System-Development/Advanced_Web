@@ -34,10 +34,9 @@ export const petService = {  // Get all pets for a specific patient
     } catch (error) {
       console.error('Error adding pet:', error);
       throw error;
-    }
-  },
+    }  },
   // Update an existing pet
-  async updatePet(petId: string, petData: Omit<Pet, '_id' | 'prescriptions' | 'treatments'>): Promise<Pet> {
+  async updatePet(petId: string, petData: Partial<Omit<Pet, '_id'>>): Promise<Pet> {
     try {
       const response = await fetch(`${API_BASE_URL}/pets/${petId}`, {
         method: 'PUT',
