@@ -39,20 +39,20 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
           </button>
         )}
       </div>
-      <div className="text-[var(--color-greyText)] dark:text-gray-200 space-y-6 font-[Poppins] text-base sm:text-lg">
-        {isEditing ? (
+      <div className="text-[var(--color-greyText)] dark:text-gray-200 space-y-6 font-[Poppins] text-base sm:text-lg">        {isEditing ? (
           children // This will be your <EditUserProfile /> component
         ) : (          <div className="flex flex-col gap-6">
-            <div className="flex items-center flex-wrap">
+            <div className="flex items-center flex-wrap justify-start sm:justify-start">
               <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mr-2">Email:</span>
-              <span className="break-all sm:break-normal max-w-full whitespace-nowrap overflow-x-auto text-base sm:text-lg">{email}</span>
+              <span className="break-all sm:break-normal max-w-full whitespace-nowrap overflow-x-auto text-base sm:text-lg ml-auto sm:ml-0">{email}</span>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-              <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] whitespace-nowrap">Phone Number:</span>
-              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg sm:ml-2">{phone}</span>
-            </div>            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-              <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] whitespace-nowrap">City:</span>
-              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg sm:ml-2">{capitalize(city)}</span>
+            <div className="flex items-center flex-wrap justify-start sm:justify-start">
+              <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mr-2">Mobile:</span>
+              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg ml-auto sm:ml-0">{phone}</span>
+            </div>
+            <div className="flex items-center flex-wrap justify-start sm:justify-start">
+              <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mr-2">City:</span>
+              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg ml-auto sm:ml-0">{capitalize(city)}</span>
             </div>
             {/* Edit button for mobile only */}
             {!isEditing && (
