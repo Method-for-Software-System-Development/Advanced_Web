@@ -2,7 +2,7 @@ import React, { useState, useMemo,useEffect } from 'react';
 import PatientList from './PatientList';
 import AddPatientForm from './AddPatientForm';
 import DashboardButton from './DashboardButton';
-import { Patient } from '../../types'; // Import Patient and Pet from types
+import { Patient, Pet } from '../../types'; // Import Patient and Pet from types
 import { patientService } from '../../services/patientService';
 import { petService } from '../../services/petService';
 
@@ -137,7 +137,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
     }
   };
 
-  const handleEditPet = async (petId: string, petData: any) => {
+  const handleEditPet = async (petId: string, petData: Partial<Omit<Pet, '_id' | 'prescriptions' | 'treatments'>>) => {
     try {
       // Call the service to update the pet
       const updatedPet = await petService.updatePet(petId, petData);
