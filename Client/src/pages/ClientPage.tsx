@@ -23,10 +23,10 @@ const allViews: ClientView[] = [
 ];
 
 const viewLabels: Record<ClientView, string> = {
-  profile: "My Profile",
-  appointments: "My Appointments",
-  prescriptions: "My Prescriptions",
-  history: "Treatment History",
+  profile: "👤 My Profile",
+  appointments: "📅 My Appointments",
+  prescriptions: "💊 My Prescriptions",
+  history: "📖 Treatment History",
 };
 
 const ClientPage: React.FC = () => {

@@ -395,7 +395,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                       </div>
                     </div>
                   )}
-                  {/* Description and Notes with same font size */}
+                  {/* Description and Notes */}
                   {!editingAppointmentId && !showCancelModal && (
                     <>
                       {formatted.description && (
