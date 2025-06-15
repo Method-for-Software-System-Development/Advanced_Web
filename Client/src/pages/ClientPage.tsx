@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import FooterSection from "../components/FooterSection";
 import ClientProfile from "../components/user/ClientProfile";
@@ -35,6 +35,22 @@ const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
+
+  // Check for navigation signal from AboutSection
+  useEffect(() => {
+    const navigateToAppointments = localStorage.getItem("navigateToAppointments");
+    const navigateToAddAppointment = localStorage.getItem("navigateToAddAppointment");
+    
+    if (navigateToAppointments === "true") {
+      setCurrentView("appointments");
+      localStorage.removeItem("navigateToAppointments"); // Clean up
+    } else if (navigateToAddAppointment === "true") {
+      setCurrentView("appointments");
+      localStorage.removeItem("navigateToAddAppointment"); // Clean up
+      // Note: We'll need to pass a signal to AppointmentViewClient to show the add form
+      localStorage.setItem("showAddFormDirectly", "true");
+    }
+  }, []);
 
   const handleBackToDashboard = () => {
     setCurrentView("profile");

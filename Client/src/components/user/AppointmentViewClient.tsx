@@ -120,10 +120,18 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
       setIsLoading(false);
     }
   };
-
   // Load appointments on component mount
   useEffect(() => {
     loadAppointments();
+  }, []);
+
+  // Check for direct navigation to add form
+  useEffect(() => {
+    const showAddFormDirectly = localStorage.getItem("showAddFormDirectly");
+    if (showAddFormDirectly === "true") {
+      setShowAddForm(true);
+      localStorage.removeItem("showAddFormDirectly"); // Clean up
+    }
   }, []);
 
   const sortedAppointments = useMemo(() => {

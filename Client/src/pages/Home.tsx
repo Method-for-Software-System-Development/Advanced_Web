@@ -14,7 +14,7 @@ const Home: React.FC<HomeProps> = ({ onLoginClick }) => {
     <>
       <Navbar onLoginClick={onLoginClick} />
       <main className="pt-40 bg-[#F5D2B3]">
-        <AboutSection />
+        <AboutSection onLoginClick={onLoginClick} />
         <TeamSection />
         <ContactSection />
         <FooterSection />
