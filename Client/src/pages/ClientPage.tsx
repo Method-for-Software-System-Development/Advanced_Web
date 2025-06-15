@@ -23,11 +23,13 @@ const allViews: ClientView[] = [
 ];
 
 const viewLabels: Record<ClientView, string> = {
-  profile: "My Profile",
-  appointments: "My Appointments",
-  prescriptions: "My Prescriptions",
-  history: "Treatment History",
+  profile: "👤 My Profile",
+  appointments: "📅 My Appointments",
+  prescriptions: "💊 My Prescriptions",
+  history: "📖 Treatment History",
 };
+
+const CLINIC_PHONE = "+97241234567"; // Sourced from ContactSection for consistency
 
 const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
@@ -84,6 +86,13 @@ const ClientPage: React.FC = () => {
             onClick={() => setShowEmergencyModal(true)}
             className="w-full sm:w-auto"
           />
+          <a
+            href={`tel:${CLINIC_PHONE}`}
+            className="bg-[#664147] dark:bg-[#58383E] text-white px-4 py-2 rounded shadow hover:bg-[#4d3034] dark:hover:bg-[#4A2F33] font-semibold transition text-base sm:text-sm w-full sm:w-auto"
+            style={{ textDecoration: 'none' }}
+          >
+            📞 Contact us
+          </a>
         </div>
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}

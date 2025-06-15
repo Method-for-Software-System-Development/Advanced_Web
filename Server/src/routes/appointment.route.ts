@@ -82,14 +82,22 @@ appointmentRouter.get("/", async (req: Request, res: Response) => {
  * }
  * ---------------------------------------------------------------
  */
+/**
+ * POST /api/appointments/emergency
+ * Schedules an emergency appointment with the best-available veterinarian.
+ * - Cancels non-uncancellable appointments if needed.
+ * - Never cancels or overlaps SURGERY appointments.
+ * - Sends notifications to clients, vet, secretary, and pet owner.
+ * - Returns detailed info on the action performed.
+ */
 appointmentRouter.post(
   "/emergency",
   async (
     req: Request,
     res: Response
-  ): Promise<Response>  => {
+  ): Promise<Response> => {
     try {
-      /* ---------- 0) Validate input ---------- */
+      // 0) Validate input
       const { userId, petId, description, emergencyReason } = req.body;
       if (!userId || !petId || !description) {
         return res.status(400).json({
@@ -97,18 +105,39 @@ appointmentRouter.post(
         });
       }
 
-      /* ---------- 1) Pick the best-available vet ---------- */
+      // 1) Find the best-available veterinarian for the emergency
       const now = new Date();
-      const { vet, toCancel } = await findAvailableVetForEmergency(now);
+      let vet, toCancel;
+      try {
+        const result = await findAvailableVetForEmergency(now);
+        vet = result.vet;
+        toCancel = result.toCancel;
+      } catch (err: any) {
+        // Specific handling if no vet is available for the emergency window
+        if (
+          err instanceof Error &&
+          (
+            err.message === "No active veterinarians found." ||
+            err.message === "No available vet found for the emergency window."
+          )
+        ) {
+          return res.status(503).json({
+            error:
+              "No veterinarians are currently available for an emergency appointment. Please arrive at the clinic and a veterinarian will be assigned as soon as possible."
+          });
+        }
+        // For other errors, continue to default error handling below
+        throw err;
+      }
 
-      /* ---------- 2) Cancel & notify clients ---------- */
+      // 2) Cancel overlapping (cancellable) appointments & notify clients
       const cancelledAppointments: typeof toCancel = [];
-
       for (const appt of toCancel) {
         appt.status = AppointmentStatus.CANCELLED;
         await appt.save();
         cancelledAppointments.push(appt);
 
+        // Notify the affected client via email
         const user = await User.findById(appt.userId);
         if (user?.email) {
           await sendEmergencyCancelEmail(
@@ -119,7 +148,7 @@ appointmentRouter.post(
         }
       }
 
-      /* ---------- 3) Notify the vet ---------- */
+      // 3) Notify the vet about the emergency
       if (vet.email) {
         await sendEmergencyVetAlertEmail(
           vet.email,
@@ -128,34 +157,36 @@ appointmentRouter.post(
           emergencyReason
         );
       }
-      function formatTimeTo12h(date: Date): string {
-      let h = date.getHours();
-      const m = date.getMinutes().toString().padStart(2, "0");
-      const period = h >= 12 ? "PM" : "AM";
-      h = h % 12;
-      if (h === 0) h = 12;
-      return `${h}:${m} ${period}`;
-}
 
-      /* ---------- 4) Create the emergency appointment ---------- */
+      // Helper: Formats Date to "hh:mm AM/PM"
+      function formatTimeTo12h(date: Date): string {
+        let h = date.getHours();
+        const m = date.getMinutes().toString().padStart(2, "0");
+        const period = h >= 12 ? "PM" : "AM";
+        h = h % 12;
+        if (h === 0) h = 12;
+        return `${h}:${m} ${period}`;
+      }
+
+      // 4) Create the emergency appointment (2 hours)
       const vetId = (vet._id as Types.ObjectId).toString(); // safe cast
-      const timeStr = formatTimeTo12h(now)
+      const timeStr = formatTimeTo12h(now);
       const emergencyAppt = await createAppointment(
         userId,
         petId,
         vetId,
         now,
-        timeStr,            // display-only time string
-        "emergency_care", // AppointmentType value
+        timeStr,             // display-only time string
+        "emergency_care",    // AppointmentType value
         description
       );
-
       emergencyAppt.isEmergency = true;
       emergencyAppt.emergencyReason = emergencyReason ?? "";
       emergencyAppt.cost = 1000;
+      emergencyAppt.duration = 120; // Emergency appointment: 2 hours
       await emergencyAppt.save();
 
-      /* ---------- 4.5) Notify the secretary ---------- */
+      // 4.5) Notify the secretary (do not interrupt flow if fails)
       try {
         await sendEmergencySecretaryAlertEmail({
           userId,
@@ -170,7 +201,7 @@ appointmentRouter.post(
         console.error("Failed to notify secretary about emergency appointment:", err);
       }
 
-      /* ---------- 4.6) Notify the pet owner (user) ---------- */
+      // 4.6) Notify the pet owner (do not interrupt flow if fails)
       try {
         // Fetch user, pet, and vet details for the email
         const [user, pet, vetObj] = await Promise.all([
@@ -194,7 +225,7 @@ appointmentRouter.post(
         console.error("Failed to notify pet owner about emergency appointment:", err);
       }
 
-      /* ---------- 5) Success response ---------- */
+      // 5) Success response
       return res.status(201).json({
         message: "Emergency appointment scheduled.",
         vet: {
@@ -206,7 +237,8 @@ appointmentRouter.post(
         cancelledAppointments,
         newAppointment: emergencyAppt
       });
-    } catch (err) {
+    } catch (err: any) {
+      // Log all unexpected errors
       console.error("Error scheduling emergency appointment:", err);
       return res.status(500).json({
         error: err instanceof Error ? err.message : "Unknown error"

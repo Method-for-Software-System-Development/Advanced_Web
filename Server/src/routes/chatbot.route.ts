@@ -65,13 +65,16 @@ const MENU = [
   { label: "Show history",       display: "Show history" },
   { label: "Show clinic hours",  display: "Show clinic hours" },
   { label: "Show contact details", display: "Show contact details" },
-  { label: "Emergency",          display: "Emergency" },
+  { label: "Emergency",          display: "Book emergency appointment" }, 
 ];
 
 const numberedMenu = () =>
+  "🐶 Hello, I am Kayo, your virtual assistant!\n\n" + 
   "Please choose an option by typing the corresponding number:\n" +
   MENU.map((o, i) => `${i + 1}. ${o.display}`).join("\n") +
-  "\n\nTo exit, type 'exit'.\nFor any other question, just ask.";
+  "\n\nTo exit, type 'exit'.\nAt any stage, type 'menu' to return to the main menu.\nFor any other question, just ask.";
+
+
 
 /** In-memory per-user wizard state. */
 const sessions = new Map<string, any>();
@@ -186,11 +189,7 @@ router.post("/", async (req, res) => {
       menu: [],
     });
 
-  if (text === "Emergency")
-    return res.json({
-      reply: "🚑  For emergencies call +972 4-123-4567 immediately!",
-      menu: [],
-    });
+
 
   /* ────────────────────── 9. HISTORY ENTRY POINT ───────────────────────── */
   if (text === "Show history") {
@@ -379,6 +378,110 @@ router.post("/", async (req, res) => {
     }
     return res.json({ reply: "Type 'accept' to confirm or 'exit' to cancel.", menu: [] });
   }
+  /* ======================= EMERGENCY APPOINTMENT WIZARD ======================= */
+/**
+ * Step 1: Entry point – user selects "Emergency" from the menu.
+ * Step 2: Choose pet (if multiple).
+ * Step 3: Enter reason/description.
+ * Step 4: Confirm the emergency appointment (cost $1000).
+ * Step 5: Call backend /api/appointments/emergency and show result.
+ */
+
+if (text === "Emergency") {
+  if (!uid) return res.json({ reply: "Please log in to book an emergency appointment.", menu: [] });
+
+  const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
+  const pets = (user?.pets ?? []).filter(isPet);
+  if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
+
+  // One pet – skip selection
+  if (pets.length === 1) {
+    const [pet] = pets;
+    sessions.set(uid, { step: "emergencyReason", petId: pet._id, petName: pet.name });
+    return res.json({
+      reply: `Pet selected (${pet.name}). Please describe the emergency:`,
+      menu: [],
+    });
+  }
+  // Multiple pets – ask user
+  sessions.set(uid, { step: "emergencyChoosePet", pets });
+  return res.json({
+    reply:
+      "Which pet is having an emergency?\n" +
+      pets.map((p, i) => `${i + 1}. ${p.name}`).join("\n") +
+      "\n(Type the number)",
+    menu: [],
+  });
+}
+
+// Step 2: User selects pet for emergency
+if (s?.step === "emergencyChoosePet") {
+  const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
+  const pets: IPet[] = s.pets;
+  if (idx < 0 || idx >= pets.length)
+    return res.json({ reply: "Invalid number. Try again:", menu: [] });
+
+  const pet = pets[idx];
+  sessions.set(uid!, { step: "emergencyReason", petId: pet._id, petName: pet.name });
+  return res.json({
+    reply: `Pet selected (${pet.name}). Please describe the emergency:`,
+    menu: [],
+  });
+}
+
+// Step 3: User enters reason/description for emergency
+if (s?.step === "emergencyReason") {
+  const reason = text.trim();
+  if (!reason)
+    return res.json({ reply: "Please describe the emergency:", menu: [] });
+
+  // Save description and move to confirmation step
+  sessions.set(uid!, { ...s, step: "emergencyConfirm", description: reason });
+  return res.json({
+    reply:
+      `You are about to book an EMERGENCY appointment for ${s.petName}.\n` +
+      `Reason: ${reason}\n` +
+      "‼️ Cost: $1000\n" +
+      "Type 'accept' to confirm or 'exit' to cancel.",
+    menu: [],
+  });
+}
+
+// Step 4: User confirms or cancels emergency
+if (s?.step === "emergencyConfirm") {
+  if (lower === "accept") {
+    try {
+      // Call the emergency backend API (as in your app)
+      const axiosRes = await axios.post(
+        `${process.env.SERVER_URL || "http://localhost:3000"}/api/appointments/emergency`,
+        {
+          userId: uid,
+          petId: s.petId,
+          description: s.description,
+        }
+      );
+      sessions.delete(uid!);
+      return res.json({
+        reply:
+          "✅ Emergency appointment booked! " +
+          `Vet: ${axiosRes.data.vet.firstName} ${axiosRes.data.vet.lastName}\n` +
+          "You will be contacted soon.",
+        menu: [],
+      });
+    } catch (err: any) {
+      sessions.delete(uid!);
+      const msg =
+        err?.response?.data?.error ||
+        "Failed to book emergency appointment. Please try again.";
+      return res.json({ reply: msg, menu: [] });
+    }
+  }
+  if (lower === "exit") {
+    sessions.delete(uid!);
+    return res.json({ reply: "Emergency appointment cancelled.", menu: [] });
+  }
+  return res.json({ reply: "Type 'accept' to confirm or 'exit' to cancel.", menu: [] });
+}
 
   /* ======================== CANCEL WIZARD ========================= */
 

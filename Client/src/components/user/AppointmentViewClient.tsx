@@ -380,26 +380,29 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                       onSubmit={handleCancelSubmit}
                     />
                   ) : (
-                    <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
-                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
-                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
-                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
-                          {formatted.cost && (
-                            <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
-                          )}
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-base"> {/* Set consistent font size */}
+                      <div>
+                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
+                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
+                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
                       </div>
+                      <div>
+                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
+                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
+                        {formatted.cost && (
+                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {/* Description and Notes with same font size */}
+                  {!editingAppointmentId && !showCancelModal && (
+                    <>
                       {formatted.description && (
-                        <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Description:</strong> {formatted.description}</p>
+                        <p className="mt-2 text-base text-gray-600 dark:text-gray-300"><strong className="font-medium">Description:</strong> {formatted.description}</p>
                       )}
                       {formatted.notes && (
-                        <p className="mt-2 text-gray-600 dark:text-gray-300"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
+                        <p className="mt-2 text-base text-gray-600 dark:text-gray-300"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
                       )}
                     </>
                   )}

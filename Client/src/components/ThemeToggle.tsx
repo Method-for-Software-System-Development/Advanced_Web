@@ -70,8 +70,8 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
     theme === "light"
       ? { Icon: Moon, tooltip: "Switch to dark mode" }
       : theme === "dark"
-      ? { Icon: Monitor, tooltip: "Switch to system mode" }
-      : { Icon: Sun, tooltip: "Switch to light mode" };
+        ? { Icon: Monitor, tooltip: "Switch to system mode" }
+        : { Icon: Sun, tooltip: "Switch to light mode" };
 
   // Full-width button (mobile)
   if (variant === "button")
@@ -80,8 +80,8 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
         onClick={handleClick}
         aria-label={tooltip}
         className={`
-          w-[90%] bg-[#664147] text-white flex items-center justify-center
-          px-10 py-2 rounded-full hover:bg-[#58383E] transition
+          w-[90%] bg-wine dark:bg-white text-white dark:text-wine flex items-center justify-center
+          px-10 py-2 rounded-full hover:bg-wineDark dark:hover:bg-whiteDark transform transition duration-200
           font-[Nunito] text-lg font-bold cursor-pointer
           ${className}
         `}
@@ -99,9 +99,10 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       title={tooltip}
       className={`
         flex items-center justify-center rounded-full
-        bg-[#664147] text-white w-11 h-11
-        hover:bg-[#58383E] transform transition duration-200 hover:scale-110
-        cursor-pointer ${className}
+        bg-wine dark:bg-white text-white dark:text-wine w-11 h-11
+        hover:bg-wineDark dark:hover:bg-whiteDark transform transition duration-200 hover:scale-110
+        cursor-pointer
+        ${className}
       `}
     >
       <Icon size={20} />

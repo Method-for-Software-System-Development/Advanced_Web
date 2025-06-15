@@ -6,6 +6,7 @@ import AppointmentNotesInline from './AppointmentNotesInline';
 import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
 import { API_URL } from '../../config/api';
+import EmergencyAppointmentModal from './EmergencyAppointmentModal';
 
 interface AppointmentViewProps {
   onBack: () => void;
@@ -27,7 +28,7 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
     staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
     description: appointment.description,
     notes: appointment.notes,
-    status: appointment.status,
+    status: appointment.status, // <-- Add status to the returned object
     duration: appointment.duration,
     cost: appointment.cost,
     date: appointment.date
@@ -48,6 +49,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   
   // Success message state
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
 
   // Load appointments for selected date
   useEffect(() => {
@@ -354,7 +357,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
       </div>{/* Calendar and Export Section */}
       <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-3xl mx-auto">
-        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Select Date to View Appointments</h2>        <div className="flex justify-center mb-6">
+        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Select Date to View Appointments</h2>
+        <div className="flex justify-center mb-6">
           <TailwindCalendar
             onChange={(value: Value) => handleDateChange(value)}
             value={selectedDate}
@@ -362,7 +366,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             onActiveStartDateChange={({ activeStartDate }: { activeStartDate: Date | null }) => activeStartDate && setCurrentCalendarMonthView(activeStartDate)}
             tileContent={tileContent}
           />
-        </div><div className="text-center">
+        </div>
+        <div className="text-center">
           <div className="flex gap-4 justify-center">
             <button
               onClick={handleExportToExcel}
@@ -377,8 +382,51 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             >
               Add New Appointment
             </button>
-          </div>        </div>
-      </section>      {/* Add Appointment Form Section */}
+            <button
+              onClick={() => setShowEmergencyModal(true)}
+              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200"
+            >
+              Emergency Appointment
+            </button>
+          </div>
+        </div>
+      </section>
+      {showEmergencyModal && (
+        <EmergencyAppointmentModal
+          open={showEmergencyModal}
+          onClose={() => setShowEmergencyModal(false)}
+          onConfirm={async (reason, petId, patientId) => {
+            setIsSubmittingEmergency(true);
+            setError("");
+            try {
+              if (!patientId || !petId || !reason.trim()) {
+                setError("Please select a patient, pet, and provide a description for the emergency.");
+                setIsSubmittingEmergency(false);
+                return;
+              }
+              await appointmentService.createEmergencyAppointment({
+                userId: patientId,
+                petId,
+                description: reason,
+                emergencyReason: reason || "EMERGENCY"
+              });
+              alert("Emergency appointment request sent! Please come to the clinic immediately. Our staff will contact you soon.");
+              setShowEmergencyModal(false);
+            } catch (err: any) {
+              if (err instanceof Error) {
+                setError(err.message);
+              } else if (typeof err === 'object' && err !== null && 'message' in err) {
+                setError((err as any).message);
+              } else {
+                setError('Failed to schedule emergency appointment.');
+              }
+            } finally {
+              setIsSubmittingEmergency(false);
+            }
+          }}
+          isSubmitting={isSubmittingEmergency}
+        />
+      )}      {/* Add Appointment Form Section */}
       {showAddForm && (
         <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
@@ -425,18 +473,22 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                         {formattedApt.service}
                       </span>
                     </div>                    <div className="flex gap-2">
-                      <select
-                        value={formattedApt.status}
-                        onChange={(e) => handleUpdateStatus(apt._id, e.target.value as AppointmentStatus)}
-                        className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200"
-                        disabled={formattedApt.status === AppointmentStatus.CANCELLED}
-                      >
-                        <option value={AppointmentStatus.SCHEDULED}>Scheduled</option>
-                        <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
-                        <option value={AppointmentStatus.IN_PROGRESS}>In Progress</option>
-                        <option value={AppointmentStatus.COMPLETED}>Completed</option>
-                        <option value={AppointmentStatus.NO_SHOW}>No Show</option>
-                      </select>                      {formattedApt.status === AppointmentStatus.COMPLETED && (
+                      {/* Hide status dropdown for cancelled appointments */}
+                      {formattedApt.status !== AppointmentStatus.CANCELLED && (
+                        <select
+                          value={formattedApt.status}
+                          onChange={(e) => handleUpdateStatus(apt._id, e.target.value as AppointmentStatus)}
+                          className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200"
+                        >
+                          <option value={AppointmentStatus.SCHEDULED}>Scheduled</option>
+                          <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
+                          <option value={AppointmentStatus.IN_PROGRESS}>In Progress</option>
+                          <option value={AppointmentStatus.COMPLETED}>Completed</option>
+                          <option value={AppointmentStatus.NO_SHOW}>No Show</option>
+                        </select>
+                      )}
+
+                      {formattedApt.status === AppointmentStatus.COMPLETED && (
                         <button
                           onClick={() => handleEditNotes(apt._id)}
                           className="px-3 py-1 bg-[#EF92A6] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-[#E57D98] transition-colors duration-150"
@@ -445,13 +497,16 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                           {formattedApt.notes ? 'Edit Notes' : 'Add Notes'}
                         </button>
                       )}
-                      <button
-                        onClick={() => handleCancelAppointment(apt._id)}
-                        className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
-                        disabled={formattedApt.status === AppointmentStatus.CANCELLED}
-                      >
-                        Cancel
-                      </button>
+                      
+                      {/* Hide cancel button for cancelled appointments */}
+                      {formattedApt.status !== AppointmentStatus.CANCELLED && (
+                        <button
+                          onClick={() => handleCancelAppointment(apt._id)}
+                          className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </div>
                   </div>                  
                   <p className="mt-2 text-sm text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formattedApt.time}</p>
