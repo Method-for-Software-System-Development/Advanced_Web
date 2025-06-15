@@ -47,7 +47,8 @@ const corsOptions = {
         
         // List of allowed origins
         const allowedOrigins = [
-            'https://client-tal-yagudins-projects.vercel.app',
+            'furever-friend-client.vercel.app',
+            'client-olive-three.vercel.app',
             'http://localhost:5173',
             'http://localhost:3000',
             'http://127.0.0.1:5173',
