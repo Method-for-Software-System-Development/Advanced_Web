@@ -14,6 +14,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import MessageBubble, { MessageBubbleProps } from "./MessageBubble";
+import { API_URL } from "../../config/api";
 
 export interface ChatWindowProps {
   open: boolean;
@@ -27,7 +28,7 @@ async function sendChatMessage(message: string, _retry = false): Promise<{ reply
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch("http://localhost:3000/api/chatbot", {
+  const res = await fetch(`${API_URL}/chatbot`, {
     method: "POST",
     headers,
     body: JSON.stringify({ message }),

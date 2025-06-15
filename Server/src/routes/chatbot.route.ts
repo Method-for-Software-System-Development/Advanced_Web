@@ -42,18 +42,26 @@ const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || "").trim();
 
 /** Minimal wrapper around Gemini Flash with 503 retry. */
 async function askGemini(prompt: string, retries = 3): Promise<string> {
+  // Check if API key is configured
+  if (!GEMINI_API_KEY) {
+    console.warn('GEMINI_API_KEY not configured');
+    return "I'm sorry, but I'm currently unavailable. Please try the main menu options or contact support.";
+  }
+
   const system = `You are Kayo, the friendly assistant for FurEver Friends.`
                + ` Answer briefly and warmly.\nUser: "${prompt}"`;
   try {
     const { data } = await axios.post(
       `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text: system }] }] }
+      { contents: [{ parts: [{ text: system }] }] },
+      { timeout: 10000 } // 10 second timeout for Vercel
     );
     return data.candidates?.[0]?.content?.parts?.[0]?.text
         ?? "Sorry, I didn't understand.";
   } catch (err: any) {
+    console.error('Gemini API error:', err.response?.data || err.message);
     if (retries && err.response?.status === 503) return askGemini(prompt, retries - 1);
-    throw err;
+    return "I'm having trouble connecting to my knowledge base. Please try the menu options or contact support.";
   }
 }
 
@@ -92,13 +100,14 @@ async function parseJwt(req: Request, res: Response): Promise<string | undefined
 /* ─────────────────────────── 5. Router handler ──────────────────────────── */
 
 router.post("/", async (req, res) => {
-  /* 5.1  Basic message retrieval */
-  let text = String(req.body?.message ?? "").trim();
-  if (!text) return res.json({ reply: numberedMenu(), menu: [] });
+  try {
+    /* 5.1  Basic message retrieval */
+    let text = String(req.body?.message ?? "").trim();
+    if (!text) return res.json({ reply: numberedMenu(), menu: [] });
 
-  /* 5.2  Identify user (optional) + current session */
-  const uid = await parseJwt(req, res);
-  const s   = uid ? sessions.get(uid) : undefined;
+    /* 5.2  Identify user (optional) + current session */
+    const uid = await parseJwt(req, res);
+    const s   = uid ? sessions.get(uid) : undefined;
 
   /* 5.3  Global commands – valid at ANY point */
   const lower = text.toLowerCase();
@@ -535,10 +544,17 @@ if (s?.step === "emergencyConfirm") {
     }
     return res.json({ reply: "Type 'accept' to confirm or 'exit' to abort.", menu: [] });
   }
-
   /* ───────────────────────── 11. GEMINI FALLBACK ───────────────────────── */
   const ai = await askGemini(text);
   return res.json({ reply: ai, menu: [] });
+  
+  } catch (error) {
+    console.error('Chatbot error:', error);
+    return res.status(500).json({ 
+      reply: "I'm experiencing technical difficulties. Please try again or contact support.",
+      menu: [] 
+    });
+  }
 });
 
 export default router;
