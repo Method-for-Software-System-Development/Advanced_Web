@@ -31,17 +31,16 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
   if (cached.conn && mongoose.connection.readyState === 1) {
     console.log('Using cached MongoDB connection');
     return cached.conn;
-  }
-
-  // If we don't have a promise, create one
+  }  // If we don't have a promise, create one
   if (!cached.promise) {
+    // Set mongoose-specific options for serverless
+    mongoose.set('bufferCommands', false);
+
     const opts = {
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       maxPoolSize: 10,
       retryWrites: true,
-      bufferCommands: false, // Disable mongoose buffering for serverless
-      bufferMaxEntries: 0,   // Disable mongoose buffering for serverless
     };
 
     console.log('Creating new MongoDB connection...');
