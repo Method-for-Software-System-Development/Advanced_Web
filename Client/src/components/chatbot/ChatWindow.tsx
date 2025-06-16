@@ -24,7 +24,7 @@ export interface ChatWindowProps {
 // Helper: Send a chat message to the backend API (adds JWT + auto-retry on 401)
 async function sendChatMessage(message: string, _retry = false): Promise<{ reply: string; menu: string[] }> {
   /* build headers */
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -39,7 +39,7 @@ async function sendChatMessage(message: string, _retry = false): Promise<{ reply
 
   /* ---------- 401 → remove token & retry once without it ---------- */
   if (res.status === 401 && ! _retry) {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     return sendChatMessage(message, true);          // second call – no token
   }
 

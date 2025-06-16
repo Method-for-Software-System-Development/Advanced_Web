@@ -61,10 +61,9 @@ const [modalOpen, setModalOpen] = useState(false);
   
   // Client and pet state
   const [clientPets, setClientPets] = useState<Pet[]>([]);
-  const [client, setClient] = useState<Patient | null>(null);
-  const [selectedPetId, setSelectedPetId] = useState<string | null>(
+  const [client, setClient] = useState<Patient | null>(null);  const [selectedPetId, setSelectedPetId] = useState<string | null>(
     () => {
-      const clientRaw = localStorage.getItem("client");
+      const clientRaw = sessionStorage.getItem("client");
       if (clientRaw) {
         try {
           const parsedClient = JSON.parse(clientRaw);
@@ -78,7 +77,7 @@ const [modalOpen, setModalOpen] = useState(false);
 
 useEffect(() => {
   try {
-    const clientRaw = localStorage.getItem("client");
+    const clientRaw = sessionStorage.getItem("client");
     if (!clientRaw) {
       setError('No client info found.');
       return;

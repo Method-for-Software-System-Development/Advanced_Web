@@ -53,10 +53,10 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
 
   // Check for direct navigation to add form
   useEffect(() => {
-    const showAddFormDirectly = localStorage.getItem("showAddFormDirectly");
+    const showAddFormDirectly = sessionStorage.getItem("showAddFormDirectly");
     if (showAddFormDirectly === "true") {
       setShowAddForm(true);
-      localStorage.removeItem("showAddFormDirectly"); // Clean up
+      sessionStorage.removeItem("showAddFormDirectly"); // Clean up
     }
   }, []);
 

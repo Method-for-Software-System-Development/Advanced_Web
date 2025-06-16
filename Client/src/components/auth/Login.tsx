@@ -57,14 +57,12 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
       const response = await axios.post(`${API_URL}/users/login`, {
         email,
         password,
-      });
-
-      setLoginMessage("Login successful!");
-      localStorage.setItem("client", JSON.stringify(response.data.user));
+      });      setLoginMessage("Login successful!");
+      sessionStorage.setItem("client", JSON.stringify(response.data.user));
       //  to save the JWT token you got from the server
-      localStorage.setItem("token", response.data.token);
+      sessionStorage.setItem("token", response.data.token);
       // Save the user's role for navbar/dashboard logic
-      localStorage.setItem("role", response.data.user.role || "user");
+      sessionStorage.setItem("role", response.data.user.role || "user");
 
       setTimeout(() => {
         onClose();

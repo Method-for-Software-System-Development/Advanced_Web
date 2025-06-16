@@ -91,7 +91,7 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
             <h3 className="text-sm font-medium opacity-90">Total Patients</h3>
             <p className="text-3xl font-bold">{statistics.overview.totalPatients}</p>
           </div>
-          <div className="bg-gradient-to-br from-green-400 to-green-500 text-white p-6 rounded-lg shadow-lg">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 text-white p-6 rounded-lg shadow-lg">
             <h3 className="text-sm font-medium opacity-90">Active Staff</h3>
             <p className="text-3xl font-bold">{statistics.overview.totalStaff}</p>
           </div>
@@ -99,11 +99,11 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
             <h3 className="text-sm font-medium opacity-90">Today's Appointments</h3>
             <p className="text-3xl font-bold">{statistics.overview.todayAppointments}</p>
           </div>
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 text-white p-6 rounded-lg shadow-lg">
+          <div className="bg-gradient-to-br from-green-400 to-green-400 text-white p-6 rounded-lg shadow-lg">
             <h3 className="text-sm font-medium opacity-90">Weekly Revenue</h3>
             <p className="text-2xl font-bold">{formatCurrency(statistics.overview.weeklyRevenue)}</p>
           </div>
-          <div className="bg-gradient-to-br from-red-400 to-red-500 text-white p-6 rounded-lg shadow-lg">
+          <div className="bg-gradient-to-br from-green-400 to-green-500 text-white p-6 rounded-lg shadow-lg">
             <h3 className="text-sm font-medium opacity-90">Monthly Revenue</h3>
             <p className="text-2xl font-bold">{formatCurrency(statistics.overview.monthlyRevenue)}</p>
           </div>

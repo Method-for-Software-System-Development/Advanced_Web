@@ -24,7 +24,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
   useEffect(() => {
     if (!open) return;
     try {
-      const clientRaw = localStorage.getItem("client");
+      const clientRaw = sessionStorage.getItem("client");
       if (!clientRaw) return;
       const parsedClient = JSON.parse(clientRaw);
       setClient(parsedClient);

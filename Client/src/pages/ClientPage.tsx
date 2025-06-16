@@ -35,29 +35,27 @@ const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
-
   // Check for navigation signal from AboutSection
   useEffect(() => {
-    const navigateToAppointments = localStorage.getItem("navigateToAppointments");
-    const navigateToAddAppointment = localStorage.getItem("navigateToAddAppointment");
+    const navigateToAppointments = sessionStorage.getItem("navigateToAppointments");
+    const navigateToAddAppointment = sessionStorage.getItem("navigateToAddAppointment");
     
     if (navigateToAppointments === "true") {
       setCurrentView("appointments");
-      localStorage.removeItem("navigateToAppointments"); // Clean up
+      sessionStorage.removeItem("navigateToAppointments"); // Clean up
     } else if (navigateToAddAppointment === "true") {
       setCurrentView("appointments");
-      localStorage.removeItem("navigateToAddAppointment"); // Clean up
+      sessionStorage.removeItem("navigateToAddAppointment"); // Clean up
       // Note: We'll need to pass a signal to AppointmentViewClient to show the add form
-      localStorage.setItem("showAddFormDirectly", "true");
+      sessionStorage.setItem("showAddFormDirectly", "true");
     }
   }, []);
 
   const handleBackToDashboard = () => {
     setCurrentView("profile");
   };
-
   const handleEmergencyAppointmentClient = async (reasonFromModal?: string, petIdFromModal?: string) => {
-    const clientRaw = localStorage.getItem("client");
+    const clientRaw = sessionStorage.getItem("client");
     if (!clientRaw) return;
     const client = JSON.parse(clientRaw);
     const petId = petIdFromModal || (client.pets && client.pets.length > 0 ? (typeof client.pets[0] === 'string' ? client.pets[0] : client.pets[0]._id) : null);

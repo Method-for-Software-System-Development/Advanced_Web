@@ -48,7 +48,7 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
 
   // Load client from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("client");
+    const stored = sessionStorage.getItem("client");
     if (stored) {
       const user = JSON.parse(stored);
       setClient(user);

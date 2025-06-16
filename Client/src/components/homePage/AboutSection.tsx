@@ -8,11 +8,10 @@ interface AboutSectionProps {
 
 const AboutSection: React.FC<AboutSectionProps> = ({ onLoginClick }) => {
   const navigate = useNavigate();
-
   const handleBookAppointmentClick = () => {
     // Check if user is logged in
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+    const token = sessionStorage.getItem("token");
+    const role = sessionStorage.getItem("role");
 
     if (!token) {
       // User is not logged in, trigger login modal
@@ -21,16 +20,15 @@ const AboutSection: React.FC<AboutSectionProps> = ({ onLoginClick }) => {
       }
       return;
     }    // User is logged in, navigate based on role
-    if (role === "secretary") {
-      // Navigate to secretary page and trigger add appointment form directly
+    if (role === "secretary") {      // Navigate to secretary page and trigger add appointment form directly
       navigate("/secretary");
       // Communicate to show the add appointment form directly
-      localStorage.setItem("navigateToAddAppointment", "true");
+      sessionStorage.setItem("navigateToAddAppointment", "true");
     } else {
       // Navigate to client page and trigger add appointment form directly
       navigate("/client");
       // Communicate to show the add appointment form directly
-      localStorage.setItem("navigateToAddAppointment", "true");
+      sessionStorage.setItem("navigateToAddAppointment", "true");
     }
   };
 

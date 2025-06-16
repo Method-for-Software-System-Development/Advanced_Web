@@ -24,12 +24,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard }) => {
     const onStorage = () => setRefresh(r => r + 1);
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, []);
-  // Track whether the user is logged in by checking for a JWT token in localStorage
-  const isLoggedIn = !!localStorage.getItem("token");
+  }, []);  // Track whether the user is logged in by checking for a JWT token in sessionStorage
+  const isLoggedIn = !!sessionStorage.getItem("token");
 
-  // Get the user's role from localStorage
-  const role = localStorage.getItem("role");
+  // Get the user's role from sessionStorage
+  const role = sessionStorage.getItem("role");
   // useNavigate hook for programmatic navigation
   const navigate = useNavigate();
   /**

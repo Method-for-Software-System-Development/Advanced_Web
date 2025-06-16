@@ -58,7 +58,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     setIsLoading(true);
     setError('');
     try {
-      const clientRaw = localStorage.getItem("client");
+      const clientRaw = sessionStorage.getItem("client");
       if (!clientRaw) {
         setError('No client info found.');
         setIsLoading(false);
@@ -127,10 +127,10 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
 
   // Check for direct navigation to add form
   useEffect(() => {
-    const showAddFormDirectly = localStorage.getItem("showAddFormDirectly");
+    const showAddFormDirectly = sessionStorage.getItem("showAddFormDirectly");
     if (showAddFormDirectly === "true") {
       setShowAddForm(true);
-      localStorage.removeItem("showAddFormDirectly"); // Clean up
+      sessionStorage.removeItem("showAddFormDirectly"); // Clean up
     }
   }, []);
 

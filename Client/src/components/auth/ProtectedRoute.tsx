@@ -21,13 +21,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRole, 
   excludedRoles = [],
   requireAuth = true 
-}) => {
-  // Check if user is authenticated by looking for JWT token
-  const token = localStorage.getItem('token');
+}) => {  // Check if user is authenticated by looking for JWT token
+  const token = sessionStorage.getItem('token');
   const isAuthenticated = !!token;
   
-  // Get user role from localStorage
-  const userRole = localStorage.getItem('role');
+  // Get user role from sessionStorage
+  const userRole = sessionStorage.getItem('role');
 
   // If authentication is required but user is not authenticated
   if (requireAuth && !isAuthenticated) {

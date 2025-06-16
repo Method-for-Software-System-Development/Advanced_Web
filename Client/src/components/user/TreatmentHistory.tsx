@@ -35,7 +35,7 @@ const TreatmentHistory: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const clientRaw = localStorage.getItem("client");
+      const clientRaw = sessionStorage.getItem("client");
       if (!clientRaw) {
         setError('Please log in to view treatment history.');
         return;
