@@ -10,12 +10,9 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
+import { ensureDbConnection } from './utils/dbConnection';
 
 import chatbotRouter from './routes/chatbot.route';
-
-
-
-
 import usersRouter from './routes/users.route';
 import petRouter from './routes/pet.route';
 import treatmentRouter from './routes/treatment.route';
@@ -28,46 +25,12 @@ import statisticsRouter from './routes/statistics.route';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
-/**
- * Connect to MongoDB database optimized for Vercel serverless.
- * Reuses existing connections to avoid reconnection on every function invocation.
- */
-const connectToMongoDB = async () => {
-    // Check if already connected
-    if (mongoose.connection.readyState === 1) {
-        console.log('MongoDB already connected');
-        return;
-    }
-
-    // Check if connection is in progress
-    if (mongoose.connection.readyState === 2) {
-        console.log('MongoDB connection in progress');
-        return;
-    }
-
-    try {
-        const options = {
-            serverSelectionTimeoutMS: 10000, // Timeout for serverless
-            socketTimeoutMS: 45000,
-            maxPoolSize: 10,
-            retryWrites: true,
-            bufferCommands: false, // Disable mongoose buffering for serverless
-        };
-        
-        await mongoose.connect(process.env.MONGODB_URI!, options);
-        console.log('Connected to MongoDB!');
-    } catch (err) {
-        console.error('Failed to connect to MongoDB:', err);
-        throw err;
-    }
-};
-
-// Initialize connection
-connectToMongoDB().catch(console.error);
-
 /** Middlewares for JSON parsing and CORS support */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// Ensure database connection for all API routes
+app.use('/api', ensureDbConnection);
 
 // Enhanced CORS middleware configuration
 const corsOptions = {
@@ -133,23 +96,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     // Handle preflight OPTIONS requests
     if (req.method === 'OPTIONS') {
         res.status(200).end();
-        return;
-    }
+        return;    }
       next();
-});
-
-// Database connection middleware for serverless
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        await connectToMongoDB();
-        next();
-    } catch (error) {
-        console.error('Database connection failed:', error);
-        res.status(500).json({ 
-            error: 'Database connection failed',
-            message: 'Unable to connect to the database. Please try again later.'
-        });
-    }
 });
 
 /** Serve static files from uploads directory */

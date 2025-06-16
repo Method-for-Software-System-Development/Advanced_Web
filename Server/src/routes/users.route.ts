@@ -100,19 +100,27 @@ usersRouter.post("/login", async (req: Request, res: Response) => {
         // 1. Extract email and password from request body
         const { email, password } = req.body;
 
+        console.log('Login attempt for email:', email);
+
         // 2. Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
+            console.log('User not found for email:', email);
             // User not found
             return res.status(401).send({ error: "Invalid email or password" });
         }
 
+        console.log('User found:', user.email);
+
         // 3. Compare given password with hashed password in DB
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            console.log('Password mismatch for user:', email);
             // Password does not match
             return res.status(401).send({ error: "Invalid email or password" });
         }
+
+        console.log('Password match successful for user:', email);
 
         // 4. Create a JWT token with user info
         const token = jwt.sign(
@@ -121,6 +129,8 @@ usersRouter.post("/login", async (req: Request, res: Response) => {
             { expiresIn: "1h" }
         );
 
+        console.log('JWT token created for user:', email);
+
         // 5. Return user info and JWT token
         res.status(200).send({
             message: "Login successful",
@@ -128,6 +138,7 @@ usersRouter.post("/login", async (req: Request, res: Response) => {
             token
         });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
     }
 });

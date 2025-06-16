@@ -66,7 +66,13 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
 
       setTimeout(() => {
         onClose();
-        navigate("/");
+        // Redirect based on user role
+        const userRole = response.data.user.role;
+        if (userRole === "secretary") {
+          navigate("/secretary");
+        } else {
+          navigate("/client");
+        }
       }, 1000);
     } catch (err: any) {
       // Axios errors may be in err.response.data or just err.message
