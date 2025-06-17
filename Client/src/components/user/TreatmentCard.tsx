@@ -53,10 +53,9 @@ const TreatmentCard: React.FC<TreatmentCardProps> = ({
             </div>
           </div>
           
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
+          <div className="space-y-3">            <div className="flex items-center gap-2">
               <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0]"> Cost:</span>
-              <span className="text-sm font-semibold text-[var(--color-greyText)] dark:text-gray-200">
+              <span className="text-sm text-black dark:text-gray-200">
                 {cost.toFixed(2)}$
               </span>
             </div>
@@ -77,10 +76,9 @@ const TreatmentCard: React.FC<TreatmentCardProps> = ({
           <span className="text-xs text-right break-words">{visitationType}</span>
         </div>
         <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
-        
-        <div className="flex justify-between items-center py-2">
+          <div className="flex justify-between items-center py-2">
           <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Cost:</span>
-          <span className="text-xs text-right">{cost.toFixed(2)}$</span>
+          <span className="text-xs text-black text-right">{cost.toFixed(2)}$</span>
         </div>
       </div>      {/* Description Section */}
       {description && (

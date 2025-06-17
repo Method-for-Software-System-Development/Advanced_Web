@@ -249,27 +249,28 @@ const TreatmentHistory: React.FC = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>                Refresh
-              </button>
-            </div>
-
-            {/* Mobile refresh button */}
+              </button>            </div>            {/* Mobile refresh button */}
             <div className="block sm:hidden w-full py-1 px-2 mb-4">
-              <UserNavButton
-                label="Refresh"
+              <button
                 onClick={() => {
                   if (!isLoading) {
                     setError('');
                     fetchAppointments();
                   }
                 }}
-                className={`w-full mx-auto text-[12px] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              />
+                disabled={isLoading}
+                className="w-full mx-auto px-4 py-2 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors text-[12px] flex items-center justify-center gap-2"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
             </div>
           </div>
         )}        {/* Results Count and Treatment List */}
-        {!isLoading && !error && (
-          <>            <div className="mb-4 text-[10px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
-              Showing {sortedAndFiltered.length} completed appointment{sortedAndFiltered.length !== 1 ? 's' : ''}
+        {!isLoading && !error && (          <>            <div className="mb-4 text-[14px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
+              Showing {sortedAndFiltered.length} past appointment{sortedAndFiltered.length !== 1 ? 's' : ''}
               {searchTerm && ` matching "${searchTerm}"`}
             </div><div className="space-y-6">
               {sortedAndFiltered.length > 0 ? (
