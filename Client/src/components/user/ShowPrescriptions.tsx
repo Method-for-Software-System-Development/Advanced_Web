@@ -156,8 +156,20 @@ const ShowPrescriptions: React.FC = () => {
               {successMessage}
             </div>
           </div>
-        )}        <div className="mb-6">
-          <h2 className="text-[28px] sm:text-3xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-6">Prescription History</h2>
+        )}        <div className="mb-6">          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-4">
+            <div>
+              <h2 className="text-[28px] sm:text-3xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-4">Prescription History</h2>
+            </div>
+            {/* Desktop Show Unfulfilled Only button */}
+            <div className="hidden sm:flex gap-2">
+              <button
+                onClick={() => setShowUnfulfilledOnly((v) => !v)}
+                className="px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
+              >
+                {showUnfulfilledOnly ? "Show All" : "Show Unfulfilled Only"}
+              </button>
+            </div>
+          </div>
             {/* Error Display */}
           {error && (
             <div className="mb-6 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-md">
@@ -187,27 +199,15 @@ const ShowPrescriptions: React.FC = () => {
                 <span className="text-lg text-[var(--color-wine)] dark:text-[#FDF6F0]">Loading prescription history...</span>
               </div>
             </div>
-          )}
-
-          {/* Toggle Button */}
+          )}              {/* Mobile button below headline */}
           {!isLoading && !error && (
-            <>
-              {/* Desktop button */}
-              <div className="hidden sm:flex justify-end w-auto mb-4">
-                <UserNavButton
-                  label={showUnfulfilledOnly ? "Show All" : "Show Unfulfilled Only"}
-                  onClick={() => setShowUnfulfilledOnly((v) => !v)}
-                />
-              </div>
-              {/* Mobile button below headline */}
-              <div className="block sm:hidden w-full py-1 px-2 mb-4">
-                <UserNavButton
-                  label={showUnfulfilledOnly ? "Show All" : "Show Unfulfilled Only"}
-                  onClick={() => setShowUnfulfilledOnly((v) => !v)}
-                  className="w-full mx-auto text-[12px]"
-                />
-              </div>
-            </>
+            <div className="block sm:hidden w-full py-1 px-2 mb-4">              <button
+                onClick={() => setShowUnfulfilledOnly((v) => !v)}
+                className="w-full mx-auto px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition text-[12px]"
+              >
+                {showUnfulfilledOnly ? "Show All" : "Show Unfulfilled Only"}
+              </button>
+            </div>
           )}
         </div>        {/* Search and Sort Controls */}
         {!isLoading && !error && (
@@ -264,25 +264,28 @@ const ShowPrescriptions: React.FC = () => {
                 </svg>
                 Refresh
               </button>
-            </div>
-
-            {/* MOBILE ONLY: Refresh button */}
+            </div>            {/* MOBILE ONLY: Refresh button */}
             <div className="block sm:hidden w-full py-1 px-2 mb-4">
-              <UserNavButton
-                label="Refresh"
+              <button
                 onClick={() => {
                   if (!isLoading) {
                     setError('');
                     fetchPrescriptions();
                   }
                 }}
-                className={`w-full mx-auto text-[12px] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              />
+                disabled={isLoading}
+                className="w-full mx-auto px-4 py-2 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors text-[12px] flex items-center justify-center gap-2"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
             </div>
           </div>
         )}{/* Results Count and Prescription List */}
         {!isLoading && !error && (
-          <>            <div className="mb-4 text-[10px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
+          <>            <div className="mb-4 text-[14px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
               Showing {sortedAndFiltered.length} prescription{sortedAndFiltered.length !== 1 ? 's' : ''}
               {searchTerm && ` matching "${searchTerm}"`}
               {showUnfulfilledOnly && ' (unfulfilled only)'}
@@ -297,7 +300,8 @@ const ShowPrescriptions: React.FC = () => {
                   if (!acc[key]) acc[key] = [];
                   acc[key].push(p);
                   return acc;
-                }, {} as Record<string, typeof sortedAndFiltered>)).map(([petName, prescList]) => (                  <div key={petName}>
+                }, {} as Record<string, typeof sortedAndFiltered>)).map(([petName, prescList]) => (                  
+                <div key={petName}>
                     <div className="mb-4 text-xl font-semibold text-[#664147] dark:text-[#FDF6F0]">
                       {petName}
                     </div>

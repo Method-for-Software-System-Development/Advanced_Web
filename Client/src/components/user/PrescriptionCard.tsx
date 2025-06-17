@@ -81,16 +81,15 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription }) => 
           </span>
         </div>
       </div>        {/* Prescription Details Grid - Desktop/Tablet view */}
-      <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div className="space-y-3">
-          <div className="flex items-center">
+      <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div className="space-y-3">          <div className="flex items-center">
             <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[120px]">Quantity:</span>
-            <span className="ml-2 text-sm font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0]">
+            <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">
               {prescription.quantity}
             </span>
           </div>
           <div className="flex items-center">
             <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[120px]">Referral Type:</span>
-            <span className="ml-2 text-sm text-[var(--color-wine)] dark:text-[#FDF6F0]">
+            <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">
               {prescription.referralType}
             </span>
           </div>
@@ -98,7 +97,7 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription }) => 
           <div className="space-y-3">
           <div className="flex items-center">
             <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Issued:</span>
-            <span className="ml-2 text-sm text-[var(--color-wine)] dark:text-[#FDF6F0]">{issueDate}</span>
+            <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">{issueDate}</span>
           </div>
           <div className="flex items-center">
             <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Expires:</span>
@@ -110,17 +109,16 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription }) => 
           </div>
         </div>
       </div>      {/* Mobile stacked view for better mobile experience */}
-      <div className="sm:hidden pt-2">
-        <div className="flex justify-between items-center py-2">
+      <div className="sm:hidden pt-2">        <div className="flex justify-between items-center py-2">
           <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Quantity:</span>
-          <span className="text-xs font-semibold dark:text-gray-100">
+          <span className="text-xs font-semibold text-black dark:text-gray-100">
             {prescription.quantity}
           </span>
         </div>        <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
           {/* Referral section - vertical layout if text is too long for one line */}
         <div className={`py-2 ${(prescription.referralType.length > 30) ? 'flex flex-col gap-1' : 'flex justify-between items-center'}`}>
           <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Referral:</span>
-          <span className={`text-xs dark:text-gray-200 break-words ${(prescription.referralType.length > 30) ? 'text-left' : ''}`}>
+          <span className={`text-xs text-black dark:text-gray-200 break-words ${(prescription.referralType.length > 30) ? 'text-left' : ''}`}>
             {prescription.referralType}
           </span>
         </div>
@@ -128,7 +126,7 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription }) => 
         
         <div className="flex justify-between items-center py-2">
           <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Issued:</span>
-          <span className="text-xs text-right">{issueDate}</span>
+          <span className="text-xs text-black text-right">{issueDate}</span>
         </div>
         <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
         
