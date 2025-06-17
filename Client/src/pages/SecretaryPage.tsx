@@ -33,9 +33,9 @@ const SecretaryPage: React.FC = () => {
   const handleBackToDashboard = () => {
     setCurrentView('welcome');
   }; return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F9F3F0] to-[#EAE0D9] dark:from-[#121212] dark:to-[#1a1a1a] text-[#4A3F35] dark:text-[#FDF6F0]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-creamDark to-cream to-50% dark:from-darkModeDark dark:to-darkMode text-greyText dark:text-white">
       <Navbar onBackToDashboard={currentView !== 'welcome' ? handleBackToDashboard : undefined} />
-      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">{currentView === 'welcome' && (
+      <main className="flex-grow pt-35 px-4 sm:px-6 lg:px-8">{currentView === 'welcome' && (
         <EnhancedSecretaryWelcome
           onNavigateToAppointments={() => navigateTo('appointments')}
           onNavigateToManagePatients={() => navigateTo('managePatients')}

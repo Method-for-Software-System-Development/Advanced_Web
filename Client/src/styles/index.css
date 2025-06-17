@@ -17,8 +17,15 @@
   --color-wine: #664147;
   --color-wineDark: #58383E;
   --color-whiteDark: #DBDBDB;
+  --color-mint: #D1F5E0;
+  --color-mintDark: #9CE9BC;
+  --color-orange: #FFDACC;
+  --color-orangeDark: #FFAA8A;
   --color-grayText: #3B3B3B;
-  --color-darkMode: #121212;
+  --color-lightGrayText: #D5D5D5;
+  --color-darkMode: #3B3B3B;
+  --color-darkModeDark: #323232;
+  --color-darkModeLight: #4E4E4E;
   --color-greenButton: #00c951;
   --color-greenButtonDark: #00a63e;
   --color-redButton: #ff4d4d;
@@ -70,7 +77,6 @@ body {
 .team-custom-scrollbar {
   scrollbar-color: #664147 white;
 }
-
 .dark .team-custom-scrollbar {
   scrollbar-color: #FDF6F0 #664147;
 }
@@ -78,10 +84,17 @@ body {
 .login-custom-scrollbar {
   scrollbar-color: #99A1AF white;
 }
-
 .dark .login-custom-scrollbar {
   scrollbar-color: #99A1AF #121212;
 }
+
+.dashboard-custom-scrollbar {
+  scrollbar-color: #99A1AF white;
+}
+.dark .dashboard-custom-scrollbar {
+  scrollbar-color: #99A1AF #4E4E4E;
+}
+
 
 /* Form styles */
 @layer components {
