@@ -100,13 +100,6 @@ const ClientPage: React.FC = () => {
             onClick={() => setShowEmergencyModal(true)}
             className="w-full sm:w-auto"
           />
-          <a
-            href={`tel:${CLINIC_PHONE}`}
-            className="bg-[#664147] dark:bg-[#58383E] text-white px-4 py-2 rounded shadow hover:bg-[#4d3034] dark:hover:bg-[#4A2F33] font-semibold transition text-base sm:text-sm w-full sm:w-auto"
-            style={{ textDecoration: 'none' }}
-          >
-            📞 Contact us
-          </a>
         </div>
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}
