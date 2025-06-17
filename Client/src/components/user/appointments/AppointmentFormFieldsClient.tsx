@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Staff, AppointmentType } from '../../../types';
 import TimeSlotSelector from './TimeSlotSelectorClient';
 
@@ -32,6 +32,20 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
   staffAppointments,
   loadingAppointments
 }) => {
+  // State to track if we're on mobile view
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
+
+  // Effect to update isMobile state when window size changes
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   const getAvailableDurations = (appointmentType: AppointmentType) => {
     switch (appointmentType) {
       case AppointmentType.WELLNESS_EXAM:
@@ -60,8 +74,8 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
     <div className="border-b pb-4 dark:border-gray-600">
       <h3 className="text-lg font-semibold text-gray-700 mb-3 dark:text-[#FDF6F0]">Appointment Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date *</label>
+        <div>          
+          <label htmlFor="appointmentDate" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Date *</label>
           <input
             type="date"
             id="appointmentDate"
@@ -70,49 +84,53 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
             onChange={(e) => onInputChange('date', e.target.value)}
             min={new Date().toISOString().split('T')[0]} // Block past dates
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="mt-1 block w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Staff Member *</label>
+        <div>          
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Staff Member *</label>
           <select
             value={formData.staffId}
             onChange={(e) => onStaffChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 [&>option]:text-xs sm:[&>option]:text-sm"
             required
           >
-            <option value="" disabled>{loadingStaff ? 'Loading staff...' : 'Select Staff Member'}</option>
-            {staff
+            <option value="" disabled>{loadingStaff ? 'Loading staff...' : 'Select Staff Member'}</option>            {staff
               .filter(member => member.role?.toLowerCase() === 'veterinarian' || member.role?.toLowerCase() === 'chief veterinarian & clinic director')
               .map(member => (
-                <option key={member._id} value={member._id}>
-                  {member.firstName} {member.lastName} ({member.role})
+                <option key={member._id} value={member._id}>                  
+                {member.firstName} {member.lastName} ({
+                    // For mobile view, display just 'clinic director' instead of the full title
+                    isMobile && member.role?.toLowerCase() === 'chief veterinarian & clinic director' 
+                      ? 'clinic director'
+                      : member.role
+                  })
                 </option>
               ))}
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Appointment Type *</label>
+        <div>          
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Appointment Type *</label>
           {/* Hidden input to ensure type is submitted */}
           <input type="hidden" name="type" value={AppointmentType.WELLNESS_EXAM} />
           <input
             type="text"
             value="Wellness Exam"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
             disabled
           />
         </div>
 
-        <div>
-          <label htmlFor="durationMinutes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (minutes) *</label>
+        <div>          
+          <label htmlFor="durationMinutes" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Duration (minutes) *</label>
           {/* Hidden input to ensure duration is submitted */}
           <input type="hidden" name="duration" value={30} />
           <input
             type="text"
             value="30 minutes"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
             disabled
           />
         </div>
@@ -127,45 +145,40 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
           isLoading={loadingAppointments}
         />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Cost ($) *</label>
+        <div>          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Cost ($) *</label>
           <input
             type="number"
             value={formData.cost}
             onChange={(e) => onInputChange('cost', parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
             min="0"
             step="0.01"
             required
             disabled
           />
         </div>
-      </div>
-
+      </div>      
       <div className="mt-4">
-        <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Reason for Visit *</label>
+        <label htmlFor="reason" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Reason for Visit *</label>
         <textarea
           id="reason"
           name="description"
           value={formData.description}
-          onChange={(e) => onInputChange('description', e.target.value)}
-          rows={3}
+          onChange={(e) => onInputChange('description', e.target.value)}            rows={3}
           maxLength={300}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+          className="mt-1 block w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
           placeholder="e.g., Annual check-up, vaccination, injury assessment..."
         />
-      </div>
-
+      </div>      
       <div className="mt-4">
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Additional Notes (Optional)</label>
+        <label htmlFor="notes" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Additional Notes (Optional)</label>
         <textarea
           id="notes"
           name="notes"
           value={formData.notes || ''}
-          onChange={(e) => onInputChange('notes', e.target.value)}
-          rows={2}
+          onChange={(e) => onInputChange('notes', e.target.value)}          rows={2}
           maxLength={200}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+          className="mt-1 block w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
           placeholder="Any other relevant information..."
         />
       </div>

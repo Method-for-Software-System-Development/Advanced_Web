@@ -333,17 +333,23 @@ useEffect(() => {
             {successMessage}
           </div>
         </div>
-      )}
-
-      <div className="mb-6 flex justify-between items-center">
+      )}      {/* Desktop view for header and button */}
+      <div className="mb-6 hidden md:flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Add New Appointment</h2>
+          <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">New Appointment Scheduler</h2>
           <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
-        </div>
-        <UserNavButton
-          label="< Return to My Upcoming Appointments"
+        </div>        <UserNavButton
+          label="< Return to Upcoming Appointments"
           onClick={onClose}
-          className="px-4 py-2 bg-whitet text-[#533139] border border-[#533139] rounded-md text-sm font-bold hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] shadow-md disabled:opacity-50"
+          className="px-4 py-2 bg-[#4A3F35] text-white border border-[#4A3F35] rounded-md text-sm font-bold hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] shadow-md disabled:opacity-50 dark:bg-[#FDF6F0] dark:text-[#4A3F35] dark:border-[#FDF6F0]"
+        />
+      </div>
+        {/* Mobile view for header and button */}      <div className="mb-6 md:hidden">
+        <h2 className="text-[19px] font-semibold text-[#533139] dark:text-[#FDF6F0] mb-2">New Appointment Scheduler</h2>
+        <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-4"></div>        <UserNavButton
+          label="Return to Appointments"
+          onClick={onClose}
+          className="px-1.5 py-2 bg-[#4A3F35] text-white border border-[#4A3F35] rounded-md text-[10px] font-bold hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] shadow-md disabled:opacity-50 dark:bg-[#FDF6F0] dark:text-[#4A3F35] dark:border-[#FDF6F0] w-full"
         />
       </div>
 
@@ -353,10 +359,9 @@ useEffect(() => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8 bg-[#FDF6F0] dark:bg-[#4A3F35] p-6 rounded-xl shadow-md border border-[#EF92A6] dark:border-[#D17C8F]">
-        {/* Pet Selection */}
+      <form onSubmit={handleSubmit} className="space-y-8 bg-[#FDF6F0] dark:bg-[#4A3F35] p-6 rounded-xl shadow-md border border-[#EF92A6] dark:border-[#D17C8F]">        {/* Pet Selection */}
         {client && (
-          <div className="mb-4">
+          <div className="mb-4 text-[13px] md:text-base">
             <PetSelectionClient
               pets={clientPets}
               selectedPetId={selectedPetId}
@@ -365,9 +370,9 @@ useEffect(() => {
               showPetType={false}
             />
           </div>
-        )}
-        {/* Appointment Form Fields */}
-        <div className="mb-4">
+        )}        
+        {/* Appointment Form Fields */}        
+        <div className="mb-4 text-[13px] md:text-base">
           <AppointmentFormFieldsClient
             formData={{
               date: formData.date || formatDateToYYYYMMDD(selectedDate),
@@ -387,17 +392,14 @@ useEffect(() => {
             loadingStaff={loadingStaff}
             staffAppointments={staffAppointments}
             loadingAppointments={loadingAppointments}
-          />
-        </div>
-        {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-4">
+          />        </div>        {/* Form Actions */}
+        <div className="flex justify-between md:justify-between pt-4 space-x-2 md:space-x-3">
           <button
             type="button"
-            onClick={onClose}
-            className="px-4 py-2 border border-[var(--color-redButton)] rounded-md text-sm font-medium text-[var(--color-redButton)] hover:bg-[var(--color-redButton)] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-redButton)] transition-colors duration-150"
-          >
+            onClick={onClose}            className="px-3 md:px-4 py-1.5 md:py-2 w-[35%] md:w-auto bg-red-500 text-white rounded-md text-xs md:text-sm font-medium focus:ring-[#FF5757] hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed min-w-[70px]"          >
             Cancel
-          </button>          <button
+          </button>
+          <button
             type="submit"
             disabled={
               !formData.time ||
@@ -408,7 +410,7 @@ useEffect(() => {
               loadingStaff ||
               isSubmitting
             }
-            className="flex items-center px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
+            className="flex items-center justify-center px-2 md:px-4 py-1.5 md:py-2 w-[65%] md:w-auto bg-[#EF92A6] text-white rounded-md text-xs md:text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
           >
             {isSubmitting ? (
               <>
@@ -422,9 +424,9 @@ useEffect(() => {
               'Create Appointment'
             )}
           </button>
-        </div>
-      </form>
-    </div>  );
+        </div>      </form>
+    </div>
+  );
 };
 
 export default AddAppointmentFormToClient;

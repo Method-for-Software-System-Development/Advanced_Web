@@ -39,7 +39,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [sortField, setSortField] = useState<'date' | 'petName' | 'staffName' | 'service'>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelingAppointmentId, setCancelingAppointmentId] = useState<string | null>(null);
@@ -228,199 +228,332 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     } catch (err) {
       setError('Failed to cancel appointment.');
     } finally {
-      setCancelingAppointmentId(null);
-    }
+      setCancelingAppointmentId(null);    }
   };
-
+  
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl">
-      {/* Success Message Banner */}
-      {successMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            {successMessage}
-          </div>
-        </div>
-      )}
-
-      {/* Header, now only the title and count */}
-      {!showAddForm && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-1">My Upcoming Appointments</h1>
-            <div className="text-sm text-gray-500 dark:text-gray-300">
-              Showing {filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled').length} appointments
+    <div className="flex justify-center w-full min-h-[600px]">
+      <div 
+        className="w-full max-w-5xl bg-white dark:bg-[#664147] rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8 mobile:w-full"
+        style={{ width: "80%" }}
+      >
+        {/* Success Message Banner */}
+        {successMessage && (
+          <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              {successMessage}
+            </div>
+          </div> 
+        )}        {/* Header, now only the title and count */}
+        {!showAddForm && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-4">            <div>              
+            <h1 className="text-[21px] sm:text-3xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-4">Upcoming Appointments</h1>
+            </div>
+            {/* Desktop Add button */}
+            <div className="hidden sm:flex gap-2">
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition">
+                Schedule an Appointment
+              </button>
+            </div>            {/* Mobile Add button - centered and full width with desktop style */}
+            <div className="flex sm:hidden w-full py-1 px-2">
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="w-full mx-auto px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition text-[12px]">
+                Schedule an Appointment
+              </button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
-            >
-              + Add New Appointment
-            </button>
+        )}
+        {/* Search and Sort Controls */}
+        {!showAddForm && (
+          <div className="mb-8 space-y-4">
+            {/* Search Input */}
+            <div>
+              <label htmlFor="search-pet" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Search by Pet Name
+              </label>
+              <input
+                id="search-pet"
+                type="text"
+                placeholder="Enter pet name..."
+                className="block w-full px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-base mobile:text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
+              {/* Sort Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div className="flex gap-2 sm:gap-4 w-full sm:w-auto -ml-3 sm:ml-0">                <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Sort by:</label>
+                  <select
+                    id="sort-field"
+                    value={sortField}
+                    onChange={e => setSortField(e.target.value as any)}
+                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none max-w-[100px] sm:max-w-none"
+                  >
+                    <option value="date">Date</option>
+                    <option value="petName">Pet Name</option>
+                    <option value="staffName">Staff</option>
+                    <option value="service">Service</option>                  
+                    </select>
+                </div>                <div className="flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none">
+                  <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Order:</label>
+                  <select
+                    value={sortDirection}
+                    onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
+                    className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none max-w-[130px] sm:max-w-none"
+                  >
+                    <option value="desc">Newest First</option>
+                    <option value="asc">Oldest First</option>
+                  </select>
+                </div>
+              </div>
+              {/* DESKTOP ONLY: Refresh button */}
+              <button
+                onClick={() => {
+                  setError('');
+                  loadAppointments();
+                }}
+                disabled={isLoading}
+                className="hidden sm:flex px-4 py-2 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
+            </div>            {/* MOBILE ONLY: Refresh button */}
+            <div className="block sm:hidden w-full py-1 px-2 mb-4">              <button
+                onClick={() => {
+                  if (!isLoading) {
+                    setError('');
+                    loadAppointments();
+                  }
+                }}
+                disabled={isLoading}
+                className="w-full mx-auto px-4 py-2 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors text-[12px] flex items-center justify-center gap-2"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-      {/* Search row*/}
-      {!showAddForm && (
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Search by Pet Name:</span>
-          <input
-            id="search-pet"
-            type="text"
-            placeholder="Enter pet name..."
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{ minWidth: 200 }}
-          />
-        </div>
-      )}
-      {/* Sort controls row with label */}
-      {!showAddForm && (
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Sort by:</span>
-          <select
-            id="sort-field"
-            value={sortField}
-            onChange={e => setSortField(e.target.value as any)}
-            className="px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-            style={{ minWidth: 120 }}
-          >
-            <option value="date">Date</option>
-            <option value="petName">Pet Name</option>
-            <option value="staffName">Staff Member</option>
-            <option value="service">Service</option>
-          </select>
-          <button
-            type="button"
-            onClick={() => setSortDirection(d => d === 'asc' ? 'desc' : 'asc')}
-            className="px-2 py-1 border border-gray-300 rounded-md text-sm bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-            title={`Sort ${sortDirection === 'asc' ? 'Descending' : 'Ascending'}`}
-          >
-            {sortDirection === 'asc' ? (
-              <span>&uarr;</span>
-            ) : (
-              <span>&darr;</span>
-            )}
-          </button>
-        </div>
-      )}
+        )}
 
-      {showAddForm && (
-        <section className="mb-8">
-          <AddAppointmentFormToClient
-            onClose={() => setShowAddForm(false)}
-            onAppointmentAdded={handleAppointmentAdded}
-            selectedDate={new Date()}
-          />
-        </section>
-      )}
+        {showAddForm && (
+          <section className="mb-8">
+            <AddAppointmentFormToClient
+              onClose={() => setShowAddForm(false)}
+              onAppointmentAdded={handleAppointmentAdded}
+              selectedDate={new Date()}
+            />
+          </section>
+        )}
 
-      {/* Filter appointments by pet name */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded">
-          {error}
-        </div>
-      )}
+        {/* Filter appointments by pet name */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded">
+            {error}
+          </div>        )}        {/* Showing appointment count */}
+        {!showAddForm && !isLoading && !error && (
+          <div className="mb-4 text-[14px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
+            Showing {filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled').length} appointment{filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled').length !== 1 ? 's' : ''}
+          </div>
+        )}
 
-      {isLoading ? (
-        <p className="text-gray-500 dark:text-gray-400 text-center">Loading appointments...</p>
-      ) : filteredAppointments && filteredAppointments.length > 0 ? (
-        <ul className="space-y-6">
-          {filteredAppointments
-            .filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled')
-            .map(apt => {
-              const formatted = formatAppointmentForDisplay(apt);
-              let petName = formatted.petName;
-              if (petName === 'Unknown Pet' && apt.petId && typeof apt.petId === 'object' && 'name' in apt.petId) {
-                petName = apt.petId.name;
-              }
-              return (
-                <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl shadow bg-[#FDF6F0] dark:bg-[#4A3F35] hover:shadow-lg transition-shadow duration-200 ease-in-out">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
-                    <div className="flex items-center gap-3 mb-2 sm:mb-0">
-                      {/* Only show Scheduled if not editing this appointment */}
-                      {editingAppointmentId !== apt._id && (
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400">
-                          Scheduled
+        {isLoading ? (
+          <p className="text-gray-500 dark:text-gray-400 text-center">Loading appointments...</p>
+        ) : filteredAppointments && filteredAppointments.length > 0 ? (
+          <ul className="space-y-6">
+            {filteredAppointments
+              .filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled')
+              .map(apt => {
+                const formatted = formatAppointmentForDisplay(apt);
+                let petName = formatted.petName;
+                if (petName === 'Unknown Pet' && apt.petId && typeof apt.petId === 'object' && 'name' in apt.petId) {
+                  petName = apt.petId.name;
+                }
+                return (
+                  <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl shadow bg-[#FDF6F0] dark:bg-[#4A3F35] hover:shadow-lg transition-shadow duration-200 ease-in-out">                    {/* Desktop view header */}
+                    <div className="hidden sm:flex sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0]">
+                          {petName}
+                        </h2>
+                        <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full">
+                          {formatted.service}
                         </span>
-                      )}
-                      <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full">
-                        {formatted.service}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      {editingAppointmentId !== apt._id && (
-                        <button
-                          onClick={() => handleCancelClick(apt._id)}
-                          className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                          disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                      {editingAppointmentId !== apt._id && (
-                        <button
-                          onClick={() => setEditingAppointmentId(apt._id)}
-                          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150"
-                          disabled={editingAppointmentId === apt._id}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  {editingAppointmentId === apt._id ? (
-                    <EditAppointmentForm
-                      appointment={apt}
-                      onSave={handleEditSave}
-                      onCancel={() => setEditingAppointmentId(null)}
-                    />
-                  ) : showCancelModal && cancelingAppointmentId === apt._id ? (
-                    <CancelReasonModal
-                      isOpen={true}
-                      onClose={handleCancelModalClose}
-                      onSubmit={handleCancelSubmit}
-                    />
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-base"> {/* Set consistent font size */}
-                      <div>
-                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {petName}</p>
-                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Date:</strong> {new Date(formatted.date).toLocaleDateString()}</p>
-                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formatted.time}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff Member:</strong> {formatted.staffName}</p>
-                        <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formatted.duration} min</p>
-                        {formatted.cost && (
-                          <p className="text-gray-700 dark:text-gray-200"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formatted.cost}</p>
+                      </div>                      <div className="flex gap-2 min-w-[160px]">
+                        {editingAppointmentId !== apt._id && (
+                          <button
+                            onClick={() => handleCancelClick(apt._id)}
+                            className="flex-1 px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed min-w-[70px]"
+                            disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        {editingAppointmentId !== apt._id && (
+                          <button
+                            onClick={() => setEditingAppointmentId(apt._id)}
+                            className="flex-1 px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 min-w-[70px]"
+                            disabled={editingAppointmentId === apt._id}
+                          >
+                            Edit
+                          </button>
                         )}
                       </div>
+                    </div>                    {/* Mobile view header */}                    <div className="flex flex-col sm:hidden mb-4 gap-1">
+                      <div>
+                        <h2 className="text-[18px] font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-1">
+                          {petName}
+                        </h2>                      </div>                      <div>
+                        <span className="px-2 py-1 text-xs font-medium text-white bg-[#EF92A6] rounded-full">
+                          {formatted.service}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  {/* Description and Notes with same font size */}
-                  {!editingAppointmentId && !showCancelModal && (
-                    <>
-                      {formatted.description && (
-                        <p className="mt-2 text-base text-gray-600 dark:text-gray-300"><strong className="font-medium">Description:</strong> {formatted.description}</p>
-                      )}
-                      {formatted.notes && (
-                        <p className="mt-2 text-base text-gray-600 dark:text-gray-300"><strong className="font-medium">Notes:</strong> {formatted.notes}</p>
-                      )}
-                    </>
-                  )}
-                </li>
-              );
-            })}
-        </ul>
-      ) : (
-        <p className="text-gray-500 dark:text-gray-400 text-center">No upcoming appointments.</p>
-      )}
+                    {editingAppointmentId === apt._id ? (
+                      <EditAppointmentForm
+                        appointment={apt}
+                        onSave={handleEditSave}
+                        onCancel={() => setEditingAppointmentId(null)}
+                      />
+                    ) : showCancelModal && cancelingAppointmentId === apt._id ? (
+                      <CancelReasonModal
+                        isOpen={true}
+                        onClose={handleCancelModalClose}
+                        onSubmit={handleCancelSubmit}
+                      />                    ) : (
+                      <>
+                        {/* Desktop view */}
+                        <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 gap-4 text-base">
+                          <div className="space-y-3">
+                            <div className="flex items-center">
+                              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Date:</span>
+                              <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">{new Date(formatted.date).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Time:</span>
+                              <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">{formatted.time}</span>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center">
+                              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[120px]">Staff Member:</span>
+                              <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">{formatted.staffName}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[120px]">Duration:</span>
+                              <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">{formatted.duration} min</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mobile view with horizontal separators and right-aligned labels */}
+                        <div className="sm:hidden pt-2">
+                          <div className="flex justify-between items-center py-2">
+                            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Date:</span>
+                            <span className="text-xs text-black dark:text-gray-100 text-right">{new Date(formatted.date).toLocaleDateString()}</span>
+                          </div>
+                          <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+                          
+                          <div className="flex justify-between items-center py-2">
+                            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Time:</span>
+                            <span className="text-xs text-black dark:text-gray-100 text-right">{formatted.time}</span>
+                          </div>
+                          <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+                          
+                          <div className="flex justify-between items-center py-2">
+                            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Staff:</span>
+                            <span className="text-xs text-black dark:text-gray-100 text-right">{formatted.staffName}</span>
+                          </div>
+                          <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
+                          
+                          <div className="flex justify-between items-center py-2">
+                            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Duration:</span>
+                            <span className="text-xs text-black dark:text-gray-100 text-right">{formatted.duration} min</span>
+                          </div>                        </div>
+                      </>
+                    )}
+                    
+                    {/* Description and Notes with styling matching TreatmentCard */}
+                    {!editingAppointmentId && !showCancelModal && (
+                      <>
+                        {formatted.description && (
+                          <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-blue-900 rounded-lg border border-gray-200 dark:border-blue-600">
+                            {/* Desktop view */}
+                            <div className="hidden sm:flex sm:items-start">
+                              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] sm:mr-3 mb-1 sm:mb-0 flex-shrink-0">Description:</span>
+                              <p className="text-sm sm:text-base text-black dark:text-gray-200 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap flex-1">{formatted.description}</p>
+                            </div>
+                            {/* Mobile view */}
+                            <div className="sm:hidden">
+                              <div className="flex justify-between items-start py-2">
+                                <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Description:</span>
+                              </div>
+                              <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0] mt-1 pt-2">
+                                <p className="text-xs text-black dark:text-gray-200 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap">{formatted.description}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}                        {formatted.notes && (
+                          <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
+                            {/* Desktop view */}
+                            <div className="hidden sm:flex sm:items-start">
+                              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] sm:mr-3 mb-1 sm:mb-0 flex-shrink-0">Notes:</span>
+                              <p className="text-sm sm:text-base text-black dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap flex-1">{formatted.notes}</p>
+                            </div>
+                            {/* Mobile view */}
+                            <div className="sm:hidden">
+                              <div className="flex justify-between items-start py-2">
+                                <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Notes:</span>
+                              </div>
+                              <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0] mt-1 pt-2">
+                                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap">{formatted.notes}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Mobile action buttons - shown below description/notes */}
+                        <div className="sm:hidden flex gap-2 mt-3">
+                          {editingAppointmentId !== apt._id && (
+                            <button
+                              onClick={() => handleCancelClick(apt._id)}
+                              className="flex-1 px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                              disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
+                            >
+                              Cancel
+                            </button>
+                          )}
+                          {editingAppointmentId !== apt._id && (
+                            <button
+                              onClick={() => setEditingAppointmentId(apt._id)}
+                              className="flex-1 px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150"
+                              disabled={editingAppointmentId === apt._id}
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+          </ul>
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 text-center">No upcoming appointments.</p>
+        )}
+      </div>
     </div>
   );
 };

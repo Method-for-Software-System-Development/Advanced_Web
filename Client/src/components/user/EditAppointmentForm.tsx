@@ -67,18 +67,10 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Pet Name Display - inline */}
-      <div className="mb-2 flex items-center gap-2">
-        <span className="text-md font-semibold text-gray-800 dark:text-gray-100">Pet Name:</span>
-        <span className="text-gray-700 dark:text-gray-300">
-          {typeof appointment.petId === 'object' ? appointment.petId.name : appointment.petId}
-        </span>
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-4">      {/* Error Display */}
       {error && <div className="text-red-600">{error}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date *</label>
+        <div>          <label htmlFor="appointmentDate" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Date *</label>
           <input
             type="date"
             id="appointmentDate"
@@ -87,23 +79,20 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
             onChange={e => setDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]} // Block past dates
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="mt-1 block w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Staff Member *</label>
-          <select
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Staff Member *</label>          <select
             value={staffId}
             onChange={e => setStaffId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 [&>option]:text-xs sm:[&>option]:text-sm [&>option]:py-1.5 sm:[&>option]:py-2"
             required
           >
             <option value="" disabled>{loadingStaff ? 'Loading staff...' : 'Select Staff Member'}</option>
             {staffList
-              .filter(member => member.role?.toLowerCase() === 'veterinarian' || member.role?.toLowerCase() === 'chief veterinarian & clinic director')
-              .map(member => (
-                <option key={member._id} value={member._id}>
-                  {member.firstName} {member.lastName} ({member.role})
+              .filter(member => member.role?.toLowerCase() === 'veterinarian' || member.role?.toLowerCase() === 'chief veterinarian & clinic director')              .map(member => (                <option key={member._id} value={member._id}>
+                  {member.firstName} {member.lastName} {member.role?.toLowerCase().includes('chief') ? '(Clinic Director)' : `(${member.role})`}
                 </option>
               ))}
           </select>
@@ -119,11 +108,10 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
             isLoading={loadingStaff}
           />
         </div>
-      </div>
-      <div className="flex gap-2 mt-4">
+      </div>      <div className="flex gap-2 mt-4 justify-center sm:justify-start">
         <button
           type="submit"
-          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2"
+          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2 w-[50%] sm:w-auto"
           disabled={loading}
         >
           Save
@@ -131,7 +119,7 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2"
+          className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#664147] focus:ring-offset-2 w-[50%] sm:w-auto"
           disabled={loading}
         >
           Return
