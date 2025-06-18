@@ -5,7 +5,7 @@
  *   onClose  – callback when the user clicks ✕
  *
  * State:
- *   messages    – array of { id, role, text }
+ *   messages    – array of { id, roleS, text }
  *   input       – current user input
  *   menuOptions – array of quick reply options for the current step
  *   isTyping    – whether "Kayo is typing..." is shown
@@ -155,15 +155,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
           }}
           className="flex"
         >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message…"
-            className="flex-1 min-w-0 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
-                       focus:outline-none dark:text-white"
-            disabled={isTyping}
-          />
+        <textarea
+        // Multi-line textarea input for chat, replacing the standard input field. Allows the user to send messages with Enter, and add new lines with Shift+Enter.
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message…"
+          rows={2}
+          className="flex-1 min-w-0 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
+                    focus:outline-none dark:text-white resize-none"
+          disabled={isTyping}
+          onKeyDown={(e) => {
+            // On Enter (without Shift) – send the message
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault(); // Prevents a new line
+              handleSend();
+            }
+            // Shift+Enter inserts a new line (default browser behavior)
+          }}
+        />
+
           <button
             type="submit"
             className="bg-[#664147] hover:bg-[#58383E] cursor-pointer text-white px-6 rounded-r-md"
