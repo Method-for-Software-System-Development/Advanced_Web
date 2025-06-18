@@ -571,5 +571,4 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   );
 };
 
-// Export the component as default
 export default AppointmentViewClient;
