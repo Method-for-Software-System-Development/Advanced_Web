@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import DashboardButton from './DashboardButton';
 import { prescriptionService } from '../../services/prescriptionService';
 import { patientService } from '../../services/patientService';
 import { Prescription, Patient, Pet, Medicine } from '../../types';
@@ -34,16 +33,16 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);  const [formData, setFormData] = useState<PrescriptionFormData>(initialFormData);
-  const [searchTerm, setSearchTerm] = useState('');const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);  const [statusFilter, setStatusFilter] = useState<'all' | 'fulfilled' | 'pending'>('all');
+  const [showAddForm, setShowAddForm] = useState(false); const [formData, setFormData] = useState<PrescriptionFormData>(initialFormData);
+  const [searchTerm, setSearchTerm] = useState(''); const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null); const [statusFilter, setStatusFilter] = useState<'all' | 'fulfilled' | 'pending'>('all');
   const [expiredFilter, setExpiredFilter] = useState<'all' | 'expired' | 'not-expired'>('not-expired');
-  
+
   // New state for search functionality
   const [selectedClient, setSelectedClient] = useState<Patient | null>(null);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [clientPets, setClientPets] = useState<Pet[]>([]);
-  
+
   // Load initial data
   useEffect(() => {
     loadData();
@@ -51,13 +50,13 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
   const loadData = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const [prescriptionsData, patientsData] = await Promise.all([
         prescriptionService.getAllPrescriptions(),
         patientService.getAllPatients()
       ]);
-      
+
       setPrescriptions(prescriptionsData);
       setPatients(patientsData);
     } catch (err) {
@@ -83,7 +82,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       setError('Please select a pet.');
       setIsSubmitting(false);
       return;
-    }    if (!formData.medicineName.trim()) {
+    } if (!formData.medicineName.trim()) {
       setError('Please enter a medicine name.');
       setIsSubmitting(false);
       return;
@@ -127,7 +126,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       await prescriptionService.createPrescription(prescriptionData);
       await loadData(); // Refresh data
       setShowAddForm(false);
-      setFormData(initialFormData);      
+      setFormData(initialFormData);
       setSelectedClient(null);
       setSelectedPetId(null);
       setClientPets([]);
@@ -142,7 +141,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     }
   };
 
-  const handleToggleFulfilled = async (prescriptionId: string, currentStatus: boolean) => {    try {
+  const handleToggleFulfilled = async (prescriptionId: string, currentStatus: boolean) => {
+    try {
       await prescriptionService.updatePrescription(prescriptionId, { fulfilled: !currentStatus });
       await loadData(); // Refresh data
       setSuccessMessage(`Prescription marked as ${!currentStatus ? 'fulfilled' : 'pending'}!`);
@@ -154,7 +154,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
   };
 
   const handleDeletePrescription = async (prescriptionId: string) => {
-    if (!confirm('Are you sure you want to delete this prescription?')) return;    try {
+    if (!confirm('Are you sure you want to delete this prescription?')) return; try {
       await prescriptionService.deletePrescription(prescriptionId);
       await loadData(); // Refresh data
       setSuccessMessage('Prescription deleted successfully!');
@@ -188,11 +188,11 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown Patient';
 
     return { patientName, petName };
-  };  const filteredPrescriptions = prescriptions
+  }; const filteredPrescriptions = prescriptions
     .filter(prescription => {
       const { patientName, petName } = getPatientInfo(prescription);
       const searchLower = searchTerm.toLowerCase();
-      
+
       // Search filter
       const matchesSearch = (
         prescription.medicineType.toLowerCase().includes(searchLower) ||
@@ -201,20 +201,20 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
         petName.toLowerCase().includes(searchLower) ||
         prescription.referralType.toLowerCase().includes(searchLower)
       );
-      
+
       // Status filter
-      const matchesStatus = statusFilter === 'all' || 
-                           (statusFilter === 'fulfilled' && prescription.fulfilled) ||
-                           (statusFilter === 'pending' && !prescription.fulfilled);
-        // Expired filter
+      const matchesStatus = statusFilter === 'all' ||
+        (statusFilter === 'fulfilled' && prescription.fulfilled) ||
+        (statusFilter === 'pending' && !prescription.fulfilled);
+      // Expired filter
       const today = new Date();
       const expirationDate = new Date(prescription.expirationDate);
       const isExpired = expirationDate <= today && !prescription.fulfilled;
-      const matchesExpiredFilter = 
-        expiredFilter === 'all' || 
+      const matchesExpiredFilter =
+        expiredFilter === 'all' ||
         (expiredFilter === 'expired' && isExpired) ||
         (expiredFilter === 'not-expired' && !isExpired);
-      
+
       return matchesSearch && matchesStatus && matchesExpiredFilter;
     })
     .sort((a, b) => {
@@ -227,17 +227,17 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     setSelectedClient(client);
     setSelectedPetId(null);
     setFormData({ ...formData, petId: '' });
-    
+
     // Set client pets for selection - only show active pets
     if (client && client.pets) {
-      const pets: Pet[] = client.pets.filter((pet): pet is Pet => 
+      const pets: Pet[] = client.pets.filter((pet): pet is Pet =>
         typeof pet === 'object' && pet !== null && pet.isActive === true
       );
       setClientPets(pets);
     } else {
       setClientPets([]);
     }
-      // Update selectedPatientId for backward compatibility if needed
+    // Update selectedPatientId for backward compatibility if needed
   };
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
@@ -246,14 +246,14 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       ...initialFormData,
       petId
     });
-  };const handleMedicineChange = (medicineName: string, medicineType: string, referralType: string) => {
+  }; const handleMedicineChange = (medicineName: string, medicineType: string, referralType: string) => {
     const newFormData = {
       ...formData,
       medicineName,
       medicineType,
       referralType
     };
-    
+
     setFormData(newFormData);
   };
 
@@ -264,18 +264,16 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       </div>
     );
   }
-
   return (
     <>
-      <div className="mb-8 text-center">
-        <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
-      </div>
+      <div className="max-w-7xl mx-auto mt-5 mb-10 p-4 md:p-8 bg-white dark:bg-darkModeLight rounded-xl shadow-2xl">
 
-      <div className="max-w-7xl mx-auto p-4 md:p-8 bg-white dark:bg-[#664147] rounded-xl shadow-2xl">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-3">💊 Prescription Management</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">Create, view, and manage pet prescriptions</p>
-        </header>        {error && (
+          <h1 className="text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">&#128138; Add Prescription</h1>
+          <p className="text-lg text-grayText dark:text-lightGrayText">Create new prescriptions for patients</p>
+        </header>
+
+        {error && (
           <div className="mb-6 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-lg">
             {error}
           </div>
@@ -287,25 +285,25 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
           </div>
         )}        {/* Prescription Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">Total Prescriptions</h3>
-            <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{prescriptions.length}</p>
+          <div className="bg-blue-100  p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-blue-800 ">Total Prescriptions</h3>
+            <p className="text-2xl font-bold text-blue-900 ">{prescriptions.length}</p>
           </div>
-          <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-green-800 dark:text-green-200">Fulfilled</h3>
-            <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+          <div className="bg-green-100  p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-green-800 ">Fulfilled</h3>
+            <p className="text-2xl font-bold text-green-900 ">
               {prescriptions.filter(p => p.fulfilled).length}
             </p>
           </div>
-          <div className="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Pending</h3>
-            <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
+          <div className="bg-yellow-100  p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-yellow-800 ">Pending</h3>
+            <p className="text-2xl font-bold text-yellow-900 ">
               {prescriptions.filter(p => !p.fulfilled).length}
             </p>
           </div>
-          <div className="bg-red-100 dark:bg-red-900 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">Expired</h3>
-            <p className="text-2xl font-bold text-red-900 dark:text-red-100">
+          <div className="bg-red-100  p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-red-800 ">Expired</h3>
+            <p className="text-2xl font-bold text-red-900 ">
               {prescriptions.filter(p => {
                 const today = new Date();
                 const expirationDate = new Date(p.expirationDate);
@@ -325,14 +323,14 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
           if (expiringSoonPrescriptions.length > 0) {
             return (
               <div className="mb-8">
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                <div className="p-4 bg-yellow-50  border border-yellow-200  rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-yellow-600 dark:text-yellow-400 text-xl">⏰</span>
-                    <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">
+                    <span className="text-yellow-600  text-xl">⏰</span>
+                    <h3 className="text-lg font-semibold text-yellow-800 ">
                       Expiring Soon ({expiringSoonPrescriptions.length})
                     </h3>
                   </div>
-                  <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-3">
+                  <p className="text-yellow-700  text-sm mb-3">
                     These prescriptions will expire within 15 days.
                   </p>
                   <div className="h-32 overflow-y-auto space-y-2 pr-2">
@@ -341,7 +339,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                       const expirationDate = new Date(p.expirationDate);
                       const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                       return (
-                        <div key={p._id} className="text-sm text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800 p-2 rounded flex-shrink-0">
+                        <div key={p._id} className="text-sm text-yellow-800  bg-yellow-100  p-2 rounded flex-shrink-0">
                           <strong>{p.medicineType}</strong> for {petName} ({patientName}) - Expires in {daysUntilExpiration} days ({new Date(p.expirationDate).toLocaleDateString()})
                         </div>
                       );
@@ -373,11 +371,11 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
 
         {/* Add Prescription Form */}
         {showAddForm && (
-        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg border">
-          <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Create New Prescription</h3>
-            
-          <form onSubmit={handleSubmit} className="space-y-4">              
-            <div className="space-y-6">
+          <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-lg border">
+            <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Create New Prescription</h3>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-6">
                 {/* Client Search Section */}
                 <div>
                   <ClientSearchPrescription
@@ -442,7 +440,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                     </div>
                   </div>
                 )}
-            </div>
+              </div>
 
               {/* Action Buttons */}
 
@@ -521,146 +519,141 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
           <h3 className="text-xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0]">
             All Prescriptions ({filteredPrescriptions.length})
           </h3>
-          
+
           {filteredPrescriptions.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 dark:text-gray-400">No prescriptions found.</p>
             </div>
           ) : (
             <div className="grid gap-4">              {filteredPrescriptions.map((prescription) => {
-                const { patientName, petName } = getPatientInfo(prescription);                const expirationDate = new Date(prescription.expirationDate);
-                const today = new Date();
-                const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                const isExpiringSoon = daysUntilExpiration <= 15 && daysUntilExpiration > 0 && !prescription.fulfilled;
-                const isExpired = daysUntilExpiration <= 0 && !prescription.fulfilled;
-                
-                return (    
-                    <div
-                    key={prescription._id}
-                    className={`p-3 sm:p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 hover:shadow-md transition-shadow ${
-                      isExpired ? 'border-red-300 dark:border-red-600' : 
-                      isExpiringSoon ? 'border-yellow-300 dark:border-yellow-600' : 
-                      'border-gray-200 dark:border-gray-600'
-                    }`}
-                  >
-                    {/* Desktop layout*/}
-                    <div className="hidden md:block">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h4 className="text-lg font-semibold text-[#4A3F35] dark:text-[#FDF6F0]">
-                              {prescription.medicineName || prescription.medicineType}
-                            </h4>
-                            <span
-                              className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                prescription.fulfilled
-                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                              }`}
-                            >
-                              {prescription.fulfilled ? 'Fulfilled' : 'Pending'}
-                            </span>
-                            {isExpired && !prescription.fulfilled && (
-                              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                Expired
-                              </span>
-                            )}
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
-                            <p><strong>Patient:</strong> {patientName}</p>
-                            <p><strong>Pet:</strong> {petName}</p>
-                            <p><strong>Medicine:</strong> {prescription.medicineName || 'N/A'}</p>
-                            <p><strong>Type:</strong> {prescription.medicineType}</p>
-                            <p><strong>Referral:</strong> {prescription.referralType}</p>
-                            <p><strong>Quantity:</strong> {prescription.quantity}</p>
-                            <p><strong>Expires:</strong> {new Date(prescription.expirationDate).toLocaleDateString()}</p>
-                            <p><strong>Issued:</strong> {new Date(prescription.issueDate).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col gap-2 ml-4">
-                          <button
-                            onClick={() => handleToggleFulfilled(prescription._id, prescription.fulfilled)}
-                            className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${
-                              prescription.fulfilled
-                                ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
-                                : 'bg-green-500 hover:bg-green-600 text-white'
-                            }`}
-                          >
-                            {prescription.fulfilled ? 'Mark Pending' : 'Mark Fulfilled'}
-                          </button>
-                          <button
-                            onClick={() => handleDeletePrescription(prescription._id)}
-                            className="px-3 py-1 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+              const { patientName, petName } = getPatientInfo(prescription); const expirationDate = new Date(prescription.expirationDate);
+              const today = new Date();
+              const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              const isExpiringSoon = daysUntilExpiration <= 15 && daysUntilExpiration > 0 && !prescription.fulfilled;
+              const isExpired = daysUntilExpiration <= 0 && !prescription.fulfilled;
 
-                    {/* Mobile layout */}
-                    <div className="md:hidden space-y-3">
-                      {/* Header with medicine name and status badges on right */}
-                      <div className="flex justify-between items-start gap-3">
-                        <h4 className="text-base font-semibold text-[#4A3F35] dark:text-[#FDF6F0] leading-tight flex-1">
-                          {prescription.medicineName || prescription.medicineType}
-                        </h4>
-                        
-                        {/* Status badges */}
-                        <div className="flex flex-wrap gap-2 flex-shrink-0">
+              return (
+                <div
+                  key={prescription._id}
+                  className={`p-3 sm:p-4 border rounded-lg bg-gray-50 dark:bg-darkMode hover:shadow-md transition-shadow ${isExpired ? 'border-red-300 dark:border-red-600' :
+                      isExpiringSoon ? 'border-yellow-300 dark:border-yellow-600' :
+                        'border-gray-200 dark:border-gray-600'
+                    }`}
+                >
+                  {/* Desktop layout*/}
+                  <div className="hidden md:block">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="text-lg font-semibold text-[#4A3F35] dark:text-[#FDF6F0]">
+                            {prescription.medicineName || prescription.medicineType}
+                          </h4>
                           <span
-                            className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
-                              prescription.fulfilled
+                            className={`px-2 py-1 text-xs font-semibold rounded-full ${prescription.fulfilled
                                 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                 : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                            }`}
+                              }`}
                           >
                             {prescription.fulfilled ? 'Fulfilled' : 'Pending'}
                           </span>
                           {isExpired && !prescription.fulfilled && (
-                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 whitespace-nowrap">
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                               Expired
                             </span>
                           )}
                         </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-300">
+                          <p><strong>Patient:</strong> {patientName}</p>
+                          <p><strong>Pet:</strong> {petName}</p>
+                          <p><strong>Medicine:</strong> {prescription.medicineName || 'N/A'}</p>
+                          <p><strong>Type:</strong> {prescription.medicineType}</p>
+                          <p><strong>Referral:</strong> {prescription.referralType}</p>
+                          <p><strong>Quantity:</strong> {prescription.quantity}</p>
+                          <p><strong>Expires:</strong> {new Date(prescription.expirationDate).toLocaleDateString()}</p>
+                          <p><strong>Issued:</strong> {new Date(prescription.issueDate).toLocaleDateString()}</p>
+                        </div>
                       </div>
 
-                      {/* Prescription details */}
-                      <div className="grid grid-cols-1 gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <p><strong>Patient:</strong> {patientName}</p>
-                        <p><strong>Pet:</strong> {petName}</p>
-                        <p><strong>Medicine:</strong> {prescription.medicineName || 'N/A'}</p>
-                        <p><strong>Type:</strong> {prescription.medicineType}</p>
-                        <p><strong>Referral:</strong> <span className="break-words">{prescription.referralType}</span></p>
-                        <p><strong>Quantity:</strong> {prescription.quantity}</p>
-                        <p><strong>Expires:</strong> {new Date(prescription.expirationDate).toLocaleDateString()}</p>
-                        <p><strong>Issued:</strong> {new Date(prescription.issueDate).toLocaleDateString()}</p>
-                      </div>
-
-                      {/* Mobile action buttons - horizontal layout */}
-                      <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                      <div className="flex flex-col gap-2 ml-4">
                         <button
                           onClick={() => handleToggleFulfilled(prescription._id, prescription.fulfilled)}
-                          className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex-1 ${
-                            prescription.fulfilled
+                          className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${prescription.fulfilled
                               ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
                               : 'bg-green-500 hover:bg-green-600 text-white'
-                          }`}
+                            }`}
                         >
                           {prescription.fulfilled ? 'Mark Pending' : 'Mark Fulfilled'}
                         </button>
                         <button
                           onClick={() => handleDeletePrescription(prescription._id)}
-                          className="px-3 py-2 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded transition-colors flex-1"
+                          className="px-3 py-1 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
                         >
                           Delete
                         </button>
                       </div>
                     </div>
                   </div>
-                );
-              })}
+
+                  {/* Mobile layout */}
+                  <div className="md:hidden space-y-3">
+                    {/* Header with medicine name and status badges on right */}
+                    <div className="flex justify-between items-start gap-3">
+                      <h4 className="text-base font-semibold text-[#4A3F35] dark:text-[#FDF6F0] leading-tight flex-1">
+                        {prescription.medicineName || prescription.medicineType}
+                      </h4>
+
+                      {/* Status badges */}
+                      <div className="flex flex-wrap gap-2 flex-shrink-0">
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${prescription.fulfilled
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                            }`}
+                        >
+                          {prescription.fulfilled ? 'Fulfilled' : 'Pending'}
+                        </span>
+                        {isExpired && !prescription.fulfilled && (
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 whitespace-nowrap">
+                            Expired
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Prescription details */}
+                    <div className="grid grid-cols-1 gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <p><strong>Patient:</strong> {patientName}</p>
+                      <p><strong>Pet:</strong> {petName}</p>
+                      <p><strong>Medicine:</strong> {prescription.medicineName || 'N/A'}</p>
+                      <p><strong>Type:</strong> {prescription.medicineType}</p>
+                      <p><strong>Referral:</strong> <span className="break-words">{prescription.referralType}</span></p>
+                      <p><strong>Quantity:</strong> {prescription.quantity}</p>
+                      <p><strong>Expires:</strong> {new Date(prescription.expirationDate).toLocaleDateString()}</p>
+                      <p><strong>Issued:</strong> {new Date(prescription.issueDate).toLocaleDateString()}</p>
+                    </div>
+
+                    {/* Mobile action buttons - horizontal layout */}
+                    <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                      <button
+                        onClick={() => handleToggleFulfilled(prescription._id, prescription.fulfilled)}
+                        className={`px-3 py-2 text-xs font-semibold rounded transition-colors flex-1 ${prescription.fulfilled
+                            ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                            : 'bg-green-500 hover:bg-green-600 text-white'
+                          }`}
+                      >
+                        {prescription.fulfilled ? 'Mark Pending' : 'Mark Fulfilled'}
+                      </button>
+                      <button
+                        onClick={() => handleDeletePrescription(prescription._id)}
+                        className="px-3 py-2 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded transition-colors flex-1"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
             </div>
           )}
         </div>

@@ -26,72 +26,74 @@ const StaffGrid: React.FC<StaffGridProps> = ({
       {staffList.map((staffMember) => (
         <div
           key={staffMember._id}
-          className={`border rounded-lg p-4 shadow-md transition-all duration-200 ${
+          className={`border rounded-lg p-4 shadow-md transition-all duration-200 flex flex-col h-full ${
             staffMember.isActive 
-              ? 'bg-white border-gray-200 dark:bg-[#664147] dark:border-gray-600' 
+              ? 'bg-white border-gray-200 dark:bg-darkMode dark:border-gray-600' 
               : 'bg-gray-50 border-red-200 opacity-70 dark:bg-gray-800 dark:border-red-500'
           }`}
         >
-          {!staffMember.isActive && (
-            <div className="mb-2 text-sm text-red-600 font-semibold dark:text-red-400">INACTIVE</div>
-          )}
-          
-          {staffMember.imageUrl && (
-            <div className="flex justify-center mb-4">
-              <img
-                src={`${API_BASE_URL}${staffMember.imageUrl}`}
-                alt={`${staffMember.firstName} ${staffMember.lastName}`}
-                className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 shadow-sm dark:border-gray-500"
-              />
+          <div className="flex-grow">
+            {!staffMember.isActive && (
+              <div className="mb-2 text-sm text-red-600 font-semibold dark:text-red-400">INACTIVE</div>
+            )}
+            
+            {staffMember.imageUrl && (
+              <div className="flex justify-center mb-4">
+                <img
+                  src={`${API_BASE_URL}${staffMember.imageUrl}`}
+                  alt={`${staffMember.firstName} ${staffMember.lastName}`}
+                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 shadow-sm dark:border-gray-500"
+                />
+              </div>
+            )}
+            
+            <div className="text-lg font-bold text-wine mb-2 text-center dark:text-white">
+              {staffMember.firstName} {staffMember.lastName}
             </div>
-          )}
-          
-          <div className="text-lg font-bold text-[#664147] mb-2 text-center dark:text-[#FDF6F0]">
-            {staffMember.firstName} {staffMember.lastName}
-          </div>
-          
-          <div className="text-sm text-gray-600 mb-3 space-y-1 dark:text-gray-300">
-            <div><strong>Role:</strong> {staffMember.role}</div>
-            <div><strong>Email:</strong> {staffMember.email}</div>
-            <div><strong>Phone:</strong> {staffMember.phone}</div>
-            {staffMember.specialization && (
-              <div><strong>Specialization:</strong> {staffMember.specialization}</div>
-            )}
-            {staffMember.yearsOfExperience > 0 && (
-              <div><strong>Experience:</strong> {staffMember.yearsOfExperience} years</div>
-            )}
-            {staffMember.licenseNumber && (
-              <div><strong>License:</strong> {staffMember.licenseNumber}</div>
-            )}
-          </div>
-          
-          {staffMember.description && (
-            <div className="text-xs text-gray-500 mb-2 italic bg-gray-50 p-2 rounded dark:text-gray-400 dark:bg-gray-700">
-              {staffMember.description}
+            
+            <div className="text-sm text-grayText mb-3 space-y-1 dark:text-lightGrayText">
+              <div><strong>Role:</strong> {staffMember.role}</div>
+              <div><strong>Email:</strong> {staffMember.email}</div>
+              <div><strong>Phone:</strong> {staffMember.phone}</div>
+              {staffMember.specialization && (
+                <div><strong>Specialization:</strong> {staffMember.specialization}</div>
+              )}
+              {staffMember.yearsOfExperience > 0 && (
+                <div><strong>Experience:</strong> {staffMember.yearsOfExperience} years</div>
+              )}
+              {staffMember.licenseNumber && (
+                <div><strong>License:</strong> {staffMember.licenseNumber}</div>
+              )}
             </div>
-          )}
-          
-          <div className="text-xs text-green-600 mt-2 mb-3 dark:text-green-400">
-            <strong>Availability:</strong> {formatAvailability(staffMember.availableSlots || [])}
+            
+            {staffMember.description && (
+              <div className="text-xs text-gray-500 mb-2 italic bg-gray-50 p-2 rounded dark:text-gray-400 dark:bg-gray-700">
+                {staffMember.description}
+              </div>
+            )}
+            
+            <div className="text-xs text-green-600 mt-2 mb-3 dark:text-green-400">
+              <strong>Availability:</strong> {formatAvailability(staffMember.availableSlots || [])}
+            </div>
           </div>
           
-          <div className="flex gap-2 mt-3">
+          <div className="flex gap-4 justify-center mt-auto pt-3">
             <button
-              className="px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 dark:bg-[#58383E] dark:hover:bg-[#4A2F35]"
+              className="cursor-pointer w-30 py-1 bg-wine hover:bg-wineDark text-white text-sm font-semibold rounded-md transition-colors duration-200"
               onClick={() => onEditStaff(staffMember)}
             >
               Edit
             </button>
             {staffMember.isActive ? (
               <button
-                className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 dark:bg-orange-600 dark:hover:bg-orange-700"
+                className="cursor-pointer w-30 py-1 bg-redButton hover:bg-redButtonDark text-white text-sm font-semibold rounded-md transition-colors duration-200"
                 onClick={() => onDeactivateStaff(staffMember._id)}
               >
                 Deactivate
               </button>
             ) : (
               <button
-                className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 dark:bg-green-600 dark:hover:bg-green-700"
+                className="cursor-pointer w-30 py-1 bg-greenButton hover:bg-greenButtonDark text-white text-sm font-semibold rounded-md transition-colors duration-200"
                 onClick={() => onActivateStaff(staffMember._id)}
               >
                 Activate
@@ -101,7 +103,7 @@ const StaffGrid: React.FC<StaffGridProps> = ({
         </div>
       ))}
       {staffList.length === 0 && (
-        <div className="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">
+        <div className="col-span-full text-center py-10 text-grayText dark:lightGrayText">
           No {showInactive ? 'inactive' : 'active'} staff members found.
         </div>
       )}

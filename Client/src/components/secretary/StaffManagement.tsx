@@ -6,6 +6,7 @@ import StaffForm, { StaffFormData } from './staff/StaffForm';
 import AvailabilityScheduler from './staff/AvailabilityScheduler';
 import ImageUpload from './staff/ImageUpload';
 import StaffGrid from './staff/StaffGrid';
+import { Plus, Eye, X } from 'lucide-react';
 
 // Local definitions for Availability and DayAvailability
 export interface DayAvailability {
@@ -15,7 +16,7 @@ export interface DayAvailability {
   isAvailable: boolean;
 }
 
-export interface Availability { 
+export interface Availability {
   monday: DayAvailability;
   tuesday: DayAvailability;
   wednesday: DayAvailability;
@@ -115,7 +116,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
 
   useEffect(() => {
     loadStaff();
-  }, [loadStaff]);  useEffect(() => {
+  }, [loadStaff]); useEffect(() => {
     if (editingStaff) {
       const newFormData = {
         firstName: editingStaff.firstName,
@@ -171,7 +172,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
         if (!selectedImage && editingStaff?.imageUrl) {
           staffDataToSend.append(formKey, editingStaff.imageUrl);
         } else if (!selectedImage) {
-           staffDataToSend.append(formKey, ''); // No new image, and no existing image or creating new
+          staffDataToSend.append(formKey, ''); // No new image, and no existing image or creating new
         }
         // If selectedImage is present, it will be appended as 'image' later.
         // The backend should handle 'imageUrl' vs 'image' logic.
@@ -221,11 +222,11 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
     } finally {
       setLoading(false);
     }
-  };  const handleEdit = (staffMember: Staff) => {
+  }; const handleEdit = (staffMember: Staff) => {
     // Set the editing staff - useEffect will handle populating the form data
     setEditingStaff(staffMember);
     setShowAddForm(true);
-  };  const handleDeactivate = async (id: string) => {
+  }; const handleDeactivate = async (id: string) => {
     try {
       await axios.delete(`${API_URL}/staff/${id}`);
       loadStaff();
@@ -243,7 +244,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
       setError('Failed to activate staff.');
       console.error(err);
     }
-  };const handleFormInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  }; const handleFormInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => {
       const updated = { ...prev, [name]: name === 'yearsOfExperience' ? parseInt(value) || 0 : value };
@@ -266,13 +267,13 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
       reader.readAsDataURL(file);
       // Temporarily set imageUrl to something to indicate a file is staged,
       // or rely on selectedImage state. Backend will use the 'image' field.
-      setFormData(prev => ({...prev, imageUrl: file.name})); // Or some placeholder
+      setFormData(prev => ({ ...prev, imageUrl: file.name })); // Or some placeholder
     } else {
       // If no file is selected (e.g., user cancels file dialog),
       // revert to the existing image if editing, or null if not.
       setSelectedImage(null);
       setImagePreview(editingStaff?.imageUrl ? `${API_BASE_URL}${editingStaff.imageUrl}` : null);
-      setFormData(prev => ({...prev, imageUrl: editingStaff?.imageUrl || ''}));
+      setFormData(prev => ({ ...prev, imageUrl: editingStaff?.imageUrl || '' }));
     }
   };
 
@@ -295,49 +296,45 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
     return () => {
       document.head.removeChild(style);
     };
-  }, []);  if (loading && staff.length === 0) return <p className="dark:text-gray-300">Loading staff...</p>;
+  }, []); if (loading && staff.length === 0) return <p className="dark:text-gray-300">Loading staff...</p>;
   if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
-  
+
   const filteredStaff = showInactive ? staff.filter(s => !s.isActive) : staff.filter(s => s.isActive);
-    return (
-    <div className="max-w-7xl mx-auto p-6 bg-gradient-to-br from-[#FDF6F0] to-[#F5D2B3] dark:from-[#664147] dark:to-[#3d262a] min-h-screen text-[#3B3B3B] dark:text-[#FDF6F0]">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="px-4 py-2 bg-[#664147] dark:bg-[#58383E] text-white rounded-lg shadow-md hover:bg-[#58383E] dark:hover:bg-[#4A2F33] transition-colors duration-200 flex items-center gap-2"
-            >
-              ← Back to Dashboard
-            </button>
-          )}
-          <h1 className="text-3xl font-bold text-[#664147] dark:text-[#FDF6F0]">Manage Staff</h1>
-        </div>
-      </div>      <div className="flex flex-wrap gap-4 mb-6">
-        <button 
-          onClick={() => { 
+
+  return (
+    <div className="mt-5 mb-8 p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto">
+
+      <header className="mb-8 text-center">
+        <h1 className="text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">&#128101; Manage Staff</h1>
+        <p className="text-lg text-grayText dark:text-lightGrayText">Update profiles, roles, and availability</p>
+      </header>
+      <div className="flex flex-wrap gap-4 mb-6 justify-center">
+        <button
+          onClick={() => {
             if (showAddForm || editingStaff) {
               resetForm();
             } else {
               setShowAddForm(true);
             }
           }}
-          className={`px-6 py-3 rounded-lg shadow-md font-semibold transition-colors duration-200 ${
-            showAddForm || editingStaff 
-              ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white' 
-              : 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white'
-          }`}
+          className={`flex items-center justify-center gap-2 w-60 h-11 font-bold rounded-full transition-colors duration-200 cursor-pointer ${showAddForm || editingStaff
+            ? 'bg-redButton text-white hover:bg-redButtonDark'
+            : 'bg-pinkDark text-white hover:bg-pinkDarkHover'
+            }`}
         >
+          {showAddForm || editingStaff ? <X size={20} /> : <Plus size={20} />}
           {showAddForm && !editingStaff ? 'Cancel Add New Staff' : editingStaff ? 'Cancel Edit / View List' : 'Add New Staff Member'}
         </button>
-        
-        <button 
+
+        <button
           onClick={() => setShowInactive(!showInactive)}
-          className="px-6 py-3 bg-[#91C0EC] hover:bg-[#C7DFF5] dark:bg-[#5A8BB8] dark:hover:bg-[#7BA5CC] text-[#664147] dark:text-[#FDF6F0] rounded-lg shadow-md font-semibold transition-colors duration-200"
+          className="flex items-center justify-center gap-2 w-60 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer"
         >
+          <Eye size={20} />
           {showInactive ? 'Show Active Staff' : 'Show Inactive Staff'}
         </button>
-      </div>      {showAddForm || editingStaff ? (
+      </div>
+      {showAddForm || editingStaff ? (
         <div className="bg-white dark:bg-[#4A2F33] rounded-lg shadow-xl p-6 border border-gray-200 dark:border-gray-600">
           <h3 className="text-2xl font-semibold text-[#664147] dark:text-[#FDF6F0] mb-6">
             {editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}
@@ -358,7 +355,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
             }
             availabilitySection={
               <AvailabilityScheduler
-                availability={availability} 
+                availability={availability}
                 onAvailabilityChange={handleAvailabilityChange}
               />
             }
