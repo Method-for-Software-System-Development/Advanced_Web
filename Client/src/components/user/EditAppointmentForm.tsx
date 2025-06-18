@@ -1,27 +1,36 @@
 import React, { useState, useEffect, useMemo } from 'react';
+// Types and services
 import { Appointment, Staff } from '../../types';
 import staffService from '../../services/staffService';
 import appointmentService from '../../services/appointmentService';
 import TimeSlotSelector from './appointments/TimeSlotSelectorClient';
 
+// Props for the edit appointment form
 interface EditAppointmentFormProps {
   appointment: Appointment;
   onSave: (updated: { staffId: string; date: string; time: string }) => void;
   onCancel: () => void;
 }
 
+// EditAppointmentForm allows editing the staff, date, and time of an appointment
 const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, onSave, onCancel }) => {
+  // State for staff list and selected staff
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [staffId, setStaffId] = useState<string>(typeof appointment.staffId === 'object' ? appointment.staffId._id : appointment.staffId);
+  // State for date and time
   const [date, setDate] = useState<string>(appointment.date.slice(0, 10));
   const [time, setTime] = useState<string>(appointment.time);
+  // Loading and error states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [loadingStaff, setLoadingStaff] = useState(false);
+  // Appointments for the selected staff and date
   const [staffAppointments, setStaffAppointments] = useState<Appointment[]>([]);
 
+  // Memoized selected staff object
   const selectedStaff = useMemo(() => staffList.find(s => s._id === staffId) || null, [staffList, staffId]);
 
+  // Load all staff on mount
   useEffect(() => {
     setLoadingStaff(true);
     staffService.getAllStaff().then(staff => {
@@ -33,6 +42,7 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
     });
   }, []);
 
+  // Load appointments for the selected staff and date
   useEffect(() => {
     if (staffId && date) {
       appointmentService.getAppointmentsByStaff(staffId, date).then(setStaffAppointments).catch(() => setStaffAppointments([]));
@@ -41,22 +51,20 @@ const EditAppointmentForm: React.FC<EditAppointmentFormProps> = ({ appointment, 
     }
   }, [staffId, date]);
 
+  // Handle form submission for saving the appointment changes
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
     // Validate that the selected date is not in the past
     const selectedDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
     if (selectedDate < today) {
       setError('Cannot schedule appointments in the past. Please select a future date.');
       setLoading(false);
       return;
     }
-    
     try {
       await onSave({ staffId, date, time });
     } catch (err: any) {

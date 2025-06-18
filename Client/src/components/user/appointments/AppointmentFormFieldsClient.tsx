@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+// Types and time slot selector
 import { Staff, AppointmentType } from '../../../types';
 import TimeSlotSelector from './TimeSlotSelectorClient';
 
+// Props for the appointment form fields component
 interface AppointmentFormFieldsClientProps {
   formData: {
     date: string;
@@ -22,6 +24,7 @@ interface AppointmentFormFieldsClientProps {
   loadingAppointments: boolean;
 }
 
+// AppointmentFormFieldsClient renders the fields for scheduling an appointment
 const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = ({
   formData,
   staff,
@@ -46,6 +49,8 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Get available durations for the selected appointment type
   const getAvailableDurations = (appointmentType: AppointmentType) => {
     switch (appointmentType) {
       case AppointmentType.WELLNESS_EXAM:
@@ -55,10 +60,12 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
     }
   };
 
+  // Get the cost for the selected appointment type
   const getTypeCosts = (appointmentType: AppointmentType) => {
     return 55;
   };
 
+  // Handle appointment type change
   const handleTypeChange = (newType: AppointmentType) => {
     onInputChange('type', newType);
     const newCost = getTypeCosts(newType);

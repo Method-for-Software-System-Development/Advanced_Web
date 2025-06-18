@@ -6,7 +6,6 @@ import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
 import { API_URL } from '../../config/api';
-import EmergencyAppointmentModal from './appointments/EmergencyAppointmentModal';
 import UserNavButton from './UserNavButton';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,14 +22,22 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Helper to format a Date object to 'YYYY-MM-DD' string for input fields
   const formatDateToYYYYMMDD = (date: Date): string => {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
-const [modalOpen, setModalOpen] = useState(false);
 
+  // Show a success message for a few seconds
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000);
+  };
+  
   const [formData, setFormData] = useState<Partial<Appointment>>({
     date: formatDateToYYYYMMDD(selectedDate),
     time: '',
@@ -51,14 +58,6 @@ const [modalOpen, setModalOpen] = useState(false);
   const [staffAppointments, setStaffAppointments] = useState<Appointment[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
 
-  // Function to show success message with auto-dismiss
-  const showSuccessMessage = (message: string) => {
-    setSuccessMessage(message);
-    setTimeout(() => {
-      setSuccessMessage('');
-    }, 3000);
-  };
-  
   // Client and pet state
   const [clientPets, setClientPets] = useState<Pet[]>([]);
   const [client, setClient] = useState<Patient | null>(null);  const [selectedPetId, setSelectedPetId] = useState<string | null>(
@@ -75,67 +74,68 @@ const [modalOpen, setModalOpen] = useState(false);
       return null;
     }  );
 
-useEffect(() => {
-  try {
-    const clientRaw = sessionStorage.getItem("client");
-    if (!clientRaw) {
-      setError('No client info found.');
-      return;
-    }
-    const parsedClient = JSON.parse(clientRaw);
-    setClient(parsedClient);
-    if (parsedClient.pets && parsedClient.pets.length > 0) {
-      let petsArr = parsedClient.pets;
-      // If pets are strings (IDs), fetch full pet objects
-      if (typeof petsArr[0] === 'string') {
-        // Only send valid 24-char ObjectID strings
-        const validPetIds = petsArr.filter((id: string) => typeof id === 'string' && id.length === 24);
-        if (validPetIds.length === 0) {
-          setClientPets([]); setSelectedPetId(null);
-          return;
-        }
-        fetch(`${API_URL}/pets/byIds`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ids: validPetIds }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            // Filter only active pets
-            const activePets = Array.isArray(data) ? data.filter((pet: any) => pet.isActive !== false) : [];
-            setClientPets(activePets);
-            if (activePets.length > 0) {
-              setSelectedPetId(activePets[0]._id);
-            } else {
-              setSelectedPetId(null);
-            }
-          })
-          .catch(() => {
-            setClientPets([]);
-            setSelectedPetId(null);
-            setError('Failed to fetch pets.');
-          });
-      } else {
-        // Already full pet objects
-        // Filter only active pets
-        const activePets = petsArr.filter((pet: any) => pet.isActive !== false);
-        setClientPets(activePets);
-        if (activePets.length > 0) {
-          setSelectedPetId(activePets[0]._id);
-        } else {
-          setSelectedPetId(null);
-        }
+  // Load client and pets from session storage and fetch pets if needed
+  useEffect(() => {
+    try {
+      const clientRaw = sessionStorage.getItem("client");
+      if (!clientRaw) {
+        setError('No client info found.');
+        return;
       }
-    } else {
-      setClientPets([]);
-      setSelectedPetId(null);
+      const parsedClient = JSON.parse(clientRaw);
+      setClient(parsedClient);
+      if (parsedClient.pets && parsedClient.pets.length > 0) {
+        let petsArr = parsedClient.pets;
+        // If pets are strings (IDs), fetch full pet objects
+        if (typeof petsArr[0] === 'string') {
+          // Only send valid 24-char ObjectID strings
+          const validPetIds = petsArr.filter((id: string) => typeof id === 'string' && id.length === 24);
+          if (validPetIds.length === 0) {
+            setClientPets([]); setSelectedPetId(null);
+            return;
+          }
+          fetch(`${API_URL}/pets/byIds`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: validPetIds }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              // Filter only active pets
+              const activePets = Array.isArray(data) ? data.filter((pet: any) => pet.isActive !== false) : [];
+              setClientPets(activePets);
+              if (activePets.length > 0) {
+                setSelectedPetId(activePets[0]._id);
+              } else {
+                setSelectedPetId(null);
+              }
+            })
+            .catch(() => {
+              setClientPets([]);
+              setSelectedPetId(null);
+              setError('Failed to fetch pets.');
+            });
+        } else {
+          // Already full pet objects
+          // Filter only active pets
+          const activePets = petsArr.filter((pet: any) => pet.isActive !== false);
+          setClientPets(activePets);
+          if (activePets.length > 0) {
+            setSelectedPetId(activePets[0]._id);
+          } else {
+            setSelectedPetId(null);
+          }
+        }
+      } else {
+        setClientPets([]);
+        setSelectedPetId(null);
+      }
+    } catch (err) {
+      setError('Failed to load client info.');
     }
-  } catch (err) {
-    setError('Failed to load client info.');
-  }
-}, []);
+  }, []);
 
-  // Load staff appointments when staff member or date changes
+  // Load staff appointments for the selected staff and date
   useEffect(() => {
     if (selectedStaff && formData.date) {
       loadStaffAppointments();
@@ -151,6 +151,21 @@ useEffect(() => {
     }
   }, [formData.duration]);
 
+  // Fetch all staff members from the server
+  const loadStaff = async () => {
+    try {
+      setLoadingStaff(true);
+      const activeStaff = await staffService.getAllStaff();
+      setStaff(activeStaff);
+    } catch (err) {
+      console.error('Error loading staff:', err);
+      setError('Failed to load staff members.');
+    } finally {
+      setLoadingStaff(false);
+    }
+  };
+
+  // Fetch all appointments for a staff member on a specific date
   const loadStaffAppointments = async () => {
     if (!selectedStaff || !formData.date) return;
 
@@ -169,19 +184,7 @@ useEffect(() => {
     }
   };
 
-  const loadStaff = async () => {
-    try {
-      setLoadingStaff(true);
-      const activeStaff = await staffService.getAllStaff();
-      setStaff(activeStaff);
-    } catch (err) {
-      console.error('Error loading staff:', err);
-      setError('Failed to load staff members.');
-    } finally {
-      setLoadingStaff(false);
-    }
-  };
-
+  // Handle staff selection change
   const handleStaffChange = (staffId: string) => {
     const selectedStaffMember = staff.find(s => s._id === staffId) || null;
     setSelectedStaff(selectedStaffMember);
@@ -189,44 +192,17 @@ useEffect(() => {
     handleInputChange('time', '');
   };
 
+  // Handle input change for form fields
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Handle pet selection change
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
   };
-  /**
- * Sends an emergency-appointment request to the backend.
- * Uses minimal fields: userId (client), petId, description.
- * Shows a success banner and closes the form on success.
- */
-  const handleEmergencyAppointmentClient = async (reasonFromModal?: string) => {
-  if (!client || !selectedPetId) {
-    setError("Please select a pet.");
-    return;
-  }
-  setIsSubmitting(true);
-  setError(null);
-
-  try {
-    await appointmentService.createEmergencyAppointment({
-      userId: client._id,
-      petId: selectedPetId,
-      description: formData.description?.trim() || '',
-      emergencyReason: reasonFromModal?.trim() || "No reason provided"
-    });
-
-    showSuccessMessage("Emergency request sent! Please come to the clinic ASAP—our staff will contact you shortly.");
-    setTimeout(onClose, 2000);
-  } catch (err: any) {
-    setError(err?.message || "Failed to create emergency appointment.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
   
+   // Handle form submission for creating a new appointment
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -313,16 +289,6 @@ useEffect(() => {
   }, []);
   return (
     <div className="w-full">
-      {/* Emergency Modal */}
-    <EmergencyAppointmentModal
-      open={modalOpen}
-      onClose={() => setModalOpen(false)}
-      isSubmitting={isSubmitting}
-      onConfirm={async (reason: string) => {
-        setModalOpen(false);
-        await handleEmergencyAppointmentClient(reason);
-      }}
-    />
       {/* Success Message Banner */}
       {successMessage && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
