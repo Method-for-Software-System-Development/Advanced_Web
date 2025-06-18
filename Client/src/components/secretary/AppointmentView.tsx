@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import TailwindCalendar from './TailwindCalendar';
-import DashboardButton from './DashboardButton';
 import AddAppointmentForm from './AddAppointmentForm';
 import AppointmentNotesInline from './AppointmentNotesInline';
 import appointmentService from '../../services/appointmentService';
