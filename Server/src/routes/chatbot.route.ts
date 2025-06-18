@@ -580,6 +580,49 @@ if (match) {
     });
   }
 }
+/* ──────────────────────── 8c. Specialty Information Handler ────────────────────────
+   Answers questions like "Who is the cardiologist?" or "Who is the dermatologist?".
+   This uses the staff/search/specialty API to retrieve real-time doctor info by specialty from the DB.
+   Only English specialties are supported for now.
+------------------------------------------------------------------------------- */
+
+const specialtyRegex = /^(?:who\s+is\s+the|which\s+doctor\s+is\s+the)\s+([a-z\s-]+)\??$/i;
+const specialtyMatch = specialtyRegex.exec(text);
+if (specialtyMatch) {
+  const specialization = specialtyMatch[1].trim();
+  try {
+    // Query the staff search by specialty endpoint
+    const response = await axios.get(
+      `${process.env.SERVER_URL || "http://localhost:3000"}/api/staff/search/specialty`,
+      { params: { specialization } }
+    );
+
+    const staffList = response.data;
+    if (staffList && staffList.length) {
+      // Compose a reply for each matching doctor
+      const reply = staffList.map((doc: any) =>
+        `👨‍⚕️ **Dr. ${doc.firstName} ${doc.lastName}**\n` +
+        (doc.specialization ? `• Specialty: ${doc.specialization}\n` : "") +
+        `• Experience: ${doc.yearsOfExperience} years\n` +
+        (doc.description ? `• About: ${doc.description}\n` : "") +
+        (doc.availableSlots && doc.availableSlots.length
+          ? `• Usual hours: ${doc.availableSlots.join(", ")}`
+          : "")
+      ).join("\n\n");
+      return res.json({ reply, menu: [] });
+    } else {
+      return res.json({
+        reply: `Sorry, I couldn't find any doctor with specialty: ${specialization}.`,
+        menu: []
+      });
+    }
+  } catch (err) {
+    return res.json({
+      reply: "There was a problem searching for the doctor by specialty.",
+      menu: []
+    });
+  }
+}
 
   /* ───────────────────────── 11. GEMINI FALLBACK ───────────────────────── */
   const ai = await askGemini(text);

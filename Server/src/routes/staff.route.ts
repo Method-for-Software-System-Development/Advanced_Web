@@ -113,6 +113,35 @@ staffRouter.get("/search", async (req, res) => {
   }
 });
 /**
+ * GET /api/staff/search/specialty?specialization=Cardiologist
+ * Returns all active staff members with the given specialization, case-insensitive.
+ * Now supports "cardiology", "cardiologist", and plural/singular forms.
+ */
+staffRouter.get("/search/specialty", async (req, res) => {
+  try {
+    let q = String(req.query.specialization || "").trim();
+    if (!q) return res.status(400).json({ error: "specialization query is required" });
+
+    // Normalize input to handle both "cardiology" and "cardiologist(s)" forms
+    q = q.replace(/(ist|ists)?$/i, ""); // Remove "ist" or "ists" at the end (e.g., "cardiologist" -> "cardiolog")
+    // Now build a RegExp that matches both "cardiology" and "cardiologist(s)"
+    const reg = new RegExp(q, "i");
+
+    // Find staff with specialization that matches (case-insensitive)
+    const staffList = await Staff.find({
+      isActive: true,
+      specialization: reg,
+    });
+
+    if (!staffList.length) return res.status(404).json({ error: "No staff found with this specialization" });
+    res.status(200).json(staffList);
+  } catch (error) {
+    console.error("Error searching staff by specialization:", error);
+    res.status(500).json({ error: "Failed to search staff member by specialization" });
+  }
+});
+
+/**
  * GET /api/staff/:id
  * Get a specific staff member by ID
  */
