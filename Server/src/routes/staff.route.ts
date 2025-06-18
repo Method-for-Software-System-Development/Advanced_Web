@@ -72,7 +72,46 @@ staffRouter.get("/", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to fetch staff members" });
   }
 });
+/**
+ * GET /api/staff/search?name=Levin
+ * Returns a staff member by name (first+last or just last), case-insensitive.
+ * Supports: "Levin", "Micheal Levin", "Dr Levin", "Dr Micheal Levin"
+ */
+staffRouter.get("/search", async (req, res) => {
+  try {
+    const q = String(req.query.name || "").trim();
+    if (!q) return res.status(400).json({ error: "name query is required" });
 
+    // Remove possible leading 'Dr ' or 'dr. '
+    const clean = q.replace(/^dr\.?\s+/i, "");
+
+    // Try matching full name (firstName + lastName)
+    const nameParts = clean.split(/\s+/).filter(Boolean);
+    let staff = null;
+
+    // 1. Try exact full name (case-insensitive)
+    if (nameParts.length >= 2) {
+      staff = await Staff.findOne({
+        isActive: true,
+        firstName: { $regex: new RegExp(`^${nameParts[0]}$`, "i") },
+        lastName:  { $regex: new RegExp(`^${nameParts.slice(1).join(" ")}$`, "i") }
+      });
+    }
+    // 2. Try by last name only
+    if (!staff && nameParts.length >= 1) {
+      staff = await Staff.findOne({
+        isActive: true,
+        lastName: { $regex: new RegExp(`^${nameParts[nameParts.length - 1]}$`, "i") }
+      });
+    }
+
+    if (!staff) return res.status(404).json({ error: "Staff member not found" });
+    res.status(200).json(staff);
+  } catch (error) {
+    console.error("Error searching staff by name:", error);
+    res.status(500).json({ error: "Failed to fetch staff member" });
+  }
+});
 /**
  * GET /api/staff/:id
  * Get a specific staff member by ID
@@ -353,5 +392,6 @@ staffRouter.put("/:id/activate", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to activate staff member" });
   }
 });
+
 
 export default staffRouter;

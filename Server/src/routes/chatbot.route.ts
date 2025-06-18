@@ -544,6 +544,43 @@ if (s?.step === "emergencyConfirm") {
     }
     return res.json({ reply: "Type 'accept' to confirm or 'exit' to abort.", menu: [] });
   }
+  /* ──────────────────────── 8b. Doctor Information Handler ────────────────────────
+   Answers questions like "Who is Dr Smith?" or "Tell me about Dr Cohen".
+   This uses the staff/search API to retrieve real-time doctor info from the DB.
+   Only English names (A-Z) are supported for now.
+------------------------------------------------------------------------------- */
+
+const doctorRegex = /^(?:who\s+is|tell\s+me\s+about)\s+dr\.?\s+([a-z\s-]+)\??$/i;
+const match = doctorRegex.exec(text);
+if (match) {
+  const name = match[1].trim();
+  try {
+    // Query the staff search endpoint
+    const response = await axios.get(
+      `${process.env.SERVER_URL || "http://localhost:3000"}/api/staff/search`,
+      { params: { name } }
+    );
+
+    const doc = response.data;
+    let reply =
+      `👩‍⚕️ **Dr. ${doc.firstName} ${doc.lastName}**\n` +
+      (doc.specialization ? `• Specialty: ${doc.specialization}\n` : "") +
+      `• Experience: ${doc.yearsOfExperience} years\n` +
+      (doc.description ? `• About: ${doc.description}\n` : "") +
+      (doc.availableSlots && doc.availableSlots.length
+        ? `• Usual hours: ${doc.availableSlots.join(", ")}`
+        : "");
+
+    return res.json({ reply, menu: [] });
+  } catch (err) {
+    // Doctor not found or error from the API
+    return res.json({
+      reply: `Sorry, I couldn't find a doctor named ${name}.`,
+      menu: []
+    });
+  }
+}
+
   /* ───────────────────────── 11. GEMINI FALLBACK ───────────────────────── */
   const ai = await askGemini(text);
   return res.json({ reply: ai, menu: [] });
