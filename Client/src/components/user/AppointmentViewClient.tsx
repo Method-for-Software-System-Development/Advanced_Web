@@ -1,16 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
+// Component for adding a new appointment (form)
 import AddAppointmentFormToClient from './AddAppointmentFormToClient.tsx';
+// Component for editing an existing appointment
 import EditAppointmentForm from './EditAppointmentForm';
+// Service for API calls related to appointments
 import appointmentService from '../../services/appointmentService';
+// Appointment type definition
 import { Appointment } from '../../types';
+// Navigation button for user section
 import UserNavButton from './UserNavButton';
+// Modal for entering cancel reason
 import { CancelReasonModal } from './CancelReasonModal';
 
+// Props for AppointmentViewClient component
 interface AppointmentViewClientProps {
   onBack?: () => void; // Make this optional since it's not being used
 }
 
-// Helper function to format appointment data for display
+// Helper function to format appointment data for display in the UI
 const formatAppointmentForDisplay = (appointment: Appointment) => {
   // Handle populated vs unpopulated references
   const staff = typeof appointment.staffId === 'object' ? appointment.staffId : null;
@@ -31,7 +38,9 @@ const formatAppointmentForDisplay = (appointment: Appointment) => {
   };
 };
 
+// Main component for viewing, adding, editing, and canceling appointments for the client
 const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
+  // State variables for appointments, loading, errors, UI controls, etc.
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,7 +62,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     }, 3000); // Auto-dismiss after 3 seconds
   };
 
-  // Function to load all appointments from pets
+  // Function to load all appointments for the client's pets
   const loadAppointments = async () => {
     setIsLoading(true);
     setError('');
@@ -125,7 +134,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     loadAppointments();
   }, []);
 
-  // Check for direct navigation to add form
+  // Check for direct navigation to add form (from other pages)
   useEffect(() => {
     const showAddFormDirectly = sessionStorage.getItem("showAddFormDirectly");
     if (showAddFormDirectly === "true") {
@@ -134,6 +143,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     }
   }, []);
 
+  // Memoized sorted appointments based on sort field and direction
   const sortedAppointments = useMemo(() => {
     const sorted = [...appointments].sort((a, b) => {
       let aVal: string | number = '';
@@ -165,7 +175,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     return sorted;
   }, [appointments, sortField, sortDirection]);
 
-  // Filter appointments by pet name
+  // Memoized filtered appointments by pet name
   const filteredAppointments = useMemo(() => {
     if (!searchTerm.trim()) return sortedAppointments;
     return sortedAppointments.filter(apt => {
@@ -207,16 +217,19 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     }
   };
 
+  // Handler for clicking cancel on an appointment
   const handleCancelClick = (appointmentId: string) => {
     setCancelingAppointmentId(appointmentId);
     setShowCancelModal(true);
   };
 
+  // Handler for closing the cancel modal
   const handleCancelModalClose = () => {
     setShowCancelModal(false);
     setCancelingAppointmentId(null);
   };
 
+  // Handler for submitting a cancel reason
   const handleCancelSubmit = async (reason: string) => {
     if (!cancelingAppointmentId) return;
     setCancelReason(reason);
@@ -558,4 +571,5 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   );
 };
 
+// Export the component as default
 export default AppointmentViewClient;
