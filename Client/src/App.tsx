@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ChatButton from "./components/chatbot/ChatButton";
-import ChatWindow from "./components/chatbot/ChatWindow";
 import Login from "./components/auth/Login";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Home from "./pages/Home";
@@ -31,11 +29,6 @@ const App = () => {
           } 
         />
       </Routes>
-
-      {/* Floating chat toggle */}
-      <ChatButton onClick={() => setChatOpen(!chatOpen)} />
-      <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
-
       {/* Login modal */}
       {loginOpen && (
         <Login onClose={() => setLoginOpen(false)} />

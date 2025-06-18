@@ -8,9 +8,10 @@ import LogoutButton from "./auth/LogoutButton";
 interface NavbarProps {
   onLoginClick?: () => void;
   onBackToDashboard?: () => void;
+  onLogout?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard }) => {
+const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogout}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   // Dummy state to force a re-render when localStorage changes
   const [refresh, setRefresh] = useState(0);
@@ -75,7 +76,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard }) => {
               Dashboard
             </button>
           )}
-          {isLoggedIn ? (<LogoutButton onLogout={() => setRefresh(r => r + 1)} />) : (
+         {isLoggedIn ? (
+  <LogoutButton onLogout={() => {
+    setRefresh(r => r + 1);  // Force a re-render of navbar state
+    if (onLogout) onLogout(); // Call parent onLogout to close chat
+  }} />) : (
             onLoginClick && (
               <button
                 onClick={onLoginClick}
@@ -122,7 +127,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard }) => {
               </button>
             )}
             {isLoggedIn ? (
-              <LogoutButton variant="mobile" onLogout={() => setRefresh(r => r + 1)} />) : (
+              <LogoutButton
+              variant="mobile"
+              onLogout={() => {
+                setRefresh(r => r + 1);
+                if (onLogout) onLogout(); 
+              }}
+            />
+            ) : (
               onLoginClick && (
                 <button
                   onClick={() => { setMenuOpen(false); onLoginClick(); }}

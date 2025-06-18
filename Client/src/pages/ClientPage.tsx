@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import ChatButton from "../components/chatbot/ChatButton";
+import ChatWindow from "../components/chatbot/ChatWindow";
 import FooterSection from "../components/FooterSection";
 import ClientProfile from "../components/user/ClientProfile";
 import TreatmentHistory from "../components/user/TreatmentHistory";
@@ -35,6 +37,8 @@ const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+
   // Check for navigation signal from AboutSection
   useEffect(() => {
     const navigateToAppointments = sessionStorage.getItem("navigateToAppointments");
@@ -83,7 +87,11 @@ const ClientPage: React.FC = () => {
   const visibleViews = allViews.filter((v) => v !== currentView);
   return (
     <div className="min-h-screen flex flex-col bg-[#F9F3F0] dark:bg-[#2D1B1F] text-[#4A3F35] dark:text-[#FDF6F0]">
-      <Navbar onBackToDashboard={currentView !== "profile" ? handleBackToDashboard : undefined} />
+      <Navbar onBackToDashboard={currentView !== "profile" ? handleBackToDashboard : undefined}
+      onLogout={() => setChatOpen(false)} />
+      <ChatButton onClick={() => setChatOpen(!chatOpen)} />
+      <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
+
 
       <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap gap-4 justify-center mb-10">

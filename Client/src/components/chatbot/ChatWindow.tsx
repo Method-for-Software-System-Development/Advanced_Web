@@ -62,6 +62,32 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
   const [isTyping, setIsTyping] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+ // --- GET CURRENT USER ID ---
+  function getCurrentUserId() {
+    try {
+      const userString = sessionStorage.getItem("user");
+      if (!userString) return null;
+      const userObj = JSON.parse(userString);
+      return userObj._id || null;
+    } catch (err) {
+      return null;
+    }
+  }
+  const userId = getCurrentUserId();
+  /**
+   * Clear chat messages and input when the current user changes.
+   * This ensures chat history is always separated per user session.
+   */
+ useEffect(() => {
+  setMessages([]);
+  setInput("");
+  if (open) {
+    sendChatMessage("menu").then(resp => {
+      setMessages([{ role: "bot", text: resp.reply }]);
+      setMenuOptions(resp.menu || []);
+    });
+  }
+}, [userId]);
 
   /** Always scroll to bottom when messages update */
   useEffect(() => {
