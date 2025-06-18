@@ -36,9 +36,9 @@ const TailwindCalendar: React.FC<TailwindCalendarProps> = ({
           font-family: inherit;
           line-height: 1.125em;
         }
-
+        
         .dark .tailwind-calendar .react-calendar {
-          background: #4A2F33;
+          background: #3B3B3B;
           border-color: #4b5563;
         }
 

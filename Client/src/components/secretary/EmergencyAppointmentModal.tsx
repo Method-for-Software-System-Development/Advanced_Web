@@ -61,10 +61,9 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f8d7da]/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-[#FDF6F0] dark:bg-[#4A3F35] p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn">
-        <button
+      <div className="relative w-full max-w-md bg-[#FDF6F0] dark:bg-[#4A3F35] p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn">        <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-[#EF92A6] dark:hover:text-[#D17C8F] text-2xl font-bold focus:outline-none"
+          className="absolute top-3 right-3 text-gray-400 hover:text-[#EF92A6] dark:hover:text-[#D17C8F] text-2xl font-bold focus:outline-none cursor-pointer"
           aria-label="Close modal"
         >
           &times;
@@ -130,18 +129,16 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
               I understand that this appointment is for emergencies only.
             </label>
           </div>
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
+          <div className="flex justify-end space-x-3 pt-4">            <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-[var(--color-redButton)] rounded-md text-sm font-medium text-[var(--color-redButton)] hover:bg-[var(--color-redButton)] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-redButton)] transition-colors duration-150"
+              className="px-4 py-2 border border-[var(--color-redButton)] rounded-md text-sm font-medium text-[var(--color-redButton)] hover:bg-[var(--color-redButton)] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-redButton)] transition-colors duration-150 cursor-pointer"
               disabled={isSubmitting}
             >
               Cancel
-            </button>
-            <button
+            </button>            <button
               type="submit"
-              className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
+              className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md cursor-pointer"
               disabled={!checked || isSubmitting || !selectedPetId || !selectedPatientId}
             >
               {isSubmitting ? "Sending..." : "Confirm Emergency"}

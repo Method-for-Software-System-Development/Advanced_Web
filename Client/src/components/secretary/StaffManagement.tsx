@@ -299,9 +299,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({ onBack }) => {
   if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
   
   const filteredStaff = showInactive ? staff.filter(s => !s.isActive) : staff.filter(s => s.isActive);
-  
-  return (
-    <div className="container mx-auto p-6 bg-gradient-to-br from-[#FDF6F0] to-[#F5D2B3] dark:from-[#664147] dark:to-[#3d262a] min-h-screen text-[#3B3B3B] dark:text-[#FDF6F0]">
+    return (
+    <div className="max-w-7xl mx-auto p-6 bg-gradient-to-br from-[#FDF6F0] to-[#F5D2B3] dark:from-[#664147] dark:to-[#3d262a] min-h-screen text-[#3B3B3B] dark:text-[#FDF6F0]">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {onBack && (

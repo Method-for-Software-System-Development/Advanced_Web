@@ -196,7 +196,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => { 
     <div className="mb-8 text-center">
         <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
         </div>
-          <div className="max-w-6xl mx-auto p-4 md:p-8 bg-white dark:bg-[#664147] rounded-xl shadow-2xl">
+          <div className="max-w-7xl mx-auto p-4 md:p-8 bg-white dark:bg-[#664147] rounded-xl shadow-2xl">
         
       <header className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-[#4A3F35] dark:text-[#FDF6F0] mb-3">Manage Patients</h1>
