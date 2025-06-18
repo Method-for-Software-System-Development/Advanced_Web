@@ -12,8 +12,10 @@
   --color-creamDark: #F5D2B3;
   --color-pink: #F7C9D3;
   --color-pinkDark: #EF92A6;
+  --color-pinkDarkHover: #E7617E;
   --color-sky: #C7DFF5;
   --color-skyDark: #91C0EC;
+  --color-skyDarkHover: #6A9DDC;
   --color-wine: #664147;
   --color-wineDark: #58383E;
   --color-whiteDark: #DBDBDB;
@@ -28,8 +30,8 @@
   --color-darkModeLight: #4E4E4E;
   --color-greenButton: #00c951;
   --color-greenButtonDark: #00a63e;
-  --color-redButton: #ff4d4d;
-  --color-redButtonDark: #e60000;
+  --color-redButton: #E7000B;
+  --color-redButtonDark: #C5000A;
 }
 
 /* --- Global styles --- */

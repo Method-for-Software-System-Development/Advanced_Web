@@ -127,7 +127,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
                 setFirstName(value);
               }
             }}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
@@ -143,7 +143,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
                 setLastName(value);
               }
             }}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
@@ -161,7 +161,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             }}
             inputMode="numeric"
             pattern="[0-9]*"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
@@ -171,7 +171,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             id="email" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
@@ -181,7 +181,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             id="street" 
             value={street}
             onChange={(e) => setStreet(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
@@ -191,7 +191,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             id="city" 
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
@@ -209,7 +209,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             }}
             inputMode="numeric"
             pattern="[0-9]*"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
         </div>
         <div>
@@ -219,7 +219,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
             id="password" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
           <div className={"mt-1 text-xs " + getPasswordStrength(password).color + " dark:text-gray-400"}>
             Strength: {getPasswordStrength(password).label}

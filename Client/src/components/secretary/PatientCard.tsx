@@ -36,9 +36,9 @@ const PatientCard: React.FC<PatientCardProps> = ({
   };
   
   return (
-    <div className="p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 mb-4">
+    <div className="p-6 bg-white dark:bg-darkMode rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 mb-4">
       <div className="flex justify-between items-start mb-2">
-        <h3 className="text-xl font-semibold text-[#664147] dark:text-[#FDF6F0]">{patient.firstName+' '+patient.lastName}</h3>
+        <h3 className="text-xl font-semibold text-wine dark:text-white">{patient.firstName+' '+patient.lastName}</h3>
         <button 
           onClick={() => onEditPatient(patient)}
           className="px-3 py-1 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 text-sm"
@@ -50,9 +50,9 @@ const PatientCard: React.FC<PatientCardProps> = ({
       {patient.phone && <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Phone: {patient.phone}</p>}
       {patient.street && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Street: {patient.street}</p>}
       {patient.city && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">City: {patient.city}</p>}      {patient.postalCode && <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Postal Code: {patient.postalCode}</p>}
-      <div className="flex justify-between items-center mb-2">
-        <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300">Pets:</h4>
-        <div className="flex items-center space-x-2">
+      <div className="border-t mt-2 flex justify-between items-center mb-2">
+        <h4 className="text-md mt-2 font-semibold text-gray-700 dark:text-gray-300">Pets:</h4>
+        <div className="flex mt-2 items-center space-x-2">
           <input
             type="checkbox"
             id={`showInactive-${patient._id}`}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import TailwindCalendar from './TailwindCalendar';
-import DashboardButton from './DashboardButton';
 import AddAppointmentForm from './AddAppointmentForm';
 import AppointmentNotesInline from './AppointmentNotesInline';
 import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
 import { API_URL } from '../../config/api';
 import EmergencyAppointmentModal from './EmergencyAppointmentModal';
+import { Download, Plus, AlertCircle } from 'lucide-react';
 
 interface AppointmentViewProps {
   onBack: () => void;
@@ -359,47 +359,59 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             </svg>
             {successMessage}
           </div>
-        </div>
-      )}
+        </div>)}
 
-      <div className="mb-8 text-center">
-        <DashboardButton onClick={onBack} label="&larr; Back to Dashboard" />
-      </div>{/* Calendar and Export Section */}
-      <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-3xl mx-auto">
-        <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-4">Select Date to View Appointments</h2>
-        <div className="flex justify-center mb-6">
-          <TailwindCalendar
-            onChange={(value: Value) => handleDateChange(value)}
-            value={selectedDate}
-            locale="en-US"
-            onActiveStartDateChange={({ activeStartDate }: { activeStartDate: Date | null }) => activeStartDate && setCurrentCalendarMonthView(activeStartDate)}
-            tileContent={tileContent}
-          />
-        </div>
-        <div className="text-center">
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={handleExportToExcel}
-              disabled={appointments.length === 0 || isLoading}
-              className="px-6 py-3 bg-[#664147] text-white font-semibold rounded-lg shadow-md hover:bg-[#58383E] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Export Appointments for {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-            </button>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="px-6 py-3 bg-[#EF92A6] text-white font-semibold rounded-lg shadow-md hover:bg-[#E57D98] transition-colors duration-200"
-            >
-              Add New Appointment
-            </button>
-            <button
-              onClick={() => setShowEmergencyModal(true)}
-              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200"
-            >
-              Emergency Appointment
-            </button>
+      {/* Calendar and Export Section */}
+      <section className="mt-5 mb-8 p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto">
+
+        <header className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">&#128197; View Appointments</h1>
+          <p className="text-lg text-grayText dark:text-lightGrayText">Access calendar, view schedules, and export reports</p>
+        </header>
+
+        <div className="flex justify-center">
+          <div className="w-fit">
+            <h2 className="text-2xl font-semibold text-grayText dark:text-white mb-4 text-left lg:ml-0">Select Date to View Appointments Below</h2>
+            <div className="flex flex-col lg:flex-row gap-8 items-start mb-6">
+              <div className="flex justify-start lg:justify-center w-full lg:w-auto">
+                <TailwindCalendar
+                  onChange={(value: Value) => handleDateChange(value)}
+                  value={selectedDate}
+                  locale="en-US"
+                  onActiveStartDateChange={({ activeStartDate }: { activeStartDate: Date | null }) => activeStartDate && setCurrentCalendarMonthView(activeStartDate)}
+                  tileContent={tileContent}
+                />
+              </div>
+              <div className="flex flex-col gap-6 w-full lg:w-110">
+                <button
+                  onClick={handleExportToExcel}
+                  disabled={appointments.length === 0 || isLoading}
+                  className="flex items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Download size={20} />
+                  Export Appointments to Excel for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </button>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="flex items-center justify-center gap-2 h-11 bg-pinkDark text-white font-bold rounded-full hover:bg-pinkDarkHover transition-colors duration-200 cursor-pointer"
+                >
+                  <Plus size={20} />
+                  Add New Appointment
+                </button>
+                <button
+                  onClick={() => setShowEmergencyModal(true)}
+                  className="flex items-center justify-center gap-2 h-11 bg-redButton text-white font-bold rounded-full hover:bg-redButtonDark transition-colors duration-200 cursor-pointer"
+                >
+                  <AlertCircle size={20} />
+                  Emergency Appointment
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
       </section>
+
       {showEmergencyModal && (
         <EmergencyAppointmentModal
           open={showEmergencyModal}
@@ -435,23 +447,19 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
           }}
           isSubmitting={isSubmittingEmergency}
         />
-      )}      {/* Add Appointment Form Section */}
+      )}
+
+      {/* Add Appointment Form Section */}
       {showAddForm && (
-        <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-4">
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-md hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors ml-auto"
-            >
-              Cancel
-            </button>          </div>          <AddAppointmentForm
+        <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-7xl mx-auto">
+          <AddAppointmentForm
             onClose={() => setShowAddForm(false)}
             onAppointmentAdded={handleAppointmentAdded}
             selectedDate={selectedDate}
           />
         </section>
       )}      {/* Appointments List Section */}
-      <section className="p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-4xl mx-auto">
+      <section className="p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto mb-10">
         <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-6">
           Appointments for {selectedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
         </h2>
@@ -471,7 +479,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             {sortedAppointments.map((apt) => {
               const formattedApt = formatAppointmentForDisplay(apt);
               return (
-                <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md bg-gray-50 dark:bg-gray-700 hover:shadow-lg transition-shadow duration-200 ease-in-out">                  <div className="flex justify-between items-start mb-4">
+                <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md bg-gray-50 dark:bg-darkMode hover:shadow-lg transition-shadow duration-200 ease-in-out">                  <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(formattedApt.status)}`}>
@@ -511,7 +519,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                     {formattedApt.status !== AppointmentStatus.CANCELLED && (
                       <button
                         onClick={() => handleCancelAppointment(apt._id)}
-                        className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150"
+                        className="px-3 py-1 bg-redButton text-white text-xs font-semibold rounded-md shadow-sm hover:bg-redButtonDark cursor-pointer transition-colors duration-150"
                       >
                         Cancel
                       </button>
@@ -519,8 +527,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                   </div>
                 </div>
                   <p className="mt-2 text-sm text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formattedApt.time}</p>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-2 text-sm">
                     <div>                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Client:</strong> {formattedApt.clientName}</p>
                       <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {formattedApt.petName}</p>
                     </div>

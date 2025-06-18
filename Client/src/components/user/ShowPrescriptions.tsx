@@ -144,7 +144,7 @@ const ShowPrescriptions: React.FC = () => {
   });  return (
     <div className="flex justify-center w-full min-h-[600px]">
       <div
-        className="w-full max-w-5xl bg-white dark:bg-[#664147] rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8 mobile:w-full"
+        className="w-full max-w-7xl bg-white dark:bg-[#664147] rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8 mobile:w-full"
         style={{ width: "80%" }}
       >        {/* Success Message Banner */}
         {successMessage && (

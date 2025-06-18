@@ -109,7 +109,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
             onChange={(e) => onInputChange('date', e.target.value)} // Changed from handleChange
             min={new Date().toISOString().split('T')[0]} // Block past dates
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
         </div>
         
@@ -120,7 +120,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           <select
             value={formData.staffId}
             onChange={(e) => onStaffChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             required
             disabled={loadingStaff}
           >
@@ -143,7 +143,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           <select
             value={formData.type}
             onChange={(e) => handleTypeChange(e.target.value as AppointmentType)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             required
           >
             {Object.values(AppointmentType).map(type => (
@@ -161,7 +161,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
             value={formData.duration} // Changed from formData.durationMinutes
             onChange={(e) => onInputChange('duration', parseInt(e.target.value))} // Changed from handleChange, added parseInt
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           >
             {getAvailableDurations(formData.type).map(duration => (
               <option key={duration} value={duration}>
@@ -186,7 +186,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
             type="number"
             value={formData.cost}
             onChange={(e) => onInputChange('cost', parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
             min="0"
             step="0.01"
             required
@@ -203,7 +203,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           onChange={(e) => onInputChange('description', e.target.value)} // Changed from handleChange
           rows={3}
           maxLength={300}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
           placeholder="e.g., Annual check-up, vaccination, injury assessment..."
         />
       </div>
@@ -217,7 +217,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           onChange={(e) => onInputChange('notes', e.target.value)} // Changed from handleChange
           rows={2}
           maxLength={200}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm placeholder-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
           placeholder="Any other relevant information..."
         />
       </div>

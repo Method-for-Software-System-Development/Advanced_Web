@@ -49,7 +49,7 @@ const ClientSearch: React.FC<ClientSearchProps> = ({ onClientSelect, selectedCli
           placeholder="Search by name, email, or phone..."
           value={searchQuery}
           onChange={(e) => handleSearch(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500"
         />
         {isLoading && <p className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Loading...</p>}
         
