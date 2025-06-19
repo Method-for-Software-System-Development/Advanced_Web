@@ -244,7 +244,7 @@ router.post("/", async (req, res) => {
     if (!uid) return res.json({ reply: "Please log in to view history.", menu: [] });
 
     const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
-    const pets = (user?.pets ?? []).filter(isPet);
+    const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
     if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
 
     /* Single pet → skip choosePet step. */
@@ -286,7 +286,7 @@ router.post("/", async (req, res) => {
     if (!uid) return res.json({ reply: "Please log in to book an appointment.", menu: [] });
 
     const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
-    const pets = (user?.pets ?? []).filter(isPet);
+    const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
     if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
 
     /* one pet → skip choosePet */
@@ -439,7 +439,7 @@ if (text === "Emergency") {
   if (!uid) return res.json({ reply: "Please log in to book an emergency appointment.", menu: [] });
 
   const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
-  const pets = (user?.pets ?? []).filter(isPet);
+  const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
   if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
 
   // One pet – skip selection
