@@ -91,11 +91,9 @@ const ClientPage: React.FC = () => {
       <ChatButton onClick={() => setChatOpen(!chatOpen)} />
       <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
 
-      <main className="flex-grow pt-40 pb-10 px-4 sm:px-6 lg:px-8">
-
-        <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">Your Pet Clinic Dashboard</h1>
-          <p className="text-lg text-grayText dark:text-lightGrayText">Track appointments, prescriptions, and your pets' wellbeing</p>
+      <main className="flex-grow pt-40 pb-10 px-4 sm:px-6 lg:px-8">        <header className="mb-8 text-center">
+          <h1 className="text-2xl sm:text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">Your Pet Clinic Dashboard</h1>
+          <p className="text-base sm:text-lg text-grayText dark:text-lightGrayText">Track appointments, prescriptions, and your pets' wellbeing</p>
         </header>
 
         <div className="max-w-7xl mx-auto mb-10">
