@@ -103,10 +103,7 @@ const TreatmentHistory: React.FC = () => {
       });
 
       setAppointments(transformedAppointments);
-        // Show success message if appointments were loaded
-      if (transformedAppointments.length > 0) {
-        showSuccessMessage(`Successfully loaded ${transformedAppointments.length} completed appointment${transformedAppointments.length !== 1 ? 's' : ''}!`);
-      }
+      
     } catch (error) {
       console.error("Error fetching appointments:", error);
       setError('Failed to load treatment history. Please try again.');

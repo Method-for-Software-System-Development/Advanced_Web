@@ -88,10 +88,6 @@ const ShowPrescriptions: React.FC = () => {
 
       setPrescriptions(allPrescriptions);
 
-      // Show success message if prescriptions were loaded
-      if (allPrescriptions.length > 0) {
-        showSuccessMessage(`Successfully loaded ${allPrescriptions.length} prescription${allPrescriptions.length !== 1 ? 's' : ''}!`);
-      }
     } catch (error) {
       console.error("Error fetching prescriptions:", error);
       setError('Failed to load prescription history. Please try again.');
