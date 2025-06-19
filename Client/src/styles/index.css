@@ -83,20 +83,9 @@ body {
   scrollbar-color: #FDF6F0 #664147;
 }
 
-.login-custom-scrollbar {
-  scrollbar-color: #99A1AF white;
+.global-custom-scrollbar {
+  scrollbar-color: #99A1AF transparent;
 }
-.dark .login-custom-scrollbar {
-  scrollbar-color: #99A1AF #121212;
-}
-
-.dashboard-custom-scrollbar {
-  scrollbar-color: #99A1AF white;
-}
-.dark .dashboard-custom-scrollbar {
-  scrollbar-color: #99A1AF #4E4E4E;
-}
-
 
 /* Form styles */
 @layer components {

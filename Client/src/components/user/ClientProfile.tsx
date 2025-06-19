@@ -134,11 +134,12 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
 
   if (!client) return <div>Loading...</div>;
   return (
-    <div className="flex justify-center w-full min-h-[600px]">
+    <div className="flex justify-center w-full">
       <div
-        className="w-full max-w-7xl bg-white dark:bg-[#664147] rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8"
+        className="mb-8 p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto"
         style={{ width: "100%" }}
       >
+
         {/* --- User Info Card --- */}
         <UserInformationCard
           firstName={client.firstName}
@@ -165,10 +166,12 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
               error={error}
             />
           )}
-        </UserInformationCard>        {/* --- Pets Section --- */}
+        </UserInformationCard>
+        
+        {/* --- Pets Section --- */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold dark:text-[#FDF6F0]">My Pets</h3>
+            <h2 className="mt-5 text-2xl font-semibold text-grayText dark:text-white mb-4 text-left">My Pets</h2>
             <div className="flex items-center gap-4">
               {/* Show inactive pets checkbox */}
               <div className="flex items-center">
@@ -218,13 +221,12 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
             </div>
           ) : (
             (() => {
-              const filteredPets = pets.filter(pet => showInactivePets || pet.isActive);
-              return filteredPets.length > 0 ? (
-                <ul className="flex flex-wrap gap-6">
+              const filteredPets = pets.filter(pet => showInactivePets || pet.isActive);              return filteredPets.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredPets.map((pet) => (
                     <PetCard key={pet._id} pet={pet} />
                   ))}
-                </ul>
+                </div>
               ) : (
                 <div className="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
                   <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
