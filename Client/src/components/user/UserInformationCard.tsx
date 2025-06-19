@@ -1,4 +1,5 @@
 import React from "react";
+import { Edit } from 'lucide-react';
 
 interface UserInfoCardProps {
   firstName: string;
@@ -23,44 +24,48 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
 }) => {
   const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   return (
-  <div className="bg-[var(--color-sky)] dark:bg-[#4A2F33] border-2 border-[var(--color-wine)] dark:border-[#FDF6F0] rounded-2xl shadow-lg w-full mx-auto sm:p-8 p-6 mobile:p-2 mobile:w-screen mobile:rounded-none">
-      {/* Name and Edit button layout */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2 sm:gap-0">
-        <h2 className="text-3xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] font-[Nunito] tracking-tight drop-shadow block sm:text-3xl">
-          {capitalize(firstName)} {capitalize(lastName)}
+  <div className="bg-sky dark:bg-darkMode border-2 border-skyDark dark:border-darkModeDark rounded-2xl shadow-lg w-full mx-auto sm:p-6 p-4 mobile:p-2 mobile:w-screen mobile:rounded-none">
+    {/* Name layout */}
+      <div className="flex flex-col">
+        <h2 className="text-4xl font-bold text-wine dark:text-white mb-1 font-[Nunito]">
+          Welcome Back, {capitalize(firstName)} {capitalize(lastName)}
         </h2>
-        {/* Edit button for desktop only */}
-        {!isEditing && (
-          <button
-            onClick={onEdit}
-            className="hidden sm:block w-36 sm:w-32 bg-[var(--color-wine)] dark:bg-[#58383E] text-white px-6 py-2 rounded-full hover:bg-[var(--color-wineDark)] dark:hover:bg-[#4A2F33] font-bold text-lg sm:text-base transition-colors duration-150 shadow-lg"
-          >
-            Edit
-          </button>
-        )}
       </div>
-      <div className="text-[var(--color-greyText)] dark:text-gray-200 space-y-6 font-[Poppins] text-base sm:text-lg">        {isEditing ? (
+      <div className="text-grayText dark:text-white text-base sm:text-lg">        {isEditing ? (
           children // This will be your <EditUserProfile /> component
-        ) : (          <div className="flex flex-col gap-6">
-            <div className="flex items-center flex-wrap justify-start sm:justify-start">
-              <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mr-2">Email:</span>
-              <span className="break-all sm:break-normal max-w-full whitespace-nowrap overflow-x-auto text-base sm:text-lg ml-auto sm:ml-0">{email}</span>
-            </div>
-            <div className="flex items-center flex-wrap justify-start sm:justify-start">
-              <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mr-2">Mobile:</span>
-              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg ml-auto sm:ml-0">{phone}</span>
-            </div>
-            <div className="flex items-center flex-wrap justify-start sm:justify-start">
-              <span className="font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mr-2">City:</span>
-              <span className="whitespace-nowrap overflow-x-auto text-base sm:text-lg ml-auto sm:ml-0">{capitalize(city)}</span>
-            </div>
-            {/* Edit button for mobile only */}
+        ) : (          <div className="flex flex-col">
+            <div className="grid grid-cols-1 lg:grid-cols-4 text-sm sm:text-base items-center">
+              <div className="flex items-center justify-start">
+                <span className="font-bold text-wine dark:text-lightGrayText mr-2">Email:</span>
+                <span className="break-all">{email}</span>
+              </div>
+              <div className="flex items-center justify-start">
+                <span className="font-bold text-wine dark:text-lightGrayText mr-2">Mobile:</span>
+                <span className="whitespace-nowrap">{phone}</span>
+              </div>
+              <div className="flex items-center justify-start">
+                <span className="font-bold text-wine dark:text-lightGrayText mr-2">Address:</span>
+                <span className="whitespace-nowrap">{capitalize(city)}</span>
+              </div>              {/* Edit button for desktop - now in the same row */}
+              {!isEditing && (
+                <div className="hidden lg:flex justify-end">
+                  <button
+                    onClick={onEdit}
+                    className="flex items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer px-6"
+                  >
+                    <Edit size={20} />
+                    Edit Profile
+                  </button>
+                </div>
+              )}
+            </div>            {/* Edit button for mobile only */}
             {!isEditing && (
               <button
                 onClick={onEdit}
-                className="block sm:hidden w-full bg-[var(--color-wine)] dark:bg-[#58383E] text-white px-6 py-2 rounded-full hover:bg-[var(--color-wineDark)] dark:hover:bg-[#4A2F33] font-bold text-base transition-colors duration-150 shadow-lg mt-4"
+                className="flex lg:hidden items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer w-full mt-4"
               >
-                Edit
+                <Edit size={20} />
+                Edit Profile
               </button>
             )}
           </div>

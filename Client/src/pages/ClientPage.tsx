@@ -43,7 +43,7 @@ const ClientPage: React.FC = () => {
   useEffect(() => {
     const navigateToAppointments = sessionStorage.getItem("navigateToAppointments");
     const navigateToAddAppointment = sessionStorage.getItem("navigateToAddAppointment");
-    
+
     if (navigateToAppointments === "true") {
       setCurrentView("appointments");
       sessionStorage.removeItem("navigateToAppointments"); // Clean up
@@ -82,33 +82,99 @@ const ClientPage: React.FC = () => {
       setIsSubmittingEmergency(false);
     }
   };
-
-  // Show navigation buttons for all views except the current one
-  const visibleViews = allViews.filter((v) => v !== currentView);
+  // Show all navigation buttons for consistency
+  const visibleViews = allViews;
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9F3F0] dark:bg-[#2D1B1F] text-[#4A3F35] dark:text-[#FDF6F0]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-creamDark to-cream to-50% dark:from-darkModeDark dark:to-darkMode text-greyText dark:text-white">
       <Navbar onBackToDashboard={currentView !== "profile" ? handleBackToDashboard : undefined}
-      onLogout={() => setChatOpen(false)} />
+        onLogout={() => setChatOpen(false)} />
       <ChatButton onClick={() => setChatOpen(!chatOpen)} />
       <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
 
+      <main className="flex-grow pt-40 pb-10 px-4 sm:px-6 lg:px-8">
 
-      <main className="flex-grow pt-40 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap gap-4 justify-center mb-10">
-          {visibleViews.map((view) => (
-            <UserNavButton
-              key={view}
-              label={viewLabels[view]}
-              onClick={() => setCurrentView(view)}
-              className="w-full sm:w-auto"
-            />
-          ))}
-          <UserNavButton
-            label="🚨 Emergency Appointment"
-            onClick={() => setShowEmergencyModal(true)}
-            className="w-full sm:w-auto"
-          />
+        <header className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">Your Pet Clinic Dashboard</h1>
+          <p className="text-lg text-grayText dark:text-lightGrayText">Track appointments, prescriptions, and your pets' wellbeing</p>
+        </header>
+
+        <div className="max-w-7xl mx-auto mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            {visibleViews.map((view) => {
+              const getButtonStyle = (viewType: ClientView) => {
+
+                switch (viewType) {
+                  case "profile":
+                    return "bg-gradient-to-br from-pink to-pinkDark";
+                  case "appointments":
+                    return "bg-gradient-to-br from-sky to-skyDark";
+                  case "prescriptions":
+                    return "bg-gradient-to-br from-mint to-mintDark";
+                  case "history":
+                    return "bg-gradient-to-br from-orange to-orangeDark";
+                  default:
+                    return "bg-gradient-to-br from-gray-400 to-gray-600";
+                }
+              };
+
+              const getIcon = (viewType: ClientView) => {
+                switch (viewType) {
+                  case "profile": return "👤";
+                  case "appointments": return "📅";
+                  case "prescriptions": return "💊";
+                  case "history": return "📖";
+                  default: return "🔧";
+                }
+              };
+
+              const getTitle = (viewType: ClientView) => {
+                switch (viewType) {
+                  case "profile": return "My Profile";
+                  case "appointments": return "My Appointments";
+                  case "prescriptions": return "My Prescriptions";
+                  case "history": return "Treatment History";
+                  default: return "Dashboard";
+                }
+              };
+
+              const getDescription = (viewType: ClientView) => {
+                switch (viewType) {
+                  case "profile": return "Edit personal & pet info";
+                  case "appointments": return "Schedule & view";
+                  case "prescriptions": return "Current & past prescriptions";
+                  case "history": return "Past treatments";
+                  default: return "General info";
+                }
+
+              }; return (
+                <button
+                  key={view}
+                  onClick={() => setCurrentView(view)}
+                  className={`relative flex flex-col items-center justify-center p-3 ${getButtonStyle(view)} text-grayText rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer ${currentView === view ? 'ring-4 ring-white ring-opacity-50 scale-105' : ''
+                    }`}
+                >
+                  <div className="text-2xl mb-1">{getIcon(view)}</div>
+                  <h3 className="text-lg font-semibold text-center">{getTitle(view)}</h3>
+                  <p className="text-xs text-center opacity-90">{getDescription(view)}</p>
+                  {currentView === view && (
+                    <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
+                  )}
+                </button>
+              );
+            })}
+
+            {/* Emergency Button */}
+            <button
+              onClick={() => setShowEmergencyModal(true)}
+              className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-redButton to-redButtonDark text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
+            >
+              <div className="text-2xl mb-1">🚨</div>
+              <h3 className="text-lg font-semibold text-center">Emergency</h3>
+              <p className="text-xs text-center opacity-90">Urgent appointment</p>
+            </button>
+          </div>
         </div>
+
         {/* View Content */}
         {currentView === "profile" && <ClientProfile />}
         {currentView === "appointments" && <AppointmentViewClient onBack={() => setCurrentView("profile")} />}

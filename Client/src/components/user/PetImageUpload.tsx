@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { API_URL } from '../../config/api';
+import { Camera } from 'lucide-react';
 
 interface PetImageUploadProps {
   petId: string;
@@ -120,14 +121,13 @@ const PetImageUpload: React.FC<PetImageUploadProps> = ({
   };
   return (
     <div className="relative">
-      {!showUpload ? (
-        <button
+      {!showUpload ? (        <button
           onClick={() => setShowUpload(true)}
           className="absolute top-0 right-0 bg-[var(--color-wine)] dark:bg-[var(--color-skyDark)] text-white p-1 rounded-full shadow-md hover:bg-[var(--color-sky)] dark:hover:bg-[var(--color-sky)] transition-colors duration-200 flex items-center justify-center text-xs"
           title="Change pet image"
         >
-          📷
-        </button>      ) : (        <div 
+          <Camera size={16} />
+        </button>) : (        <div 
           ref={uploadRef}
           className="absolute md:right-0 md:left-auto md:top-0 -right-48.5 top-0.6 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10"
         ><div className="flex flex-col gap-1 md:gap-2 min-w-[200px] md:min-w-[200px]">

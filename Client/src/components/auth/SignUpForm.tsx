@@ -68,7 +68,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onCancel }) => {
 
       <form
         onSubmit={handleSubmit}
-        className="login-form space-y-4 overflow-y-auto pr-1 max-h-[60vh] login-custom-scrollbar"
+        className="login-form space-y-4 overflow-y-auto pr-1 max-h-[60vh] global-custom-scrollbar"
       >
         {/* First Name */}
         <div>
