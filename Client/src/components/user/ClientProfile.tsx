@@ -95,12 +95,20 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
       .finally(() => {
         setIsPetsLoading(false);
       });
-  }, [client]);
-  const handleEditSave = async (data: { email: string; phone: string }) => {
+  }, [client]);  const handleEditSave = async (data: { 
+    email: string; 
+    phone: string; 
+    city: string; 
+    street?: string; 
+    postalCode?: string; 
+  }) => {
     if (!client) {
       setError("No client information available");
       return;
     }
+
+    console.log("ClientProfile received data to save:", data); // Debug log
+    console.log("Current postalCode in client:", client.postalCode); // Debug log
 
     setIsLoading(true);
     setError(null);
@@ -109,18 +117,27 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
       // Call the API to update user profile
       const response = await userService.updateUser(client._id, {
         email: data.email,
-        phone: data.phone
+        phone: data.phone,
+        city: data.city,
+        street: data.street,
+        postalCode: data.postalCode
       });
 
       // Update local state only after successful API call
       setEmail(data.email);
       setPhone(data.phone);
       setIsEditing(false);
-      
-      // Update client in localStorage with the updated data
-      const updatedClient = { ...client, email: data.email, phone: data.phone };
+        // Update client in localStorage with the updated data
+      const updatedClient = { 
+        ...client, 
+        email: data.email, 
+        phone: data.phone,
+        city: data.city || client.city, // Use existing value if not provided
+        street: data.street || client.street, // Use existing value if not provided
+        postalCode: data.postalCode
+      };
       setClient(updatedClient);
-      localStorage.setItem("client", JSON.stringify(updatedClient));
+      sessionStorage.setItem("client", JSON.stringify(updatedClient));
 
       // Show success message
       showSuccessMessage("Profile updated successfully!");
@@ -155,11 +172,13 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
             setError(null); // Clear any previous errors when entering edit mode
             setIsEditing(true);
           }}
-        >
-          {isEditing && (
+        >          {isEditing && (
             <EditUserProfile
               initialEmail={email}
               initialPhone={phone}
+              initialCity={client.city}
+              initialStreet={client.street}
+              initialPostalCode={client.postalCode}
               onSave={handleEditSave}
               onCancel={() => {
                 setError(null); // Clear errors when canceling

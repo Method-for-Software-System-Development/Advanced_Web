@@ -11,6 +11,9 @@ export const userService = {
   async updateUser(id: string, userData: {
     email?: string;
     phone?: string;
+    city?: string;
+    street?: string;
+    postalCode?: string;
   }): Promise<{ message: string; user: User }> {
     try {
       const response = await fetch(`${API_BASE_URL}/users/${id}`, {
