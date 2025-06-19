@@ -21,6 +21,8 @@ import { parseUserDate } from "../utils/dateParse";
 const router = express.Router();
 
 /* ─────────────────────────── 1. Utility helpers ─────────────────────────── */
+//Add to the response
+const MENU_HINT = "\n\nℹ️ Tip: At any time, type 'menu' to return to the main menu.";
 
 /** Format a Date as local-time YYYY-MM-DD (no UTC shift). */
 const fmtDate = (d: Date): string => {
@@ -233,7 +235,7 @@ router.post("/", async (req, res) => {
       reply:
         "FurEver Friends – 51 Snunit St, Karmiel 🇮🇱\n" +
         "Phone: +972 4-123-4567\n" +
-        "Email: info@fureverfriends.com",
+        "Email: info@fureverfriends.com"+ MENU_HINT,
       menu: [],
     });
 
@@ -287,7 +289,7 @@ router.post("/", async (req, res) => {
 
     const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
     const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
-    if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
+    if (!pets.length) return res.json({ reply: "You have no registered pets."+ MENU_HINT, menu: [] });
 
     /* one pet → skip choosePet */
     if (pets.length === 1) {
@@ -373,7 +375,7 @@ router.post("/", async (req, res) => {
 
     const time = freeSlots[idx];
     const vets = await getActiveVets();
-    if (!vets.length) return res.json({ reply: "No veterinarians available.", menu: [] });
+    if (!vets.length) return res.json({ reply: "No veterinarians available."+ MENU_HINT, menu: [] });
 
     sessions.set(uid!, { step: "chooseVet", date, time, petId, petName, vets, pets });
     return res.json({
@@ -422,7 +424,7 @@ router.post("/", async (req, res) => {
     }
     if (lower === "exit") {
       sessions.delete(uid!);
-      return res.json({ reply: "Booking process aborted.", menu: [] });
+      return res.json({ reply: "Booking process aborted."+ MENU_HINT, menu: [] });
     }
     return res.json({ reply: "Type 'accept' to confirm or 'exit' to cancel.", menu: [] });
   }
@@ -513,7 +515,7 @@ if (s?.step === "emergencyConfirm") {
         reply:
           "✅ Emergency appointment booked! " +
           `Vet: ${axiosRes.data.vet.firstName} ${axiosRes.data.vet.lastName}\n` +
-          "You will be contacted soon.",
+          "You will be contacted soon."+ MENU_HINT,
         menu: [],
       });
     } catch (err: any) {
@@ -575,7 +577,7 @@ if (s?.step === "emergencyConfirm") {
     if (lower === "accept") {
       const ok = await cancelAppointment(uid!, s.selectedAppt._id);
       sessions.delete(uid!);
-      return res.json({ reply: ok ? "Appointment cancelled." : "Could not cancel.", menu: [] });
+      return res.json({ reply: ok ? "Appointment cancelled." + MENU_HINT : "Could not cancel.", menu: [] });
     }
     if (lower === "exit") {
       sessions.delete(uid!);
