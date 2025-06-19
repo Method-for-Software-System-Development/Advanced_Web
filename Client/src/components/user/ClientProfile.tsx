@@ -13,6 +13,8 @@ interface Client {
   email: string;
   phone: string;
   city: string;
+  street: string;
+  postalCode?: string;
   pets: string[]; // Array of pet IDs
 }
 
@@ -140,13 +142,14 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
         style={{ width: "100%" }}
       >
 
-        {/* --- User Info Card --- */}
-        <UserInformationCard
+        {/* --- User Info Card --- */}        <UserInformationCard
           firstName={client.firstName}
           lastName={client.lastName}
           email={email}
           phone={phone}
           city={client.city}
+          street={client.street}
+          postalCode={client.postalCode}
           isEditing={isEditing}
           onEdit={() => {
             setError(null); // Clear any previous errors when entering edit mode

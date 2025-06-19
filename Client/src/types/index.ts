@@ -94,6 +94,9 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
+  street: string;
+  city: string;
+  postalCode?: string;
   pets: Pet[]; // Added pets property
 }
 
