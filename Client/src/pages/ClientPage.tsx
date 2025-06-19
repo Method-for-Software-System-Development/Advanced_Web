@@ -10,12 +10,13 @@ import ShowPrescriptions from "../components/user/ShowPrescriptions";
 import AppointmentViewClient from "../components/user/AppointmentViewClient";
 import EmergencyAppointmentModal from "../components/user/appointments/EmergencyAppointmentModal";
 
-// Define all 5 views (combine makeAppointment and showAppointments into 'appointments')
+// Define all views (combine makeAppointment and showAppointments into 'appointments')
 export type ClientView =
   | "profile"
   | "appointments"
   | "prescriptions"
-  | "history";
+  | "history"
+  | "contact";
 
 const allViews: ClientView[] = [
   "profile",
@@ -29,6 +30,7 @@ const viewLabels: Record<ClientView, string> = {
   appointments: "📅 My Appointments",
   prescriptions: "💊 My Prescriptions",
   history: "📖 Treatment History",
+  contact: "📞 Contact Us",
 };
 
 const CLINIC_PHONE = "+97241234567"; // Sourced from ContactSection for consistency
@@ -113,7 +115,7 @@ const ClientPage: React.FC = () => {
                   default:
                     return "bg-gradient-to-br from-gray-400 to-gray-600";
                 }
-              };
+              };      
 
               const getIcon = (viewType: ClientView) => {
                 switch (viewType) {
@@ -121,9 +123,10 @@ const ClientPage: React.FC = () => {
                   case "appointments": return "📅";
                   case "prescriptions": return "💊";
                   case "history": return "📖";
+                  case "contact": return "📞";
                   default: return "🔧";
                 }
-              };
+              };  
 
               const getTitle = (viewType: ClientView) => {
                 switch (viewType) {
@@ -131,20 +134,22 @@ const ClientPage: React.FC = () => {
                   case "appointments": return "My Appointments";
                   case "prescriptions": return "My Prescriptions";
                   case "history": return "Treatment History";
+                  case "contact": return "Contact Us";
                   default: return "Dashboard";
                 }
-              };
-
+              };              
+              
               const getDescription = (viewType: ClientView) => {
                 switch (viewType) {
                   case "profile": return "Edit personal & pet info";
                   case "appointments": return "Schedule & view";
                   case "prescriptions": return "Current & past prescriptions";
                   case "history": return "Past treatments";
+                  case "contact": return "clinic number";
                   default: return "General info";
                 }
 
-              }; return (
+              };return (
                 <button
                   key={view}
                   onClick={() => setCurrentView(view)}
@@ -158,10 +163,17 @@ const ClientPage: React.FC = () => {
                     <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
                   )}
                 </button>
-              );
-            })}
-
-            {/* Emergency Button */}
+              );            })}            
+            {/* Contact Us Button - Mobile Only */}
+            <a
+              href={`tel:${CLINIC_PHONE}`}
+              className="md:hidden flex flex-col items-center justify-center p-3 bg-gradient-to-br from-[#D8CEF5] to-[#BAA9E3]  text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
+              style={{ textDecoration: 'none' }}
+            >
+              <div className="text-2xl mb-1">📞</div>
+              <h3 className="text-lg font-semibold text-center">Contact Us</h3>
+              <p className="text-xs text-center opacity-90">clinic number</p>
+            </a>            {/* Emergency Button */}
             <button
               onClick={() => setShowEmergencyModal(true)}
               className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-redButton to-redButtonDark text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
