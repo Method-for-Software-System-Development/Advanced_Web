@@ -165,7 +165,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
           <MessageBubble key={idx} {...m} />
         ))}
         {isTyping && (
-          <div className="flex items-center gap-2 text-[#664147] font-semibold animate-pulse mt-2">
+          <div className="flex items-center gap-2 text-[#664147] dark:text-white font-semibold animate-pulse mt-2">
             <span role="img" aria-label="dog">🐶</span>
             Kayo is typing...
           </div>
@@ -173,7 +173,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t border-gray-200 dark:border-[#3B3B3B]">
+      <div className="p-3 border-t border-gray-200 dark:border-gray-800">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -187,7 +187,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message…"
           rows={2}
-          className="flex-1 min-w-0 px-4 py-3 text-sm border border-[#3B3B3B] text-[#3B3B3B] rounded-l-md
+          className="flex-1 min-w-0 px-4 py-3 text-sm border border-[#3B3B3B] dark:border-gray-200 text-[#3B3B3B] rounded-l-md
                     focus:outline-none dark:text-white resize-none"
           disabled={isTyping}
           onKeyDown={(e) => {
@@ -202,7 +202,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ open, onClose }) => {
 
           <button
             type="submit"
-            className="bg-[#664147] hover:bg-[#58383E] cursor-pointer text-white px-6 rounded-r-md"
+            className="bg-[#664147] hover:bg-[#58383E] cursor-pointer border border-[#3B3B3B] dark:border-gray-200 text-white px-6 rounded-r-md"
             disabled={isTyping}
           >
             Send
