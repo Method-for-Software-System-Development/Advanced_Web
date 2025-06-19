@@ -34,6 +34,45 @@ const fmtDate = (d: Date): string => {
 const isPet = (x: unknown): x is IPet =>
   typeof x === "object" && x !== null && "name" in x;
 
+/* ─────────────────────────  Helper: normaliseSpecialty  ─────────────────── */
+/**
+ * Converts a user-typed profession (e.g. "cardiologist", "receptionist")
+ * to the wording that is actually stored in MongoDB.
+ */
+function normaliseSpecialty(raw: string): string {
+  const ALIAS_MAP: Record<string, string> = {
+    cardiologist:  "Cardiology",
+    neurologist:   "Neurology", 
+    dermatologist: "Dermatology",
+    surgeon:       "Surgery",
+    
+    /* non-veterinarian roles */
+    receptionist:  "Clinic Receptionist",
+    secretary:     "Clinic Receptionist", 
+    "vet assistant": "Veterinary Assistant",
+    "veterinary assistant": "Veterinary Assistant",
+    nurse:         "Veterinary Assistant"
+  };
+
+  const lower = raw.trim().toLowerCase();
+  if (ALIAS_MAP[lower]) return ALIAS_MAP[lower];
+
+  /* "…ologist" → "…ology"  (neurologist → neurology) */
+  if (lower.endsWith("ologist")) {
+    const base = lower.slice(0, -7); // remove "ologist"
+    return `${base.charAt(0).toUpperCase()}${base.slice(1)}ology`;
+  }
+
+  /* "…ist" → "…y"  (therapist → therapy) */
+  if (lower.endsWith("ist")) {
+    const base = lower.slice(0, -3); // remove "ist"
+    return `${base.charAt(0).toUpperCase()}${base.slice(1)}y`;
+  }
+
+  /* default: Title-case the cleaned string */
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
 /* ─────────────────────────── 2. Gemini helper ───────────────────────────── */
 
 const GEMINI_API_URL =
@@ -562,14 +601,18 @@ if (match) {
     );
 
     const doc = response.data;
+    // In the bot response formatting:
     let reply =
       `👩‍⚕️ **Dr. ${doc.firstName} ${doc.lastName}**\n` +
-      (doc.specialization ? `• Specialty: ${doc.specialization}\n` : "") +
+      (doc.specialization && doc.specialization !== '-' && doc.specialization !== '0'
+        ? `• Specialty: ${doc.specialization}\n`
+        : (doc.role ? `• Role: ${doc.role}\n` : '')) +
       `• Experience: ${doc.yearsOfExperience} years\n` +
       (doc.description ? `• About: ${doc.description}\n` : "") +
       (doc.availableSlots && doc.availableSlots.length
         ? `• Usual hours: ${doc.availableSlots.join(", ")}`
         : "");
+
 
     return res.json({ reply, menu: [] });
   } catch (err) {
@@ -580,45 +623,81 @@ if (match) {
     });
   }
 }
-/* ──────────────────────── 8c. Specialty Information Handler ────────────────────────
-   Answers questions like "Who is the cardiologist?" or "Who is the dermatologist?".
-   This uses the staff/search/specialty API to retrieve real-time doctor info by specialty from the DB.
-   Only English specialties are supported for now.
-------------------------------------------------------------------------------- */
+//* ───────────────── 8c. Specialty / Role Information Handler ─────────────── */
+/**
+ * Matches:
+ *  • "Who is the cardiologist?"
+ *  • "Which doctor is the surgeon?"
+ *  • "Who is the receptionist?"
+ *  • "who is the veterinary assistant"
+ *  • "Who is the neurologist?"
+ */
+const specialtyRegex =
+  /^(?:who\s+is\s+(?:the\s+)?|which\s+doctor\s+is\s+(?:the\s+)?)([a-z\s-]+)\??$/i;
 
-const specialtyRegex = /^(?:who\s+is\s+the|which\s+doctor\s+is\s+the)\s+([a-z\s-]+)\??$/i;
-const specialtyMatch = specialtyRegex.exec(text);
-if (specialtyMatch) {
-  const specialization = specialtyMatch[1].trim();
+const specMatch = specialtyRegex.exec(lower);
+
+if (specMatch) {
+  const phrase = (specMatch[1] || "").trim();
+  if (!phrase) {
+    return res.json({ reply: "I need a specialty or role to search for.", menu: [] });
+  }
+
+  // ** הנה התיקון החשוב: נרמל את המילה לפני החיפוש **
+  const normalizedPhrase = normaliseSpecialty(phrase);
+  
+  console.log(`Original phrase: "${phrase}" -> Normalized: "${normalizedPhrase}"`); // לצרכי debug
+  
   try {
-    // Query the staff search by specialty endpoint
-    const response = await axios.get(
+    const { data: staffList } = await axios.get(
       `${process.env.SERVER_URL || "http://localhost:3000"}/api/staff/search/specialty`,
-      { params: { specialization } }
+      { params: { specialization: normalizedPhrase } }
     );
 
-    const staffList = response.data;
-    if (staffList && staffList.length) {
-      // Compose a reply for each matching doctor
-      const reply = staffList.map((doc: any) =>
-        `👨‍⚕️ **Dr. ${doc.firstName} ${doc.lastName}**\n` +
-        (doc.specialization ? `• Specialty: ${doc.specialization}\n` : "") +
-        `• Experience: ${doc.yearsOfExperience} years\n` +
-        (doc.description ? `• About: ${doc.description}\n` : "") +
-        (doc.availableSlots && doc.availableSlots.length
-          ? `• Usual hours: ${doc.availableSlots.join(", ")}`
-          : "")
-      ).join("\n\n");
-      return res.json({ reply, menu: [] });
-    } else {
+    if (!staffList || staffList.length === 0) {
       return res.json({
-        reply: `Sorry, I couldn't find any doctor with specialty: ${specialization}.`,
+        reply: `Sorry, there is currently no doctor with the specialty: ${phrase}.`,
         menu: []
       });
     }
-  } catch (err) {
+
+    /* Friendly titles */
+    const titles: Record<string, string> = {
+      "Clinic Receptionist": "Clinic Receptionist",
+      "Veterinary Assistant": "Veterinary Assistant", 
+      "Surgery": "Surgeon",
+    };
+
+    const reply = staffList.map((doc: any) => {
+      const isVet = /veterinarian/i.test(doc.role) || (doc.specialization && doc.specialization !== '-' && doc.specialization !== '0');
+      const icon  = isVet ? "👩‍⚕️" : "💼";
+      const title = isVet ? "Dr. " : "";
+
+      /* Prefer specialisation; else role */
+      const mainField = doc.specialization && doc.specialization.trim() && doc.specialization !== '-' && doc.specialization !== '0'
+        ? `• Specialty: ${doc.specialization}\n`
+        : `• Role: ${titles[doc.role] || doc.role}\n`;
+
+      return (
+        `${icon} **${title}${doc.firstName} ${doc.lastName}**\n` +
+        mainField +
+        (doc.yearsOfExperience ? `• Experience: ${doc.yearsOfExperience} years\n` : "") +
+        (doc.description ? `• About: ${doc.description}\n` : "") +
+        (doc.availableSlots?.length ? `• Usual hours: ${doc.availableSlots.join(", ")}` : "")
+      );
+    }).join("\n\n");
+
+    return res.json({ reply, menu: [] });
+  } catch (err: unknown) {
+    console.error("Specialty lookup error:", err);
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      return res.json({
+        reply: `Sorry, there is currently no doctor with the specialty: ${phrase}.`,
+        menu: []
+      });
+    }
     return res.json({
-      reply: "There was a problem searching for the doctor by specialty.",
+      reply: "There was a technical problem searching for the doctor by specialty.",
       menu: []
     });
   }

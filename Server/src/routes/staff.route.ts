@@ -112,34 +112,105 @@ staffRouter.get("/search", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch staff member" });
   }
 });
+/* ─────────────────────────  Helper: normaliseSpecialty  ─────────────────── */
 /**
- * GET /api/staff/search/specialty?specialization=Cardiologist
- * Returns all active staff members with the given specialization, case-insensitive.
- * Now supports "cardiology", "cardiologist", and plural/singular forms.
+ * Converts a user-typed profession (e.g. “cardiologist”, “receptionist”)
+ * to the wording that is actually stored in MongoDB.
+ *
+ * Logic order
+ * -----------
+ * 1. Exact alias table (ALIAS_MAP) — fastest path.  
+ * 2. Generic “…ologist” → “…ology”  → *neurologist* → *neurology*.  
+ * 3. Generic “…ist”     → “…y”      → *therapist*   → *therapy*.  
+ * 4. Fallback: capitalise word as-is (so “surgery” stays “Surgery”).
+ *
+ * The result is returned in **title case** so it can be used directly
+ * in UI or passed to the REST endpoint.
  */
-staffRouter.get("/search/specialty", async (req, res) => {
-  try {
-    let q = String(req.query.specialization || "").trim();
-    if (!q) return res.status(400).json({ error: "specialization query is required" });
+function normaliseSpecialty(raw: string): string {
+  const ALIAS_MAP: Record<string, string> = {
+    cardiologist:  "Cardiology",
+    neurologist:   "Neurology",
+    dermatologist: "Dermatology",
+    surgeon:       "Surgery",
 
-    // Normalize input to handle both "cardiology" and "cardiologist(s)" forms
-    q = q.replace(/(ist|ists)?$/i, ""); // Remove "ist" or "ists" at the end (e.g., "cardiologist" -> "cardiolog")
-    // Now build a RegExp that matches both "cardiology" and "cardiologist(s)"
-    const reg = new RegExp(q, "i");
+    /* non-veterinarian roles */
+    receptionist:  "Clinic Receptionist",
+    secretary:     "Clinic Receptionist",
+    "vet assistant": "Veterinary Assistant",
+    nurse:         "Veterinary Assistant"
+  };
 
-    // Find staff with specialization that matches (case-insensitive)
-    const staffList = await Staff.find({
-      isActive: true,
-      specialization: reg,
-    });
+  const lower = raw.trim().toLowerCase();
+  if (ALIAS_MAP[lower]) return ALIAS_MAP[lower];
 
-    if (!staffList.length) return res.status(404).json({ error: "No staff found with this specialization" });
-    res.status(200).json(staffList);
-  } catch (error) {
-    console.error("Error searching staff by specialization:", error);
-    res.status(500).json({ error: "Failed to search staff member by specialization" });
+  /* “…ologist” → “…ology”  (neurologist → neurology) */
+  if (lower.endsWith("ologist")) {
+    return `${lower.slice(0, -3)}y`;     // remove “ist”, add “y”
   }
-});
+
+  /* “…ist” → “…y”  (therapist → therapy) */
+  if (lower.endsWith("ist")) {
+    return `${lower.slice(0, -3)}y`;
+  }
+
+  /* default: Title-case the cleaned string */
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+/* ───────────────────  GET /api/staff/search/specialty  ──────────────────── */
+/**
+ * URL example
+ * -----------
+ *   GET /api/staff/search/specialty?specialization=Cardiology
+ *
+ * Behaviour
+ * ---------
+ * • Looks for *active* staff whose **specialization** **or** **role**
+ *   contains the requested phrase.
+ * • Matching is case-insensitive and white-space agnostic
+ *   (“clinic receptionist” === “clinic    receptionist”).
+ * • If nothing is found → 404 with a clear JSON error.
+ * • Any server error → 500 with `"Failed to search staff member by specialization"`.
+ */
+staffRouter.get(
+  "/search/specialty",
+  async (req: Request, res: Response): Promise<Response | void> => {
+    try {
+      const raw = String(req.query.specialization ?? "").trim();
+      if (!raw) {
+        return res.status(400).json({ error: "specialization query is required" });
+      }
+
+      /* Collapse extra spaces and escape RegExp meta-chars */
+      const collapsed = raw.replace(/\s+/g, " ").toLowerCase();
+      const escaped   = collapsed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+      /* Allow ANY white-space between words stored in DB */
+      const rxAny = new RegExp(escaped.split(" ").join("\\s+"), "i");
+
+      const staffList = await Staff.find({
+        isActive: true,
+        $or: [{ specialization: rxAny }, { role: rxAny }]
+      });
+
+      if (!staffList.length) {
+        return res
+          .status(404)
+          .json({ error: "No staff found with this specialization or role" });
+      }
+
+      return res.json(staffList);
+    } catch (err) {
+      console.error("Error searching staff by specialization:", err);
+      return res
+        .status(500)
+        .json({ error: "Failed to search staff member by specialization" });
+    }
+  }
+);
+
+
 
 /**
  * GET /api/staff/:id
