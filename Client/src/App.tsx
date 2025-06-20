@@ -5,13 +5,19 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Home from "./pages/Home";
 import SecretaryPage from "./pages/SecretaryPage"; // Import the new page
 import ClientPage from "./pages/ClientPage"; // Import the new page
+import ScrollToHash from "./components/ScrollToHash";
+
 
 const App = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false); // State for showing/hiding login modal
 
   return (
-    <Router>      <Routes>
+    <Router>   
+      {/* Scroll handler for URL hash navigation */}
+      <ScrollToHash />    
+      <Routes>
+     
         <Route path="/" element={<Home onLoginClick={() => setLoginOpen(true)} />} />
         <Route 
           path="/secretary" 

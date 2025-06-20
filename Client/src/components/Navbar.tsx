@@ -66,10 +66,58 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
           </div>
         </div>
         {/* Desktop Nav Links */}
-        <div className="hidden lg:flex items-center space-x-6 font-[Nunito] text-md 2xl:text-lg text-wine dark:text-white font-bold">
-          <a href="/#about" className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark">About Us</a>
-          <a href="/#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark">Our Team</a>
-          <a href="/#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark">Contact Us</a>
+        <div className="hidden lg:flex items-center space-x-6 font-[Nunito] text-md 2xl:text-lg text-wine dark:text-white font-bold">          <a
+  href="/#about"
+  className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark"
+  onClick={e => {
+    e.preventDefault();
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        navigate("/#about");
+      }, 100);
+    } else {
+      navigate("/#about");
+    }
+  }}
+>
+  About Us
+</a>
+<a
+  href="/#team"
+  className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark"
+  onClick={e => {
+    e.preventDefault();
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        navigate("/#team");
+      }, 100);
+    } else {
+      navigate("/#team");
+    }
+  }}
+>
+  Our Team
+</a>
+<a
+  href="/#contact"
+  className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark"
+  onClick={e => {
+    e.preventDefault();
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        navigate("/#contact");
+      }, 100);
+    } else {
+      navigate("/#contact");
+    }
+  }}
+>
+  Contact Us
+</a>
+
           {/* Dashboard button: appears only if user is logged in */}
           {isLoggedIn && (
             <button
@@ -112,10 +160,61 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
         <div className="lg:hidden bg-pink dark:bg-wine shadow-md border-t border-pinkDark dark:border-wineDark">
-          <div className="flex flex-col items-center space-y-4 py-6 font-[Nunito] text-lg text-wine dark:text-white font-bold">
-            <a href="/#about" className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark" onClick={() => setMenuOpen(false)}>About Us</a>
-            <a href="/#team" className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark" onClick={() => setMenuOpen(false)}>Our Team</a>
-            <a href="/#contact" className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark" onClick={() => setMenuOpen(false)}>Contact Us</a>
+          <div className="flex flex-col items-center space-y-4 py-6 font-[Nunito] text-lg text-wine dark:text-white font-bold">            <a
+  href="/#about"
+  className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark"
+  onClick={e => {
+    e.preventDefault();
+    setMenuOpen(false);
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        navigate("/#about");
+      }, 100);
+    } else {
+      navigate("/#about");
+    }
+  }}
+>
+  About Us
+</a>
+<a
+  href="/#team"
+  className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark"
+  onClick={e => {
+    e.preventDefault();
+    setMenuOpen(false);
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        navigate("/#team");
+      }, 100);
+    } else {
+      navigate("/#team");
+    }
+  }}
+>
+  Our Team
+</a>
+<a
+  href="/#contact"
+  className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark"
+  onClick={e => {
+    e.preventDefault();
+    setMenuOpen(false);
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        navigate("/#contact");
+      }, 100);
+    } else {
+      navigate("/#contact");
+    }
+  }}
+>
+  Contact Us
+</a>
+
 
             {/* Dashboard button: appears only if user is logged in */}
             {isLoggedIn && (
