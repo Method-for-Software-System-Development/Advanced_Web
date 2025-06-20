@@ -11,7 +11,7 @@ interface NavbarProps {
   onLogout?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogout}) => {
+const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogout }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   // Dummy state to force a re-render when localStorage changes
   const [refresh, setRefresh] = useState(0);
@@ -52,11 +52,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
     }
   }; return (
     <nav className="bg-gradient-to-r from-pink to-pinkDark dark:from-wine dark:to-wineDark shadow-md fixed top-0 w-full z-50">
-      <div className="px-6 md:px-20 py-4 flex justify-between items-center">
-
-        {/* Logo and Clinic Name */}
+      <div className="px-6 md:px-20 py-4 flex justify-between items-center">        {/* Logo and Clinic Name */}
         <div className="flex items-center space-x-4">
-          <img src={logo} alt="Pet Clinic Logo" className="h-16 md:h-18 2xl:h-24 w-auto" />
+          <img
+            src={logo}
+            alt="Pet Clinic Logo"
+            className="h-16 md:h-18 2xl:h-24 w-auto cursor-pointer"
+            onClick={() => navigate('/')}
+          />
           <div className="leading-snug">
             <h1 className="font-[Nunito] text-lg md:text-2xl 2xl:text-4xl font-bold text-[#664147] dark:text-white">FurEver Friends - Pet Clinic</h1>
             <p className="text-sm md:text-md 2xl:text-lg italic text-wine dark:text-white">Your pet's health. Our FurEver mission.</p>
@@ -76,11 +79,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
               Dashboard
             </button>
           )}
-         {isLoggedIn ? (
-  <LogoutButton onLogout={() => {
-    setRefresh(r => r + 1);  // Force a re-render of navbar state
-    if (onLogout) onLogout(); // Call parent onLogout to close chat
-  }} />) : (
+          {isLoggedIn ? (
+            <LogoutButton onLogout={() => {
+              setRefresh(r => r + 1);  // Force a re-render of navbar state
+              if (onLogout) onLogout(); // Call parent onLogout to close chat
+            }} />) : (
             onLoginClick && (
               <button
                 onClick={onLoginClick}
@@ -128,12 +131,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
             )}
             {isLoggedIn ? (
               <LogoutButton
-              variant="mobile"
-              onLogout={() => {
-                setRefresh(r => r + 1);
-                if (onLogout) onLogout(); 
-              }}
-            />
+                variant="mobile"
+                onLogout={() => {
+                  setRefresh(r => r + 1);
+                  if (onLogout) onLogout();
+                }}
+              />
             ) : (
               onLoginClick && (
                 <button
