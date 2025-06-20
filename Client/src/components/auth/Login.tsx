@@ -262,16 +262,12 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
                 </p>
               )}
 
-              <div className="text-center">
-                <span className="text-grayText dark:text-white">Don't have an account? </span>
-                <button
-                  type="button"
-                  onClick={() => setStep("signup")}
-                  className="font-bold text-pinkDark hover:underline cursor-pointer"
-                >
-                  Sign Up
-                </button>
-              </div>
+             <div className="text-center mt-4">
+            <span className="text-grayText dark:text-white">
+              Don&apos;t have an account? Call us: <a href="tel:+97241234567" className="font-bold text-pinkDark hover:underline">+972 4 123 4567</a>
+            </span>
+          </div>
+
             </form>
           </>
         )}
