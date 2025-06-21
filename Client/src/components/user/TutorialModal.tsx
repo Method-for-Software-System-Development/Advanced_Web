@@ -94,7 +94,7 @@ interface TutorialModalProps {
             left: rect.left - 6,
             width: rect.width + 12,
             height: rect.height + 12,
-            zIndex: 1002,
+            zIndex: 49,
             pointerEvents: "none",
             border: "3px solid #EF92A6",
             borderRadius: "18px",
