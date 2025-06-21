@@ -57,7 +57,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
       const response = await axios.post(`${API_URL}/users/login`, {
         email,
         password,
-      });      setLoginMessage("Login successful!");
+      }); setLoginMessage("Login successful!");
       sessionStorage.setItem("client", JSON.stringify(response.data.user));
       //  to save the JWT token you got from the server
       sessionStorage.setItem("token", response.data.token);
@@ -134,7 +134,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
   const handleVerify = async (e: React.FormEvent) => {
     // Show loading message while verifying
     setFpMessage("Verifying code…");
-    e.preventDefault();    try {
+    e.preventDefault(); try {
       // Send the email and code to the backend for verification
       await axios.post(`${API_URL}/users/verify-reset-code`, {
         email: fpEmail,
@@ -166,7 +166,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     if (newPassword.length < 6) return setFpMessage("Password must be at least 6 chars.");
     if (newPassword !== confirmPassword) return setFpMessage("Passwords don't match.");
 
-    setFpMessage("Saving new password...");    try {
+    setFpMessage("Saving new password..."); try {
       // API request to update password on the server
       await axios.post(`${API_URL}/users/reset-password`, {
         email: fpEmail,
@@ -261,12 +261,15 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
                   {loginMessage}
                 </p>
               )}
-
-             <div className="text-center mt-4">
-            <span className="text-grayText dark:text-white">
-              Don&apos;t have an account? Call us: <a href="tel:+97241234567" className="font-bold text-pinkDark hover:underline">+972 4 123 4567</a>
-            </span>
-          </div>
+              <div className="text-center mt-4">
+                <span className="text-grayText dark:text-white">
+                  Don&apos;t have an account?{" "}
+                  <a href="#contact" onClick={onClose} className="font-bold text-pinkDark hover:underline cursor-pointer">
+                    Contact us
+                  </a>{" "}
+                  to create an account and book a free introductory meeting or your first appointment.
+                </span>
+              </div>
 
             </form>
           </>
