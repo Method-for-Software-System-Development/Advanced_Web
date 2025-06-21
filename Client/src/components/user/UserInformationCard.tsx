@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { Edit, BookOpen } from 'lucide-react';
-import TutorialModal from "./TutorialModal";
+
 interface UserInfoCardProps {
   firstName: string;
   lastName: string;
@@ -28,8 +28,10 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
   isEditing,
   onEdit,
   children,
+  tutorialOpen,
+  setTutorialOpen,
 }) => {
-  const [tutorialOpen, setTutorialOpen] = useState(false);
+  
   const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   return (
@@ -105,7 +107,6 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
           </div>
         )}
       </div>
-       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
     </div>
     
   );

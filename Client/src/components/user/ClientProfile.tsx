@@ -5,6 +5,7 @@ import PetCard from "./PetCard";
 import { userService } from "../../services/userService";
 import { Pet } from "../../types";
 import { API_URL } from '../../config/api';
+import TutorialModal from "./TutorialModal";
 
 interface Client {
   _id: string;
@@ -16,6 +17,7 @@ interface Client {
   street: string;
   postalCode?: string;
   pets: string[]; // Array of pet IDs
+  //hasPets: boolean;
   
 }
 
@@ -32,7 +34,23 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
   const [showInactivePets, setShowInactivePets] = useState(false);
 // Tutorial modal state – controls whether the tutorial is currently open
 const [tutorialOpen, setTutorialOpen] = useState(false);
-
+ /**
+ * Auto-open the tutorial only when BOTH are true:
+ *   1. We already finished loading pets  (isPetsLoading === false)
+ *   2. The logged-in client truly has no pet IDs (client.pets.length === 0)
+ *
+ * Rationale:
+ * While the pets request is still in flight, the local `pets` array is empty,
+ * which previously triggered the modal even for users who *do* have pets.
+ * By checking the client’s IDs instead, we avoid that flash.
+ */
+useEffect(() => {
+  if (!isPetsLoading && client) {
+    if (client.pets.length === 0) {
+      setTutorialOpen(true);   // open tutorial only when the user has no pets
+    }
+  }
+}, [client, isPetsLoading]);
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
     setSuccessMessage(message);
@@ -109,16 +127,7 @@ const [tutorialOpen, setTutorialOpen] = useState(false);
       setError("No client information available");
       return;
     }
-    /**
- * Opens the tutorial modal automatically if there are no pets linked to the user.
- * Runs every time the pets list or loading state changes.
- */
-useEffect(() => {
-  // Only open if not loading pets and list is empty
-  if (!isPetsLoading && pets.length === 0) {
-    setTutorialOpen(true);
-  }
-}, [pets, isPetsLoading]);
+   
 
 
     console.log("ClientProfile received data to save:", data); // Debug log
@@ -205,7 +214,11 @@ useEffect(() => {
             />
           )}
         </UserInformationCard>
-        
+        <TutorialModal
+    open={tutorialOpen}
+    onClose={() => setTutorialOpen(false)}
+     hasPets={!!client && client.pets.length > 0} 
+    />
         {/* --- Pets Section --- */}
         <div>
           <div className="flex items-center justify-between mb-4">

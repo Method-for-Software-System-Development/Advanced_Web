@@ -10,15 +10,16 @@ interface StepData {
   title: string;
   description: string;
   selector: string | null;
+  
 }
 
 // Tutorial steps: add selector for each button's id
-const steps: StepData[] = [
+const allSteps: StepData[] = [
   {
     title: "No Pets Linked",
     description:
       "To add pets to your account, please contact the clinic secretary by phone. Adding pets yourself is not supported.\n\nCall: +972 4 123 4567",
-    selector: null, // No button to highlight
+    selector: null,
   },
   {
     title: "My Profile",
@@ -52,9 +53,13 @@ const steps: StepData[] = [
   },
 ];
 
+
+
+
 interface TutorialModalProps {
   open: boolean;
   onClose: () => void;
+  hasPets: boolean;
 }
 
 /**
@@ -63,10 +68,15 @@ interface TutorialModalProps {
  * - Modal is placed at the bottom-left corner of the screen.
  * - No blur, just a transparent background overlay.
  */
-const TutorialModal: React.FC<TutorialModalProps> = ({ open, onClose }) => {
+  const TutorialModal: React.FC<TutorialModalProps> = ({ open, onClose, hasPets  }) => {
+  const steps = React.useMemo(
+  () => (hasPets ? allSteps.slice(1) : allSteps),
+  [hasPets]
+    );
+  
   const [step, setStep] = useState(0);
   const [overlayStyle, setOverlayStyle] = useState<React.CSSProperties>({});
-
+  
   // Update overlay position when step changes or window resizes
   useEffect(() => {
     /**
@@ -102,9 +112,13 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ open, onClose }) => {
     if (open) {
       updateOverlay();
       window.addEventListener("resize", updateOverlay);
+      window.addEventListener("scroll", updateOverlay, { passive: true });
     }
-    return () => window.removeEventListener("resize", updateOverlay);
-  }, [step, open]);
+   return () => {
+    window.removeEventListener("resize", updateOverlay);
+    window.removeEventListener("scroll", updateOverlay);               
+  };
+}, [step, open, steps]);
 
   if (!open) return null;
 
