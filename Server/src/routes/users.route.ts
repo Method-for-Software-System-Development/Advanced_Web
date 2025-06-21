@@ -146,14 +146,14 @@ usersRouter.post("/login", async (req: Request, res: Response) => {
 
 /**
  * PUT /api/users/:id
- * Update user's email and phone
+ * Update user's email, phone, city, street, and postal code
  */
 usersRouter.put("/:id", async (req: Request, res: Response) => {
     try {
-        const { email, phone } = req.body;
+        const { email, phone, city, street, postalCode } = req.body;
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
-            { email, phone },
+            { email, phone, city, street, postalCode },
             { new: true }
         );
         if (!updatedUser) {

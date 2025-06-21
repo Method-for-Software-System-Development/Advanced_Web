@@ -7,7 +7,7 @@ import { API_URL } from '../config/api';
 const API_BASE_URL = API_URL;
 
 export const userService = {
-  // Update user profile (email and phone)
+  // Update user profile (email, phone, city, street, and postal code)
   async updateUser(id: string, userData: {
     email?: string;
     phone?: string;
