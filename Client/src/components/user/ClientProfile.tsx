@@ -169,11 +169,12 @@ useEffect(() => {
   return (
     <div className="flex justify-center w-full">
       <div
-        className="mb-8 p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto"
+        className="p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto"
         style={{ width: "100%" }}
       >
 
-        {/* --- User Info Card --- */}        <UserInformationCard
+        {/* --- User Info Card --- */}
+        <UserInformationCard
           firstName={client.firstName}
           lastName={client.lastName}
           email={email}
@@ -208,8 +209,8 @@ useEffect(() => {
         
         {/* --- Pets Section --- */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="mt-5 text-2xl font-semibold text-grayText dark:text-white mb-4 text-left">My Pets</h2>
+          <div className="flex items-center justify-between mt-4 mb-4">
+            <h2 className="mt-5 text-2xl font-semibold text-grayText dark:text-white mb-4 text-left">All Your Pets at a Glance:</h2>
             <div className="flex items-center gap-4">
               {/* Show inactive pets checkbox */}
               <div className="flex items-center">
@@ -218,9 +219,9 @@ useEffect(() => {
                   id="showInactivePets"
                   checked={showInactivePets}
                   onChange={(e) => setShowInactivePets(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  className="w-5 h-5 accent-wine"
                 />
-                <label htmlFor="showInactivePets" className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                <label htmlFor="showInactivePets" className="ml-2 text-md text-grayText dark:text-lightGrayText">
                   Show inactive pets
                 </label>
               </div>
