@@ -71,57 +71,69 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
     const mappedImage = imageMap[imageUrl];
     return mappedImage;
   }; return (
-    <li className="w-full mb-4 bg-[var(--color-cream)] dark:bg-[#4A2F33] rounded-xl transition-shadow duration-300 p-6 flex flex-col min-h-[120px] relative text-base text-[var(--color-greyText)] dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-lg hover:shadow-xl"><div className="flex items-center justify-between mb-4">        <div className="flex items-center gap-3">
-      {/* Pet image next to name */}          <div className="relative flex-shrink-0">
-        {currentPet.imageUrl ? (
-          <img
-            src={getImageUrl(currentPet.imageUrl)}
-            alt={`${currentPet.name} - ${currentPet.type}`}
-            className="object-cover rounded-full shadow-md border-2 border-[var(--color-skyDark)] dark:border-[#4A7C7D] pet-image"
-          />) : (
-          <div
-            className="bg-gradient-to-br from-[var(--color-sky)] to-[var(--color-skyDark)] dark:from-[#4A7C7D] dark:to-[#3A6C6D] rounded-full shadow-md border-2 border-[var(--color-wine)] dark:border-[#4A7C7D] flex items-center justify-center pet-image"
-          >
-            <Camera size={24} className="text-white" />
-          </div>)}
-        {/* Image upload overlay */}            <div className="absolute pet-image-overlay">
-          <PetImageUpload
-            petId={currentPet._id}
-            petType={currentPet.type}
-            petSex={currentPet.sex}
-            onImageUpdate={handleImageUpdate}
-          />
-        </div>
-      </div>          <div>            <h2 className={`${currentPet.name.length > 9 ? 'text-base sm:text-2xl' : 'text-2xl'} font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-1`}>
-        {currentPet.name}
-      </h2>            <div className="flex items-center gap-2 flex-wrap pet-badges-container">
-          <span className="inline-block px-3 py-1 bg-[var(--color-skyDark)] dark:bg-[#4A7C7D] text-[var(--color-wine)] dark:text-[#FDF6F0] text-sm font-semibold rounded-full pet-badge">
-            {currentPet.type}
-          </span>
-          {!currentPet.isActive && (
-            <span className="inline-block px-3 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 text-sm font-semibold rounded-full pet-badge">
-              Inactive
-            </span>
-          )}
+    <li className="w-full mb-4 bg-cream dark:bg-darkMode rounded-xl transition-shadow duration-300 p-6 flex flex-col min-h-[120px] relative text-base text-grayText dark:text-white border border-creamDark dark:border-darkModeDark shadow-lg hover:shadow-xl">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+
+          {/* Pet image next to name */}
+          <div className="relative flex-shrink-0">
+            {currentPet.imageUrl && (
+              <img
+                src={getImageUrl(currentPet.imageUrl)}
+                alt={`${currentPet.name} - ${currentPet.type}`}
+                className="object-cover rounded-full shadow-md border-2 border-wine pet-image"
+              />
+            )}
+
+            {/* Image upload overlay */}
+            <div className="absolute pet-image-overlay">
+              <PetImageUpload
+                petId={currentPet._id}
+                petType={currentPet.type}
+                petSex={currentPet.sex}
+                onImageUpdate={handleImageUpdate}
+              />
+            </div>
+          </div>
+
+          {/* Pet name and badges */}
+          <div>
+            <h2 className={`${currentPet.name.length > 9 ? 'text-base sm:text-2xl' : 'text-2xl'} font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-1`}>
+              {currentPet.name}
+            </h2>
+            <div className="flex items-center gap-2 flex-wrap pet-badges-container">
+              <span className="inline-block px-3 py-1 bg-creamDark text-[var(--color-wine)] text-sm font-semibold rounded-full pet-badge">
+                {currentPet.type}
+              </span>
+              {!currentPet.isActive && (
+                <span className="inline-block px-3 py-1 bg-red-100 text-red-800 text-sm font-semibold rounded-full pet-badge">
+                  Inactive
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-100 dark:border-gray-600">
+
+      {/* Breed and Birth Year */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 mb-6 bg-white dark:bg-darkModeLight rounded-lg p-4">
         <div className="flex items-center">
-          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Breed:</span>
-          <span className="ml-2 text-[var(--color-greyText)] dark:text-gray-200">{currentPet.breed}</span>
+          <span className="font-semibold text-[var(--color-wine)] dark:text-lightGrayText min-w-[80px]">Breed:</span>
+          <span className="text-grayText dark:text-white">{currentPet.breed}</span>
         </div>
         <div className="flex items-center">
-          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Born:</span>
-          <span className="ml-2 text-[var(--color-greyText)] dark:text-gray-200">{currentPet.birthYear}</span>
+          <span className="font-semibold text-[var(--color-wine)] dark:text-lightGrayText min-w-[80px]">Born:</span>
+          <span className="text-grayText dark:text-white">{currentPet.birthYear}</span>
         </div>
-      </div>      <div className="flex flex-col sm:flex-row gap-3">
+      </div>
+
+      {/* Buttons for prescriptions and last treatment */}
+      <div className="flex flex-col sm:flex-row gap-3">
         <button
           disabled={!currentPet.isActive}
-          className={`flex items-center justify-center gap-2 h-11 rounded-full font-bold transition-colors duration-200 cursor-pointer flex-1 ${!currentPet.isActive
-              ? 'bg-gray-400 dark:bg-gray-600 text-gray-600 dark:text-gray-400 cursor-not-allowed'
-              : 'bg-pinkDark text-white hover:bg-pinkDarkHover'
+          className={`flex items-center justify-center gap-2 h-11 rounded-full font-bold transition-colors duration-200 flex-1 ${!currentPet.isActive
+            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+            : 'bg-pinkDark text-white hover:bg-pinkDarkHover cursor-pointer'
             }`}
           onClick={() => currentPet.isActive && setShowPrescriptions((v) => !v)}
         >
@@ -134,7 +146,7 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
           </span>
         </button>
         <button
-          className="flex items-center justify-center gap-2 h-11 bg-skyDark text-white rounded-full font-bold hover:bg-sky transition-colors duration-200 cursor-pointer flex-1"
+          className="flex items-center justify-center gap-2 h-11 bg-skyDark text-white rounded-full font-bold hover:bg-skyDarkHover transition-colors duration-200 cursor-pointer flex-1"
           onClick={() => setShowLastTreatment((v) => !v)}
         >
           <Stethoscope size={20} />

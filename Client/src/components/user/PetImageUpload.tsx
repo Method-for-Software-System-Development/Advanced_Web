@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { API_URL } from '../../config/api';
-import { Camera } from 'lucide-react';
+import { Camera, Upload, Cat, Dog, Rabbit, Bird, Zap, Folder } from 'lucide-react';
 
 interface PetImageUploadProps {
   petId: string;
@@ -123,15 +123,15 @@ const PetImageUpload: React.FC<PetImageUploadProps> = ({
     <div className="relative">
       {!showUpload ? (        <button
           onClick={() => setShowUpload(true)}
-          className="absolute top-0 right-0 bg-[var(--color-wine)] dark:bg-[var(--color-skyDark)] text-white p-1 rounded-full shadow-md hover:bg-[var(--color-sky)] dark:hover:bg-[var(--color-sky)] transition-colors duration-200 flex items-center justify-center text-xs"
+          className="absolute top-0 right-0 bg-wine hover:bg-wineDark text-white p-1 cursor-pointer rounded-full shadow-md transition-colors duration-200 flex items-center justify-center"
           title="Change pet image"
         >
           <Camera size={16} />
         </button>) : (        <div 
           ref={uploadRef}
-          className="absolute md:right-0 md:left-auto md:top-0 -right-48.5 top-0.6 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10"
+          className="absolute md:right-0 md:left-auto md:top-0 -right-48.5 top-0.6 bg-white dark:bg-darkMode p-2 rounded-lg shadow-lg border border-whiteDark dark:border-darkModeDark z-10"
         ><div className="flex flex-col gap-1 md:gap-2 min-w-[200px] md:min-w-[200px]">
-            <label className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="text-xs md:text-sm font-medium text-grayText dark:text-white">
               Choose Image From:
             </label>
             <input
@@ -142,32 +142,36 @@ const PetImageUpload: React.FC<PetImageUploadProps> = ({
               disabled={isUploading}
               className="hidden"
             />
-            <div className="flex flex-col gap-1 md:gap-2">              <button
+            <div className="flex flex-col gap-1 md:gap-2">
+              <button
                 onClick={handleUploadFromFolder}
                 disabled={isUploading}
-                className="px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm bg-[var(--color-wine)] hover:bg-[var(--color-wineDark)] dark:bg-[#58383E] dark:hover:bg-[#4A2F33] text-white rounded transition-colors duration-200 flex items-center gap-1 md:gap-2"
+                className="cursor-pointer px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm bg-wine hover:bg-wineDark text-white rounded transition-colors duration-200 flex items-center gap-1 md:gap-2"
               >
-                📁 Upload from Device
-              </button><button
+                <Folder size={14} />
+                Upload from Device
+              </button>              <button
                 onClick={handleDefaultPicture}
                 disabled={isUploading}
-                className="px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm bg-[var(--color-skyDark)] dark:bg-[#4A7C7D] text-[var(--color-wine)] dark:text-[#FDF6F0] rounded transition-colors duration-200 hover:bg-[var(--color-sky)] dark:hover:bg-[#3A6C6D] flex items-center gap-1 md:gap-2"
+                className="cursor-pointer px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm bg-pinkDark hover:bg-pinkDarkHover text-white rounded transition-colors duration-200 flex items-center gap-1 md:gap-2"
               >
                 {(() => {
                   const supportedTypes = ['cat', 'dog', 'goat', 'parrot', 'rabbit', 'snake'];
                   const animalType = petType && supportedTypes.includes(petType.toLowerCase()) 
                     ? petType.toLowerCase() 
-                    : 'alien';                  const animalEmojis = {
-                    cat: '🐱',
-                    dog: '🐶',
-                    goat: '🐐',
-                    parrot: '🦜',
-                    rabbit: '🐰',
-                    snake: '🐍',
-                    alien: '👽'
+                    : 'alien';
+
+                  const animalIcons = {
+                    cat: <Cat size={14} />,
+                    dog: <Dog size={14} />,
+                    goat: <Zap size={14} />, // Using Zap as closest to goat
+                    parrot: <Bird size={14} />,
+                    rabbit: <Rabbit size={14} />,
+                    snake: <Zap size={14} />, // Using Zap as alternative for snake
+                    alien: <Zap size={14} /> // Using Zap for alien
                   };
                   
-                  return animalEmojis[animalType as keyof typeof animalEmojis];
+                  return animalIcons[animalType as keyof typeof animalIcons];
                 })()} Default Image
               </button>
             </div>

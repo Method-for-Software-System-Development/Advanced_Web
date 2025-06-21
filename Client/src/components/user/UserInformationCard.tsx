@@ -36,7 +36,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
 
   return (
     <div className="bg-sky dark:bg-darkMode border-2 border-skyDark dark:border-darkModeDark rounded-2xl shadow-lg w-full mx-auto sm:p-6 p-4 mobile:p-2 mobile:w-screen mobile:rounded-none">      {/* Name layout */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
         <h2 className="text-2xl sm:text-4xl font-bold text-wine dark:text-white font-[Nunito]">
           Welcome Back, {capitalize(firstName)} {capitalize(lastName)}
         </h2>        {/* Tutorial button in header */}
@@ -49,6 +49,12 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
             Tutorial
           </button>
         )}      </div>
+
+      {!isEditing && (
+        <div className="relative">
+          <hr className="hidden md:block border-t border-2 border-skyDark rounded-full w-full lg:w-[calc(100%-190px)]" />
+        </div>
+      )}
 
       <div className="text-grayText dark:text-white text-base sm:text-lg">
         {isEditing ? (
