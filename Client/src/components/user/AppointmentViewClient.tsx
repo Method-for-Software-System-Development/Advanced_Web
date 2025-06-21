@@ -243,12 +243,12 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     } finally {
       setCancelingAppointmentId(null);    }
   };
-  
+
   return (
-    <div className="flex justify-center w-full min-h-[600px]">
+    <div className="flex justify-center w-full">
       <div 
-        className="w-full max-w-7xl bg-white dark:bg-[#664147] rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8 mobile:w-full"
-        style={{ width: "80%" }}
+        className="p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto"
+        style={{ width: "100%" }}
       >
         {/* Success Message Banner */}
         {successMessage && (

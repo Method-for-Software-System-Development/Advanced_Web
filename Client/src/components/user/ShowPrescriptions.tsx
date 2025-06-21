@@ -138,10 +138,10 @@ const ShowPrescriptions: React.FC = () => {
       return aValue < bValue ? 1 : -1;
     }
   });  return (
-    <div className="flex justify-center w-full min-h-[600px]">
-      <div
-        className="w-full max-w-7xl bg-white dark:bg-[#664147] rounded-2xl shadow-lg p-10 flex flex-col gap-10 mt-8 mobile:w-full"
-        style={{ width: "80%" }}
+    <div className="flex justify-center w-full">
+      <div 
+        className="p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto"
+        style={{ width: "100%" }}
       >        {/* Success Message Banner */}
         {successMessage && (
           <div className="fixed top-4 right-4 z-50 bg-green-500 dark:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 dark:border-green-500 transition-all duration-300 ease-in-out">

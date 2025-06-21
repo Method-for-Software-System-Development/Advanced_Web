@@ -96,9 +96,9 @@ interface TutorialModalProps {
             height: rect.height + 12,
             zIndex: 1002,
             pointerEvents: "none",
-            border: "3px solid #c026d3",
+            border: "3px solid #EF92A6",
             borderRadius: "18px",
-            boxShadow: "0 0 20px 6px #c026d366",
+            boxShadow: "0 0 20px 6px #EF92A6",
             transition: "all 0.3s cubic-bezier(.4,2,.6,1)",
           });
         } else {
@@ -158,7 +158,7 @@ interface TutorialModalProps {
       >
         <button
           onClick={handleSkipOrClose}
-          className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600"
+          className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600 cursor-pointer"
           aria-label="Close tutorial"
         >
           ×
@@ -172,21 +172,21 @@ interface TutorialModalProps {
         <div className="flex justify-between mt-2">
           <button
             onClick={handleSkipOrClose}
-            className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+            className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition w-30 cursor-pointer"
           >
             Skip All
           </button>
           {!isLast ? (
             <button
               onClick={handleNext}
-              className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition"
+              className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-30 cursor-pointer"
             >
               Next
             </button>
           ) : (
             <button
               onClick={handleGotIt}
-              className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition"
+              className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-30 cursor-pointer"
             >
               Got it
             </button>
