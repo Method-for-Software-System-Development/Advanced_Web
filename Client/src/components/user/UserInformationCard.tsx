@@ -52,7 +52,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
 
       {!isEditing && (
         <div className="relative">
-          <hr className="hidden md:block border-t border-2 border-skyDark rounded-full w-full lg:w-[calc(100%-190px)]" />
+          <hr className="hidden md:block border-t border-2 border-skyDark dark:border-darkModeDark rounded-full w-full lg:w-[calc(100%-190px)]" />
         </div>
       )}
 

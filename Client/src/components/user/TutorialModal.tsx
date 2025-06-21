@@ -151,7 +151,7 @@ interface TutorialModalProps {
 
       {/* Tutorial modal positioned bottom-left */}
       <div
-        className="fixed z-[1010] left-8 bottom-8 max-w-md w-[350px] p-6 bg-white dark:bg-darkMode border-2 border-wine dark:border-wineDark rounded-2xl shadow-2xl"
+        className="fixed z-[1010] left-8 bottom-8 max-w-md w-[350px] p-6 bg-white dark:bg-darkMode border-2 border-wine dark:border-white rounded-2xl shadow-2xl"
         style={{
           transition: "all 0.3s",
         }}
@@ -166,7 +166,7 @@ interface TutorialModalProps {
         <h2 className="mb-2 text-xl font-bold text-wine dark:text-white">
           {steps[step].title}
         </h2>
-        <p className="text-base whitespace-pre-line text-grayText dark:text-white mb-6">
+        <p className="text-base whitespace-pre-line text-grayText dark:text-lightGrayText mb-6">
           {steps[step].description}
         </p>
         <div className="flex justify-between mt-2">
