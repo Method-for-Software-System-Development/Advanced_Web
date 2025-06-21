@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Edit, BookOpen } from 'lucide-react';
-
+import TutorialModal from "./TutorialModal";
 interface UserInfoCardProps {
   firstName: string;
   lastName: string;
@@ -12,6 +12,9 @@ interface UserInfoCardProps {
   isEditing: boolean;
   onEdit: () => void;
   children?: React.ReactNode; // For edit form
+  // Add these two props for the tutorial modal:
+  tutorialOpen: boolean;
+  setTutorialOpen: (open: boolean) => void;
 }
 
 const UserInfoCard: React.FC<UserInfoCardProps> = ({
@@ -26,6 +29,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
   onEdit,
   children,
 }) => {
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   return (
@@ -36,7 +40,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
         </h2>        {/* Tutorial button in header */}
         {!isEditing && (
           <button
-            onClick={() => {/* TODO: Add tutorial navigation logic */ }}
+            onClick={() => setTutorialOpen(true)}
             className="hidden sm:flex items-center justify-center gap-2 w-40 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer"
           >
             <BookOpen size={20} />
@@ -83,7 +87,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
             {!isEditing && (
               <div className="flex md:hidden flex-col gap-3 w-full mt-4">
                 <button
-                  onClick={() => {/* TODO: Add tutorial navigation logic */ }}
+                  onClick={() => setTutorialOpen(true)}
                   className="flex items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer w-full"
                 >
                   <BookOpen size={20} />
@@ -101,7 +105,9 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
           </div>
         )}
       </div>
+       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
     </div>
+    
   );
 };
 

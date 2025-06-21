@@ -150,8 +150,19 @@ const ClientPage: React.FC = () => {
                 }
 
               };return (
-                <button
+                              <button
                   key={view}
+                  id={
+                    view === "profile"
+                      ? "profile-btn"
+                      : view === "appointments"
+                      ? "appointments-btn"
+                      : view === "prescriptions"
+                      ? "prescriptions-btn"
+                      : view === "history"
+                      ? "history-btn"
+                      : undefined
+                  }
                   onClick={() => setCurrentView(view)}
                   className={`relative flex flex-col items-center justify-center p-3 ${getButtonStyle(view)} text-grayText rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer ${currentView === view ? 'ring-4 ring-white ring-opacity-50 scale-105' : ''
                     }`}
@@ -163,6 +174,7 @@ const ClientPage: React.FC = () => {
                     <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
                   )}
                 </button>
+
               );            })}            
             {/* Contact Us Button - Mobile Only */}
             <a
@@ -175,13 +187,15 @@ const ClientPage: React.FC = () => {
               <p className="text-xs text-center opacity-90">clinic number</p>
             </a>            {/* Emergency Button */}
             <button
-              onClick={() => setShowEmergencyModal(true)}
-              className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-redButton to-redButtonDark text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
-            >
-              <div className="text-2xl mb-1">🚨</div>
-              <h3 className="text-lg font-semibold text-center">Emergency</h3>
-              <p className="text-xs text-center opacity-90">Urgent appointment</p>
-            </button>
+            id="emergency-btn"
+            onClick={() => setShowEmergencyModal(true)}
+            className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-redButton to-redButtonDark text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
+          >
+            <div className="text-2xl mb-1">🚨</div>
+            <h3 className="text-lg font-semibold text-center">Emergency</h3>
+            <p className="text-xs text-center opacity-90">Urgent appointment</p>
+          </button>
+
           </div>
         </div>
 

@@ -16,6 +16,7 @@ interface Client {
   street: string;
   postalCode?: string;
   pets: string[]; // Array of pet IDs
+  
 }
 
 const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Client | null>(null);
@@ -29,6 +30,8 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
   const [petsError, setPetsError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [showInactivePets, setShowInactivePets] = useState(false);
+// Tutorial modal state – controls whether the tutorial is currently open
+const [tutorialOpen, setTutorialOpen] = useState(false);
 
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
@@ -106,6 +109,17 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
       setError("No client information available");
       return;
     }
+    /**
+ * Opens the tutorial modal automatically if there are no pets linked to the user.
+ * Runs every time the pets list or loading state changes.
+ */
+useEffect(() => {
+  // Only open if not loading pets and list is empty
+  if (!isPetsLoading && pets.length === 0) {
+    setTutorialOpen(true);
+  }
+}, [pets, isPetsLoading]);
+
 
     console.log("ClientProfile received data to save:", data); // Debug log
     console.log("Current postalCode in client:", client.postalCode); // Debug log
@@ -172,6 +186,8 @@ const ClientProfile: React.FC = () => {  const [client, setClient] = useState<Cl
             setError(null); // Clear any previous errors when entering edit mode
             setIsEditing(true);
           }}
+          tutorialOpen={tutorialOpen}
+          setTutorialOpen={setTutorialOpen}
         >          {isEditing && (
             <EditUserProfile
               initialEmail={email}
