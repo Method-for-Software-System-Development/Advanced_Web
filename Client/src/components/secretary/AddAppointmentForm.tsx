@@ -251,11 +251,11 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
       <h2 className="text-2xl font-semibold text-grayText dark:text-white">Add New Appointment</h2>        <button
         type="button"
         onClick={onClose}
-        className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-grayText hover:bg-gray-50 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
+        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm font-medium transition-colors cursor-pointer"
       >
         Cancel
       </button>
-    </div>          {error && (
+    </div>{error && (
       <div className="mb-4 p-4 bg-red-100 border border-red-400 text-grayText rounded dark:bg-red-900 dark:border-red-600 dark:text-white">
         {error}
       </div>

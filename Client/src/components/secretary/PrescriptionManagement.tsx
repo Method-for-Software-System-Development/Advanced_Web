@@ -363,7 +363,11 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                 setClientPets([]);
               }
             }}
-            className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition-colors duration-200"
+            className={`px-6 py-3 text-white font-semibold rounded-lg shadow-md transition-colors duration-200 ${
+              showAddForm 
+                ? 'bg-red-500 hover:bg-red-600' 
+                : 'bg-green-500 hover:bg-green-600'
+            }`}
           >
             {showAddForm ? 'Cancel' : '+ Add New Prescription'}
           </button>
@@ -442,9 +446,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                 )}
               </div>
 
-              {/* Action Buttons */}
-
-              <div className="flex justify-end gap-4 pt-4">
+              {/* Action Buttons */}              <div className="flex justify-end gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -454,7 +456,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
                     setSelectedPetId(null);
                     setClientPets([]);
                   }}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
                 >
                   Cancel
                 </button>

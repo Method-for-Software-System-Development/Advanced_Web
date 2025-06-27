@@ -127,10 +127,9 @@ const EditPatientForm: React.FC<EditPatientFormProps> = ({ initialData, onSave, 
             pattern="[0-9]*"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
           />
-        </div>
-        <div className="flex justify-end gap-3">
+        </div>        <div className="flex justify-end gap-3">
           <button onClick={handleSubmit} className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700">Save Changes</button>
-          <DashboardButton onClick={onCancel} label="Cancel" />
+          <button onClick={onCancel} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm font-semibold transition-colors duration-150 dark:bg-red-600 dark:hover:bg-red-700">Cancel</button>
         </div>
       </div>
     </section>

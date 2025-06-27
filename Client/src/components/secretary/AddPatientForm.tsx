@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import DashboardButton from './DashboardButton';
 import { Patient } from '../../types'; // Import Patient type
-import { patientService } from '../../services/patientService'; 
+import { patientService } from '../../services/patientService';
 
 interface AddPatientFormProps {
   onSave: (patientData: Omit<Patient, '_id' | 'pets'> | Patient) => void; // Adjusted to handle both add and update
@@ -224,12 +223,16 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
           <div className={"mt-1 text-xs " + getPasswordStrength(password).color + " dark:text-gray-400"}>
             Strength: {getPasswordStrength(password).label}
           </div>
-        </div>
-        <div className="flex justify-end gap-3">
+        </div>        <div className="flex justify-end gap-3">
             <button onClick={handleSubmit} className="px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded-md hover:bg-green-600 dark:hover:bg-green-700">
               Add Patient
             </button>
-            <DashboardButton onClick={onCancel} label="Cancel" />
+            <button 
+              onClick={onCancel} 
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm font-semibold transition-colors duration-150 dark:bg-red-600 dark:hover:bg-red-700"
+            >
+              Cancel
+            </button>
         </div>
       </div>
     </section>

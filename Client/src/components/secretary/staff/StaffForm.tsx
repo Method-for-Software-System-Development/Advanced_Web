@@ -435,7 +435,7 @@ const StaffForm: React.FC<StaffFormProps> = ({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md shadow-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-600 dark:hover:bg-gray-700"
+          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-red-600 dark:hover:bg-red-700"
         >
           Cancel
         </button>

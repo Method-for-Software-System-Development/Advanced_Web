@@ -146,10 +146,9 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-        </div>
-        <div className="flex justify-end gap-3">
+        </div>        <div className="flex justify-end gap-3">
             <button onClick={handleSubmit} className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50">Add Pet</button>
-            <button onClick={onCancel} className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-400 dark:hover:bg-gray-700">Cancel</button>
+            <button onClick={onCancel} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm font-semibold transition-colors duration-150 dark:bg-red-600 dark:hover:bg-red-700">Cancel</button>
         </div>
       </div>
     </section>
