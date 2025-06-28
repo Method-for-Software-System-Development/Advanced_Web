@@ -18,8 +18,7 @@ export interface IUser extends Document {
     role?: "user" | "secretary"; // User role, default is "user"
     resetPasswordCode?: string;
     resetPasswordExpires?: Date;
-
-
+    isFirstLogin?: boolean; // Track if this is the user's first login
 }
 
 const UserSchema: Schema = new Schema({
@@ -34,9 +33,8 @@ const UserSchema: Schema = new Schema({
     pets:      [{ type: mongoose.Schema.Types.ObjectId, ref: "Pet", default: [] }],
     role: { type: String, enum: ["user", "secretary"], default: "user" },
     resetPasswordCode: { type: String }, // resetPasswordCode: stores the 6-digit code sent to the user for password reset
-    resetPasswordExpires: { type: Date } // resetPasswordExpires: indicates when the code expires 
-
-
+    resetPasswordExpires: { type: Date }, // resetPasswordExpires: indicates when the code expires 
+    isFirstLogin: { type: Boolean, default: true } // Track if this is the user's first login
 }, { collection: "Users", versionKey: false });
 
 /**

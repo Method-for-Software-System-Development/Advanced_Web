@@ -97,7 +97,9 @@ export interface User {
   street: string;
   city: string;
   postalCode?: string;
-  pets: Pet[]; // Added pets property
+  pets: Pet[] | string[]; // Can be populated Pet objects or unpopulated string IDs
+  role?: string; // Add role property for secretary/admin users
+  isFirstLogin?: boolean; // Track if this is the user's first login
 }
 
 export interface Appointment {

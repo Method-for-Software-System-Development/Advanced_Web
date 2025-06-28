@@ -85,13 +85,25 @@ useEffect(() => {
       setPets([]);
       return;
     }
-    // Only send valid 24-char ObjectID strings
-    const validPetIds = client.pets.filter(id => typeof id === "string" && id.length === 24);
+
+    // Check if pets are already populated (Pet objects) or just IDs (strings)
+    const firstPet = client.pets[0];
+    if (typeof firstPet === 'object' && firstPet && '_id' in firstPet) {
+      // Pets are already populated as Pet objects
+      setPets(client.pets as unknown as Pet[]);
+      setIsPetsLoading(false);
+      return;
+    }
+
+    // Pets are just ID strings, need to fetch full pet data
+    const petIds = client.pets as string[]; // Cast to string array for ID case
+    const validPetIds = petIds.filter(id => typeof id === "string" && id.length === 24);
     if (validPetIds.length === 0) {
       setPets([]);
       return;
     }
-      setIsPetsLoading(true);
+
+    setIsPetsLoading(true);
     setPetsError(null);
     
     fetch(`${API_URL}/pets/byIds`, {

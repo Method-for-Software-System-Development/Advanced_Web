@@ -15,7 +15,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState(''); // Optional field for postal code
-  const [password, setPassword] = useState(''); 
+  const [password, setPassword] = useState('password'); // Default password 
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async () => {
@@ -48,7 +48,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
         setStreet('');
         setCity('');
         setPostalCode('');
-        setPassword('');
+        setPassword('password'); // Reset to default password
         return;
       } else {
         setErrorMessage('');
@@ -212,17 +212,17 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">*Password:</label>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            *Password:
+          </label>
           <input 
-            type="password" 
+            type="text" 
             id="password" 
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none  sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+            disabled
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none sm:text-sm bg-gray-50 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed"
+            placeholder="Default: password"
           />
-          <div className={"mt-1 text-xs " + getPasswordStrength(password).color + " dark:text-gray-400"}>
-            Strength: {getPasswordStrength(password).label}
-          </div>
         </div>        <div className="flex justify-end gap-3">
             <button onClick={handleSubmit} className="px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded-md hover:bg-green-600 dark:hover:bg-green-700">
               Add Patient

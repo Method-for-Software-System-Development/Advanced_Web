@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import statisticsService, { DashboardStatistics } from '../../services/statisticsService';
+import ChangePasswordModal from './ChangePasswordModal';
 
 interface EnhancedSecretaryWelcomeProps {
   onNavigateToAppointments: () => void;
@@ -17,6 +18,7 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
   const [statistics, setStatistics] = useState<DashboardStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
   useEffect(() => {
     loadStatistics();
@@ -276,14 +278,34 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
           </div>
         </div>
       )}      {/* Refresh Button */}
-      <div className="text-center mt-8">        <button
-        onClick={loadStatistics}
-        className="inline-block bg-wine dark:bg-white text-white dark:text-wine w-60 h-11 rounded-full hover:bg-wineDark dark:hover:bg-whiteDark transform transition duration-200 hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-bold"
-        disabled={loading}
-      >
-        {loading ? 'Refreshing...' : '⟲ Refresh Dashboard'}
-      </button>
+      <div className="text-center mt-8">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <button
+            onClick={loadStatistics}
+            className="inline-block bg-wine dark:bg-white text-white dark:text-wine w-60 h-11 rounded-full hover:bg-wineDark dark:hover:bg-whiteDark transform transition duration-200 hover:scale-110 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+            disabled={loading}
+          >
+            {loading ? 'Refreshing...' : '⟲ Refresh Dashboard'}
+          </button>
+          
+          <button
+            onClick={() => setShowChangePasswordModal(true)}
+            className="inline-block bg-pinkDark dark:bg-pinkDark text-white w-60 h-11 rounded-full hover:bg-pinkDarkHover dark:hover:bg-pinkDarkHover transform transition duration-200 hover:scale-110 cursor-pointer font-bold"
+          >
+            🔒 Change Password
+          </button>
+        </div>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+        onSuccess={() => {
+          // Optional: You can add a success notification here
+          console.log('Password changed successfully');
+        }}
+      />
     </div>
   );
 };

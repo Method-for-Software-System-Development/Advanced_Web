@@ -9,6 +9,8 @@ import UserNavButton from "../components/user/UserNavButton";
 import ShowPrescriptions from "../components/user/ShowPrescriptions";
 import AppointmentViewClient from "../components/user/AppointmentViewClient";
 import EmergencyAppointmentModal from "../components/user/appointments/EmergencyAppointmentModal";
+import FirstTimePasswordChangeModal from "../components/auth/FirstTimePasswordChangeModal";
+import { User } from "../types";
 
 // Define all views (combine makeAppointment and showAppointments into 'appointments')
 export type ClientView =
@@ -40,6 +42,8 @@ const ClientPage: React.FC = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [showFirstTimePasswordChange, setShowFirstTimePasswordChange] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Check for navigation signal from AboutSection
   useEffect(() => {
@@ -56,6 +60,54 @@ const ClientPage: React.FC = () => {
       sessionStorage.setItem("showAddFormDirectly", "true");
     }
   }, []);
+
+  // Check for first-time login on page load/refresh
+  useEffect(() => {
+    const checkFirstTimeLogin = async () => {
+      const clientRaw = sessionStorage.getItem("client");
+      if (clientRaw) {
+        const client = JSON.parse(clientRaw);
+        setCurrentUser(client); // Set initial user data immediately
+        
+        // Always check with backend for the most current isFirstLogin status
+        try {
+          const { userService } = await import("../services/userService");
+          const currentUserFromBackend = await userService.getUserById(client._id);
+          
+          // Only update if backend data is valid and has expected properties
+          if (currentUserFromBackend && currentUserFromBackend._id) {
+            setCurrentUser(currentUserFromBackend);
+            sessionStorage.setItem("client", JSON.stringify(currentUserFromBackend));
+            
+            // Check if this is a first-time login based on backend data
+            if (currentUserFromBackend.isFirstLogin === true) {
+              setShowFirstTimePasswordChange(true);
+            }
+          } else {
+            // Backend data is invalid, check isFirstLogin from sessionStorage
+            if (client.isFirstLogin === true) {
+              setShowFirstTimePasswordChange(true);
+            }
+          }
+        } catch (error) {
+          // If backend check fails, fall back to sessionStorage data
+          console.error("Failed to verify user status:", error);
+          if (client.isFirstLogin === true) {
+            setShowFirstTimePasswordChange(true);
+          }
+        }
+      }
+    };
+    
+    checkFirstTimeLogin();
+  }, []);
+
+  const handlePasswordChanged = (updatedUser: User) => {
+    // Update session storage with the updated user
+    sessionStorage.setItem("client", JSON.stringify(updatedUser));
+    setCurrentUser(updatedUser);
+    setShowFirstTimePasswordChange(false);
+  };
 
   const handleBackToDashboard = () => {
     setCurrentView("profile");
@@ -90,10 +142,20 @@ const ClientPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-creamDark to-cream to-50% dark:from-darkModeDark dark:to-darkMode text-greyText dark:text-white">
       <Navbar onBackToDashboard={currentView !== "profile" ? handleBackToDashboard : undefined}
         onLogout={() => setChatOpen(false)} />
-      <ChatButton onClick={() => setChatOpen(!chatOpen)} />
-      <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
+      
+      {/* Show FirstTimePasswordChangeModal if required - blocks everything else */}
+      {showFirstTimePasswordChange && currentUser ? (
+        <FirstTimePasswordChangeModal
+          user={currentUser}
+          onPasswordChanged={handlePasswordChanged}
+          onClose={() => {}} // Empty function since modal shouldn't be closeable
+        />
+      ) : (
+        <>
+          <ChatButton onClick={() => setChatOpen(!chatOpen)} />
+          <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
 
-      <main className="flex-grow pt-40 pb-10 px-4 sm:px-6 lg:px-8">        <header className="mb-8 text-center">
+          <main className="flex-grow pt-40 pb-10 px-4 sm:px-6 lg:px-8">        <header className="mb-8 text-center">
           <h1 className="text-2xl sm:text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">Your Pet Clinic Dashboard</h1>
           <p className="text-base sm:text-lg text-grayText dark:text-lightGrayText">Track appointments, prescriptions, and your pets wellbeing</p>
         </header>
@@ -214,9 +276,11 @@ const ClientPage: React.FC = () => {
             }}
           />
         )}
-      </main>
+          </main>
 
-      <FooterSection />
+          <FooterSection />
+        </>
+      )}
     </div>
   );
 };

@@ -103,7 +103,7 @@ usersRouter.post("/login", async (req: Request, res: Response) => {
         console.log('Login attempt for email:', email);
 
         // 2. Find the user by email
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate('pets');
         if (!user) {
             console.log('User not found for email:', email);
             // User not found
@@ -204,6 +204,25 @@ usersRouter.get("/search", async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/users/:id
+ * Retrieves a specific user by ID.
+ */
+usersRouter.get("/:id", async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id).populate('pets');
+        
+        if (!user) {
+            return res.status(404).send({ error: "User not found" });
+        }
+        
+        res.status(200).send(user);
+    } catch (error) {
+        res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+    }
+});
+
+/**
  * POST /api/users/forgot-password
  * Handles password reset requests by generating a 6-digit code,
  * saving it to the user's document, and sending it via email.
@@ -297,6 +316,44 @@ usersRouter.post("/reset-password", async (req: Request, res: Response) => {
     await user.save();
 
     res.send({ message: "Password has been reset successfully." });
+  } catch (error) {
+    res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
+  }
+});
+
+/**
+ * PUT /api/users/:id/change-password
+ * Changes user password with current password verification.
+ * Expects: { currentPassword, newPassword }
+ * Returns: { message }
+ */
+usersRouter.put("/:id/change-password", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).send({ error: "Current password and new password are required." });
+    }
+
+    // Find user by ID
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).send({ error: "User not found." });
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return res.status(401).send({ error: "Current password is incorrect." });
+    }
+
+    // Update password and set isFirstLogin to false (will trigger pre-save hook for hashing)
+    user.password = newPassword;
+    user.isFirstLogin = false;
+    await user.save();
+
+    res.send({ message: "Password changed successfully." });
   } catch (error) {
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }

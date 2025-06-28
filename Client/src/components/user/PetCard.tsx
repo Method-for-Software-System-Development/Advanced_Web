@@ -115,8 +115,8 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
         </div>
       </div>
 
-      {/* Breed and Birth Year */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 mb-6 bg-white dark:bg-darkModeLight rounded-lg p-4">
+      {/* Pet Information Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 mb-6 bg-white dark:bg-darkModeLight rounded-lg p-4">
         <div className="flex items-center">
           <span className="font-semibold text-[var(--color-wine)] dark:text-lightGrayText min-w-[80px]">Breed:</span>
           <span className="text-grayText dark:text-white">{currentPet.breed}</span>
@@ -124,6 +124,14 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
         <div className="flex items-center">
           <span className="font-semibold text-[var(--color-wine)] dark:text-lightGrayText min-w-[80px]">Born:</span>
           <span className="text-grayText dark:text-white">{currentPet.birthYear}</span>
+        </div>
+        <div className="flex items-center">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-lightGrayText min-w-[80px]">Weight:</span>
+          <span className="text-grayText dark:text-white">{currentPet.weight} kg</span>
+        </div>
+        <div className="flex items-center">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-lightGrayText min-w-[80px]">Sex:</span>
+          <span className="text-grayText dark:text-white">{currentPet.sex}</span>
         </div>
       </div>
 
