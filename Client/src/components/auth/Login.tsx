@@ -276,10 +276,10 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
 
   /* ─────────── UI ─────────── */
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       {step !== "first-time-password-change" && (
-        <div className="relative w-full max-w-lg p-8 bg-white dark:bg-darkMode rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
-          <button onClick={onClose} className="absolute top-4 right-4 text-2xl text-[#99A1AF] hover:text-[#7E889A] cursor-pointer">×</button>
+        <div className="relative w-full max-w-xs sm:max-w-lg p-3 sm:p-8 bg-white dark:bg-darkMode rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
+          <button onClick={onClose} className="absolute top-2 right-2 sm:top-4 sm:right-4 text-xl sm:text-2xl text-[#99A1AF] hover:text-[#7E889A] cursor-pointer">×</button>
 
         {/* -------- Sign-Up -------- */}
         {step === "signup" && (
@@ -292,8 +292,8 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         {/* -------- Login -------- */}
         {step === "login" && (
           <>
-            <h2 className="mb-6 text-3xl font-bold text-center text-grayText dark:text-white">Welcome Back!</h2>
-            <form onSubmit={handleLogin} className="login-form space-y-4">
+            <h2 className="mb-4 sm:mb-6 text-2xl sm:text-3xl font-bold text-center text-grayText dark:text-white">Welcome Back!</h2>
+            <form onSubmit={handleLogin} className="login-form space-y-3 sm:space-y-4">
               <div>
                 <label>Email</label>
                 <input
@@ -355,17 +355,17 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
                 />
               </div>
 
-              <button className="mt-5 w-full py-2 font-bold text-white bg-wine rounded-lg hover:bg-wineDark cursor-pointer">
+              <button className="mt-4 sm:mt-5 w-full py-2 font-bold text-white bg-wine rounded-lg hover:bg-wineDark cursor-pointer text-sm sm:text-base">
                 Login
               </button>
 
               {loginMessage && (
-                <p className={`mt-4 text-center ${loginMessage.includes("success") ? "text-green-600" : "text-red-600"}`}>
+                <p className={`mt-3 sm:mt-4 text-center text-sm ${loginMessage.includes("success") ? "text-green-600" : "text-red-600"}`}>
                   {loginMessage}
                 </p>
               )}
-              <div className="text-center mt-4">
-                <span className="text-grayText dark:text-white">
+              <div className="text-center mt-3 sm:mt-4">
+                <span className="text-grayText dark:text-white text-xs sm:text-sm">
                   Don&apos;t have an account?{" "}
                   <a href="#contact" onClick={onClose} className="font-bold text-pinkDark hover:underline cursor-pointer">
                     Contact us
