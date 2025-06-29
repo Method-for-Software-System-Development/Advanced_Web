@@ -230,8 +230,8 @@ const TreatmentHistory: React.FC = () => {
                     onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
                     className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none max-w-[130px] sm:max-w-none"
                   >
-                    <option value="desc">Newest First</option>
-                    <option value="asc">Oldest First</option>
+                    <option value="desc">Recent</option>
+                    <option value="asc">Earliest</option>
                   </select>
                 </div>
               </div>              {/* Desktop refresh button */}
