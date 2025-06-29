@@ -62,6 +62,21 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
   const [emailValid, setEmailValid] = useState(true);
   const [phoneValid, setPhoneValid] = useState(true);
   const [postalCodeValid, setPostalCodeValid] = useState(true);
+  
+  // Responsive placeholder state
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile view
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   // Initialize form data when props change
   useEffect(() => {
@@ -340,7 +355,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
               setNewPassword("");
               setConfirmPassword("");
             }}
-            className="flex items-center justify-between w-full p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150"
+            className="flex items-center justify-center sm:justify-between w-full p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150"
             disabled={isLoading}
           >
             <span className="text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0]">
@@ -362,7 +377,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
             <div className="mt-4 space-y-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               {/* Current Password */}
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                <label className={labelClasses}>Current Password:</label>
+                <label className="block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[140px] sm:min-w-[160px] mb-1 sm:mb-0">Current Password:</label>
                 <div className="relative w-full">
                   <input
                     type={showCurrentPassword ? "text" : "password"}
@@ -396,7 +411,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
 
               {/* New Password */}
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                <label className={labelClasses}>New Password:</label>
+                <label className="block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[140px] sm:min-w-[160px] mb-1 sm:mb-0">New Password:</label>
                 <div className="relative w-full">
                   <input
                     type={showNewPassword ? "text" : "password"}
@@ -405,7 +420,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
                     className={`${inputBaseClasses} border-gray-300 dark:border-gray-600 pr-12`}
                     style={inputStyle}
                     disabled={isLoading || isChangingPassword}
-                    placeholder="Enter new password (min 6 characters)"
+                    placeholder={window.innerWidth <= 768 ? "Enter min 6 characters" : "Enter new password (min 6 characters)"}
                   />
                   <button
                     type="button"
@@ -430,7 +445,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
 
               {/* Confirm New Password */}
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                <label className={labelClasses}>Confirm Password:</label>
+                <label className="block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[140px] sm:min-w-[160px] mb-1 sm:mb-0">Confirm Password:</label>
                 <div className="relative w-full">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -464,23 +479,23 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
 
               {/* Password Error/Success Messages */}
               {passwordError && (
-                <div className="text-red-600 dark:text-red-400 py-2 px-3 border border-red-300 dark:border-red-600 rounded-md bg-red-50 dark:bg-red-950">
+                <div className="text-red-600 dark:text-red-400 py-2 px-3 border border-red-300 dark:border-red-600 rounded-md bg-red-50 dark:bg-red-950 mobile:text-xs">
                   {passwordError}
                 </div>
               )}
 
               {passwordSuccess && (
-                <div className="text-green-600 dark:text-green-400 py-2 px-3 border border-green-300 dark:border-green-600 rounded-md bg-green-50 dark:bg-green-950">
+                <div className="text-green-600 dark:text-green-400 py-2 px-3 border border-green-300 dark:border-green-600 rounded-md bg-green-50 dark:bg-green-950 mobile:text-xs">
                   {passwordSuccess}
                 </div>
               )}
 
               {/* Change Password Button */}
-              <div className="flex justify-end">
+              <div className="flex justify-center sm:justify-end">
                 <button
                   type="button"
                   onClick={handlePasswordChange}
-                  className={`px-4 py-2 bg-[var(--color-wine)] dark:bg-[#44292e] text-white rounded-lg hover:bg-[var(--color-wineDark)] dark:hover:bg-[#4A2F33] font-semibold transition-colors duration-150 ${
+                  className={`w-[100%] sm:w-auto px-4 py-2 bg-[var(--color-wine)] dark:bg-[#44292e] text-white rounded-lg hover:bg-[var(--color-wineDark)] dark:hover:bg-[#4A2F33] font-semibold transition-colors duration-150 text-[14px] sm:text-base ${
                     isChangingPassword ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                   disabled={isLoading || isChangingPassword}
