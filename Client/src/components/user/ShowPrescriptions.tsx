@@ -12,7 +12,7 @@ const ShowPrescriptions: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [sortBy, setSortBy] = useState<'date' | 'pet' | 'medicine' | 'expiry'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
@@ -240,8 +240,8 @@ const ShowPrescriptions: React.FC = () => {
                     onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
                     className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none max-w-[130px] sm:max-w-none"
                   >
+                    <option value="desc">Recent</option>
                     <option value="asc">Earliest</option>
-                    <option value="desc">Latest</option>
                   </select>
                 </div>
               </div>
