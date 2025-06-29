@@ -162,13 +162,18 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
             {showLastTreatment ? "Hide Treatment" : "Last Treatment"}
           </span>
         </button>
-      </div>{showPrescriptions && (
+      </div>
+
+      {showPrescriptions && (
         <div className="mt-6">
           <PrescriptionList prescriptionIds={pet.prescriptions} />
         </div>
-      )}      {showLastTreatment && (<div className="mt-6">
-        <PetLastTreatment petId={pet._id} />
-      </div>
+      )}
+
+      {showLastTreatment && (
+        <div className="mt-6">
+          <PetLastTreatment petId={pet._id} />
+        </div>
       )}
     </li>
   );
