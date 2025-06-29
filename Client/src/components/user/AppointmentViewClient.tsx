@@ -48,7 +48,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [sortField, setSortField] = useState<'date' | 'petName' | 'staffName' | 'service'>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelingAppointmentId, setCancelingAppointmentId] = useState<string | null>(null);
@@ -321,8 +321,8 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                     onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
                     className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 flex-1 sm:flex-none max-w-[130px] sm:max-w-none"
                   >
-                    <option value="desc">Newest First</option>
-                    <option value="asc">Oldest First</option>
+                    <option value="asc">Earliest</option>
+                    <option value="desc">Latest</option>
                   </select>
                 </div>
               </div>
@@ -451,7 +451,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                           <div className="space-y-3">
                             <div className="flex items-center">
                               <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Date:</span>
-                              <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">{new Date(formatted.date).toLocaleDateString()}</span>
+                              <span className="ml-2 text-sm text-black dark:text-[#FDF6F0]">{new Date(formatted.date).toLocaleDateString('en-GB')}</span>
                             </div>
                             <div className="flex items-center">
                               <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[80px]">Time:</span>
@@ -474,7 +474,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                         <div className="sm:hidden pt-2">
                           <div className="flex justify-between items-center py-2">
                             <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Date:</span>
-                            <span className="text-xs text-black dark:text-gray-100 text-right">{new Date(formatted.date).toLocaleDateString()}</span>
+                            <span className="text-xs text-black dark:text-gray-100 text-right">{new Date(formatted.date).toLocaleDateString('en-GB')}</span>
                           </div>
                           <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0]"></div>
                           
