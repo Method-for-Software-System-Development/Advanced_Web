@@ -267,19 +267,17 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
         <span className="block mobile:hidden w-full mobile:text-xl mobile:text-left">Edit Information</span>
       </h3>
       <div className="space-y-4">
-        {/* Email field */}
+        {/* Email field (read-only) */}
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
           <label className={labelClasses}>Email:</label>
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`${inputBaseClasses} ${
-              emailValid ? "border-gray-300 dark:border-gray-600" : "border-red-500 dark:border-red-400"
-            } text-ellipsis overflow-x-auto sm:text-clip`}
+            className={`${inputBaseClasses} border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed`}
             style={inputStyle}
             inputMode="email"
-            disabled={isLoading}
+            disabled
+            readOnly
           />
         </div>
         

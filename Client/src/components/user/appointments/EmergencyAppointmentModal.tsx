@@ -79,18 +79,19 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f8d7da]/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-[#FDF6F0] dark:bg-[#4A3F35] p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn">        <button
-        onClick={onClose}
-        className="absolute top-3 right-3 text-gray-400 hover:text-[#EF92A6] dark:hover:text-[#D17C8F] text-2xl font-bold focus:outline-none cursor-pointer"
-        aria-label="Close modal"
-      >
-        &times;
-      </button>
-        <div className="mb-6 text-center">
-          <span className="text-4xl block mb-2">🚨</span>
-          <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Emergency Appointment Confirmation</h2>
-          <div className="h-1 w-16 bg-[#EF92A6] rounded-full mx-auto mb-2"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+      <div className="relative w-[95vw] max-w-xs sm:w-full sm:max-w-md bg-[#FDF6F0] dark:bg-[#4A3F35] p-3 sm:p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-[#EF92A6] dark:hover:text-[#D17C8F] text-xl sm:text-2xl font-bold focus:outline-none cursor-pointer"
+          aria-label="Close modal"
+        >
+          &times;
+        </button>
+        <div className="mb-4 sm:mb-6 text-center">
+          <span className="text-2xl sm:text-4xl block mb-2">🚨</span>
+          <h2 className="text-lg sm:text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Emergency Appointment Confirmation</h2>
+          <div className="h-1 w-8 sm:w-16 bg-[#EF92A6] rounded-full mx-auto mb-2"></div>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-2">
             <b className="text-red-700 dark:text-red-400">This is an emergency request ($1000 charge)</b><br />
             Please arrive at the clinic immediately. Our staff will contact you right away.
           </p>
