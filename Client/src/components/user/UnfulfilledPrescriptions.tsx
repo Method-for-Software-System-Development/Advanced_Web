@@ -16,7 +16,8 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
       setPrescriptions([]);
       setLoading(false);
       return;
-    }    setLoading(true);
+    }
+    setLoading(true);
     fetch(`${API_URL}/prescriptions/byIds`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -25,9 +26,11 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
       .then((res) => res.json())
       .then((data) => {
         // Only show unfulfilled prescriptions
-        const unfulfilled = Array.isArray(data)
+        let unfulfilled = Array.isArray(data)
           ? data.filter((p) => !p.fulfilled)
           : [];
+        // Sort by issueDate ascending
+        unfulfilled = unfulfilled.sort((a, b) => new Date(a.issueDate).getTime() - new Date(b.issueDate).getTime());
         setPrescriptions(unfulfilled);
         setLoading(false);
       })
@@ -35,7 +38,9 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
         setError("Failed to load prescriptions");
         setLoading(false);
       });
-  }, [prescriptionIds]);  if (loading) {
+  }, [prescriptionIds]);
+
+  if (loading) {
     return (
       <div className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow w-full">
         <div className="flex items-center justify-center py-8">
