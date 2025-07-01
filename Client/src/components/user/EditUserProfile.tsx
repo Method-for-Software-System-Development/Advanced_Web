@@ -353,7 +353,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
               setNewPassword("");
               setConfirmPassword("");
             }}
-            className="flex items-center justify-center sm:justify-between w-full p-3 text-left bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150"
+            className="flex items-center justify-center sm:justify-between w-full p-3 text-left bg-[var(--color-cream)] dark:bg-[#58383E] border-2 border-[var(--color-wine)] dark:border-[#FDF6F0] rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150"
             disabled={isLoading}
           >
             <span className="text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0]">
@@ -372,7 +372,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
           </button>
 
           {showPasswordSection && (
-            <div className="mt-4 space-y-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="mt-4 space-y-4 p-4 bg-[var(--color-cream)] dark:bg-[#58383E] rounded-xl border-2 border-[var(--color-wine)] dark:border-[#FDF6F0] shadow-md">
               {/* Current Password */}
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                 <label className="block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[140px] sm:min-w-[160px] mb-1 sm:mb-0">Current Password:</label>
