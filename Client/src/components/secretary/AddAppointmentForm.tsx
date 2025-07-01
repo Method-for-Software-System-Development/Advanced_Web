@@ -318,15 +318,6 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
             Create Appointment
           </button>
 
-          <button
-            type="button"
-            className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 shadow-md cursor-pointer"
-            onClick={handleEmergencyAppointment}
-            title="For emergencies only!"
-          >
-            🚨 Emergency Appointment
-          </button>
-
         </div>
       </form>
     </div>);
