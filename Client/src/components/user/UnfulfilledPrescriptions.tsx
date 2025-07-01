@@ -25,9 +25,13 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
     })
       .then((res) => res.json())
       .then((data) => {
-        // Only show unfulfilled prescriptions
+        // Only show unfulfilled and unexpired prescriptions
         let unfulfilled = Array.isArray(data)
-          ? data.filter((p) => !p.fulfilled)
+          ? data.filter((p) => {
+              if (p.fulfilled) return false;
+              const expiry = new Date(p.expirationDate);
+              return expiry >= new Date();
+            })
           : [];
         // Sort by issueDate ascending
         unfulfilled = unfulfilled.sort((a, b) => new Date(a.issueDate).getTime() - new Date(b.issueDate).getTime());
