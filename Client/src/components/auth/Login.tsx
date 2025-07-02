@@ -425,7 +425,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
                       value={digit}
                       onChange={(e) => handleDigitChange(index, e.target.value)}
                       onKeyDown={(e) => handleDigitKeyDown(index, e)}
-                      onPaste={index === 0 ? handleCodePaste : undefined}
+                      onPaste={handleCodePaste}
                       className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 dark:border-gray-600 rounded-lg 
                                 focus:border-wine focus:ring-2 focus:ring-wine/20 focus:outline-none
                                 bg-white dark:bg-gray-700 text-grayText dark:text-white
