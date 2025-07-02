@@ -263,7 +263,7 @@ router.post("/", async (req, res) => {
     if (pets.length === 1) {
       const pet  = pets[0];
       const past = (await getAppointmentHistoryByPet(String(pet._id)))
-                     .filter((a) => a.date < new Date());
+                     .filter((a) => a.date < new Date() && a.status !== 'cancelled');
       if (!past.length)
         return res.json({ reply: `No past appointments for ${pet.name}.`, menu: [] });
 
