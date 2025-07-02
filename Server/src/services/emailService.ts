@@ -31,7 +31,7 @@ import Staff from "../models/staffSchema";
     html: `
       <div style="max-width: 480px; margin: auto; background: #fff6ee; border-radius: 16px; box-shadow: 0 2px 10px #c9c9c9; padding: 36px; font-family: 'Segoe UI', Arial, sans-serif; color: #684A36;">
         <div style="text-align: center;">
-          <img src="https://i.ibb.co/tpPxh7BZ/logo.png" alt="FurEver Friends Logo" width="72" height="72" style="margin-bottom: 10px;" />
+          <img src="https://i.ibb.co/67njXNd3/logo.png" alt="FurEver Friends Logo" width="72" height="72" style="margin-bottom: 10px;" />
           <h2 style="color: #b97e65; margin-bottom: 8px;">FurEver Friends – Pet Clinic</h2>
         </div>
         <hr style="border: none; border-top: 1px solid #b97e65; margin: 18px 0;">
