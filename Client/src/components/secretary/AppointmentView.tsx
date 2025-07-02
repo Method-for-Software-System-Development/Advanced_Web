@@ -6,34 +6,12 @@ import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
 import { API_URL } from '../../config/api';
 import EmergencyAppointmentModal from './EmergencyAppointmentModal';
+import ConfirmCancelModal from './ConfirmCancelModal';
 import { Download, Plus, AlertCircle } from 'lucide-react';
 
 interface AppointmentViewProps {
   onBack: () => void;
 }
-
-// Helper function to format appointment data for display
-const formatAppointmentForDisplay = (appointment: Appointment) => {
-  // Handle populated vs unpopulated references
-  const staff = typeof appointment.staffId === 'object' ? appointment.staffId : null;
-  const pet = typeof appointment.petId === 'object' ? appointment.petId : null;
-  const user = typeof appointment.userId === 'object' ? appointment.userId : null;
-
-  return {
-    id: appointment._id,
-    time: appointment.time,
-    clientName: user ? `${user.firstName} ${user.lastName}` : 'Unknown Client',
-    petName: pet ? pet.name : 'Unknown Pet',
-    service: appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1).replace('_', ' '),
-    staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
-    description: appointment.description,
-    notes: appointment.notes,
-    status: appointment.status, // <-- Add status to the returned object
-    duration: appointment.duration,
-    cost: appointment.cost,
-    date: appointment.date
-  };
-};
 
 const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -50,6 +28,52 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   // Success message state
   const [successMessage, setSuccessMessage] = useState<string>(''); const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
+  const [showConfirmCancelModal, setShowConfirmCancelModal] = useState(false);
+  const [cancelAptId, setCancelAptId] = useState<string | null>(null);
+
+  // Handler to open the cancel confirmation modal
+  const handleRequestCancel = (appointmentId: string) => {
+    setCancelAptId(appointmentId);
+    setShowConfirmCancelModal(true);
+  };
+
+  // Handler to close the cancel confirmation modal
+  const handleCloseCancelModal = () => {
+    setShowConfirmCancelModal(false);
+    setCancelAptId(null);
+  };
+
+  // Handler to confirm cancellation
+  const handleConfirmCancel = async () => {
+    if (cancelAptId) {
+      await handleCancelAppointment(cancelAptId);
+    }
+    setShowConfirmCancelModal(false);
+    setCancelAptId(null);
+  };
+
+  // Helper function to format appointment data for display
+  const formatAppointmentForDisplay = (appointment: Appointment) => {
+    // Handle populated vs unpopulated references
+    const staff = typeof appointment.staffId === 'object' ? appointment.staffId : null;
+    const pet = typeof appointment.petId === 'object' ? appointment.petId : null;
+    const user = typeof appointment.userId === 'object' ? appointment.userId : null;
+
+    return {
+      id: appointment._id,
+      time: appointment.time,
+      clientName: user ? `${user.firstName} ${user.lastName}` : 'Unknown Client',
+      petName: pet ? pet.name : 'Unknown Pet',
+      service: appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1).replace('_', ' '),
+      staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
+      description: appointment.description,
+      notes: appointment.notes,
+      status: appointment.status, // <-- Add status to the returned object
+      duration: appointment.duration,
+      cost: appointment.cost,
+      date: appointment.date
+    };
+  };
 
   // Check for direct navigation to add form
   useEffect(() => {
@@ -452,6 +476,14 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
         />
       )}
 
+      {showConfirmCancelModal && (
+        <ConfirmCancelModal
+          isOpen={showConfirmCancelModal}
+          onClose={handleCloseCancelModal}
+          onConfirm={handleConfirmCancel}
+        />
+      )}
+
       {/* Add Appointment Form Section */}
       {showAddForm && (
         <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-7xl mx-auto">
@@ -521,7 +553,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                       {/* Hide cancel button for cancelled appointments */}
                       {formattedApt.status !== AppointmentStatus.CANCELLED && (
                         <button
-                          onClick={() => handleCancelAppointment(apt._id)}
+                          onClick={() => handleRequestCancel(apt._id)}
                           className="px-3 py-1 bg-redButton text-white text-xs font-semibold rounded-md shadow-sm hover:bg-redButtonDark cursor-pointer transition-colors duration-150 w-full sm:w-auto"
                         >
                           Cancel
