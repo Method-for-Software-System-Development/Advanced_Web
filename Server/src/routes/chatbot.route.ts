@@ -35,6 +35,14 @@ const fmtDate = (d: Date): string => {
 /** Runtime guard for populated pets. */
 const isPet = (x: unknown): x is IPet =>
   typeof x === "object" && x !== null && "name" in x;
+/**
+ * Checks if the user is a regular user ("user" role).
+ * @param user - User document from the database
+ * @returns boolean - true if user.role === "user"
+ */
+function isRegularUser(user: any): boolean {
+  return user?.role === "user";
+}
 
 /* ─────────────────────────  Helper: normaliseSpecialty  ─────────────────── */
 /**
@@ -244,8 +252,10 @@ router.post("/", async (req, res) => {
   /* ────────────────────── 9. HISTORY ENTRY POINT ───────────────────────── */
   if (text === "Show history") {
     if (!uid) return res.json({ reply: "Please log in to view history.", menu: [] });
-
     const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
+    if (!isRegularUser(user)) {
+    return res.json({ reply: "Please log in as a regular user to perform this action.", menu: [] });
+    }
     const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
     if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
 
@@ -286,8 +296,10 @@ router.post("/", async (req, res) => {
   /* ==========================  BOOK WIZARD  ========================== */
   if (text === "Book appointment") {
     if (!uid) return res.json({ reply: "Please log in to book an appointment.", menu: [] });
-
     const user = await User.findById(uid).populate<{ pets: IPet[] }>("pets");
+    if (!isRegularUser(user)) {
+    return res.json({ reply: "Please log in as a regular user to perform this action.", menu: [] });
+    }
     const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
     if (!pets.length) return res.json({ reply: "You have no registered pets."+ MENU_HINT, menu: [] });
 
@@ -538,7 +550,10 @@ if (s?.step === "emergencyConfirm") {
   /* entry-point */
   if (text === "Cancel appointment") {
     if (!uid) return res.json({ reply: "Please log in first.", menu: [] });
-
+    const user = await User.findById(uid);
+    if (!isRegularUser(user)) {
+    return res.json({ reply: "Please log in as a regular user to perform this action.", menu: [] });
+    }
     const upcoming = await getFutureAppointments(uid);
     if (!upcoming.length)
       return res.json({ reply: "You have no upcoming appointments to cancel.", menu: [] });
