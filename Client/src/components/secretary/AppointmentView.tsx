@@ -386,21 +386,24 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                 <button
                   onClick={handleExportToExcel}
                   disabled={appointments.length === 0 || isLoading}
-                  className="flex items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full text-base sm:text-lg px-2 sm:px-4"
                 >
                   <Download size={20} />
-                  Export Appointments to Excel for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  <span className="sm:hidden">Export today's meeting</span>
+                  <span className="hidden sm:inline">
+                    Export Appointments to Excel for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
                 </button>
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="flex items-center justify-center gap-2 h-11 bg-pinkDark text-white font-bold rounded-full hover:bg-pinkDarkHover transition-colors duration-200 cursor-pointer"
+                  className="flex items-center justify-center gap-2 h-11 bg-pinkDark text-white font-bold rounded-full hover:bg-pinkDarkHover transition-colors duration-200 cursor-pointer w-full text-base sm:text-lg"
                 >
                   <Plus size={20} />
                   Add New Appointment
                 </button>
                 <button
                   onClick={() => setShowEmergencyModal(true)}
-                  className="flex items-center justify-center gap-2 h-11 bg-redButton text-white font-bold rounded-full hover:bg-redButtonDark transition-colors duration-200 cursor-pointer"
+                  className="flex items-center justify-center gap-2 h-11 bg-redButton text-white font-bold rounded-full hover:bg-redButtonDark transition-colors duration-200 cursor-pointer w-full text-base sm:text-lg"
                 >
                   <AlertCircle size={20} />
                   Emergency Appointment
