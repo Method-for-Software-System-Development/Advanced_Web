@@ -236,8 +236,10 @@ router.post("/", async (req, res) => {
 
   /* ────────────────── 8. One-shot informational commands ───────────────── */
   if (text === "Show clinic hours")
-    return res.json({ reply: "Opening hours:\nSun-Thu 08:00–20:00\nFriday 08:00–13:00\nSaturday Closed", menu: [] });
-
+  return res.json({ 
+        reply: "Opening hours:\nSun-Thu 08:00–20:00\nFriday 08:00–13:00\nSaturday Closed" + MENU_HINT,
+        menu: []
+    });
   if (text === "Show contact details")
     return res.json({
       reply:
