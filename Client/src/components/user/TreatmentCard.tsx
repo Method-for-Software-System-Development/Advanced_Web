@@ -82,23 +82,24 @@ const TreatmentCard: React.FC<TreatmentCardProps> = ({
         </div>
       </div>      {/* Description Section */}
       {description && (
-        <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-blue-900 rounded-lg border border-gray-200 dark:border-blue-600">
-          {/* Desktop view */}
-          <div className="hidden sm:flex sm:items-start">
-            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] sm:mr-3 mb-1 sm:mb-0 flex-shrink-0">Description:</span>
-            <p className="text-sm sm:text-base text-black dark:text-gray-200 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap flex-1">{description}</p>
+      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
+        {/* Desktop view */}
+        <div className="hidden sm:flex sm:items-start">
+          <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] sm:mr-3 mb-1 sm:mb-0 flex-shrink-0">Description:</span>
+          <p className="text-sm sm:text-base text-black dark:text-gray-200 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap flex-1">{description}</p>
+        </div>
+        {/* Mobile view */}
+        <div className="sm:hidden">
+          <div className="flex justify-between items-start py-2">
+            <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Description:</span>
           </div>
-            {/* Mobile view */}
-          <div className="sm:hidden">
-            <div className="flex justify-between items-start py-2">
-              <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-xs">Description:</span>
-            </div>
-            <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0] mt-1 pt-2">
-              <p className="text-xs text-black dark:text-gray-200 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap">{description}</p>
-            </div>
+          <div className="border-t border-[var(--color-wine)] dark:border-[#FDF6F0] mt-1 pt-2">
+            <p className="text-xs text-black dark:text-gray-200 leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-wrap">{description}</p>
           </div>
         </div>
-      )}      {/* Notes Section */}
+      </div>
+    )}
+        {/* Notes Section */}
       {notes && (
         <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
           {/* Desktop view */}
