@@ -43,7 +43,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
         {!isEditing && (
           <button
             onClick={() => setTutorialOpen(true)}
-            className="hidden sm:flex items-center justify-center gap-2 w-40 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer"
+            className="hidden md:flex items-center justify-center gap-2 w-40 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer"
           >
             <BookOpen size={20} />
             Tutorial
@@ -62,22 +62,28 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
         ) : (
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-3 text-sm sm:text-base">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-22">
-
-                <div className="flex items-center justify-start">
-                  <span className="font-bold text-wine dark:text-lightGrayText mr-2 md:mr-2 w-16 sm:w-auto">Email:</span>
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-8">
+         {/* 
+                Responsive info grid: 
+                - One row per item on mobile/tablet, 
+                - Three columns in desktop (md+)
+              */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-8 w-full">
+                <div className="flex items-center">
+                  <span className="font-bold text-wine dark:text-lightGrayText mr-2">Email:</span>
                   <span className="break-all">{email}</span>
                 </div>
-                <div className="flex items-center justify-start">
-                  <span className="font-bold text-wine dark:text-lightGrayText mr-2 md:mr-2 w-16 sm:w-auto">Mobile:</span>
+                <div className="flex items-center">
+                  <span className="font-bold text-wine dark:text-lightGrayText mr-2">Mobile:</span>
                   <span className="whitespace-nowrap">{phone}</span>
                 </div>
-                <div className="flex items-center justify-start">
-                  <span className="font-bold text-wine dark:text-lightGrayText mr-2 md:mr-2 w-16 sm:w-auto">Address:</span>
+                <div className="flex items-center">
+                  <span className="font-bold text-wine dark:text-lightGrayText mr-2">Address:</span>
                   <span className="whitespace-nowrap">{capitalize(street)}, {capitalize(city)} {postalCode}</span>
                 </div>
-
               </div>
+              </div>
+
 
               {/* Desktop edit button - now in the same row */}
               {!isEditing && (
