@@ -149,53 +149,132 @@ interface TutorialModalProps {
       {/* Transparent screen overlay (no blur) */}
       <div className="fixed inset-0 z-50 bg-black/20 pointer-events-none" />
 
-      {/* Tutorial modal positioned bottom-left */}
-      <div
-        className="fixed z-[1010] left-8 bottom-8 max-w-md w-[350px] p-6 bg-white dark:bg-darkMode border-2 border-wine dark:border-white rounded-2xl shadow-2xl"
-        style={{
-          transition: "all 0.3s",
-        }}
+      {/* 
+  Tutorial Modal (Responsive)
+  - This section renders TWO modals: one for desktop and one for mobile (smaller screens).
+*/}
+
+{/* Desktop Modal */}
+<div
+  className="
+    hidden md:block
+    fixed z-[1010] left-8 bottom-8 max-w-md w-[350px] p-6
+    bg-white dark:bg-darkMode border-2 border-wine dark:border-white
+    rounded-2xl shadow-2xl
+  "
+  style={{
+    transition: "all 0.3s",
+  }}
+>
+  {/* Close button */}
+  <button
+    onClick={handleSkipOrClose}
+    className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600 cursor-pointer"
+    aria-label="Close tutorial"
+  >
+    ×
+  </button>
+  {/* Title */}
+  <h2 className="mb-2 text-xl font-bold text-wine dark:text-white">
+    {steps[step].title}
+  </h2>
+  {/* Description */}
+  <p className="text-base whitespace-pre-line text-grayText dark:text-lightGrayText mb-6">
+    {steps[step].description}
+  </p>
+  {/* Navigation buttons */}
+  <div className="flex justify-between mt-2">
+    <button
+      onClick={handleSkipOrClose}
+      className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition w-30 cursor-pointer"
+    >
+      Skip All
+    </button>
+    {!isLast ? (
+      <button
+        onClick={handleNext}
+        className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-30 cursor-pointer"
       >
-        <button
-          onClick={handleSkipOrClose}
-          className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600 cursor-pointer"
-          aria-label="Close tutorial"
-        >
-          ×
-        </button>
-        <h2 className="mb-2 text-xl font-bold text-wine dark:text-white">
-          {steps[step].title}
-        </h2>
-        <p className="text-base whitespace-pre-line text-grayText dark:text-lightGrayText mb-6">
-          {steps[step].description}
-        </p>
-        <div className="flex justify-between mt-2">
-          <button
-            onClick={handleSkipOrClose}
-            className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition w-30 cursor-pointer"
-          >
-            Skip All
-          </button>
-          {!isLast ? (
-            <button
-              onClick={handleNext}
-              className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-30 cursor-pointer"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={handleGotIt}
-              className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-30 cursor-pointer"
-            >
-              Got it
-            </button>
-          )}
-        </div>
-        <div className="mt-4 text-center text-gray-400 text-sm">
-          Step {step + 1} of {steps.length}
-        </div>
-      </div>
+        Next
+      </button>
+    ) : (
+      <button
+        onClick={handleGotIt}
+        className="px-5 py-2 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-30 cursor-pointer"
+      >
+        Got it
+      </button>
+    )}
+  </div>
+  {/* Step indicator */}
+  <div className="mt-4 text-center text-gray-400 text-sm">
+    Step {step + 1} of {steps.length}
+  </div>
+</div>
+
+{/* 
+  Mobile Modal: Visible on screens < md 
+  - Compact size, smaller padding, smaller fonts and buttons.
+*/}
+<div
+  className="
+    block md:hidden
+    fixed z-[1010] left-1/2 bottom-2 -translate-x-1/2
+    w-[95vw] max-w-xs p-2
+    bg-white dark:bg-darkMode border-2 border-wine dark:border-white
+    rounded-2xl shadow-2xl
+  "
+  style={{
+    transition: "all 0.3s",
+  }}
+>
+  {/* Close button */}
+  <button
+    onClick={handleSkipOrClose}
+    className="absolute top-1.5 right-2 text-lg text-gray-400 hover:text-gray-600 cursor-pointer"
+    aria-label="Close tutorial"
+  >
+    ×
+  </button>
+  {/* Title */}
+  <h2 className="mb-2 text-base font-bold text-wine dark:text-white">
+    {steps[step].title}
+  </h2>
+  {/* Description */}
+  <p className="text-xs whitespace-pre-line text-grayText dark:text-lightGrayText mb-4 leading-snug">
+    {steps[step].description}
+  </p>
+  {/* Navigation buttons */}
+  <div className="flex justify-between mt-2 gap-2">
+    <button
+      onClick={handleSkipOrClose}
+      className="px-1.5 py-1 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition w-1/2 text-xs cursor-pointer"
+    >
+      Skip All
+    </button>
+    {!isLast ? (
+      <button
+        onClick={handleNext}
+        className="px-1.5 py-1 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-1/2 text-xs cursor-pointer"
+      >
+        Next
+      </button>
+    ) : (
+      <button
+        onClick={handleGotIt}
+        className="px-1.5 py-1 rounded-lg bg-wine text-white font-bold hover:bg-wineDark transition w-1/2 text-xs cursor-pointer"
+      >
+        Got it
+      </button>
+    )}
+  </div>
+  {/* Step indicator */}
+  <div className="mt-2 text-center text-gray-400 text-xs">
+    Step {step + 1} of {steps.length}
+  </div>
+</div>
+
+
     </>
   );
 };
