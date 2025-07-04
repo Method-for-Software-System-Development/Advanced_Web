@@ -152,18 +152,13 @@ const AppointmentFormFieldsClient: React.FC<AppointmentFormFieldsClientProps> = 
           isLoading={loadingAppointments}
         />
 
-        <div>          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Cost ($) *</label>
-          <input
-            type="number"
-            value={formData.cost}
-            onChange={(e) => onInputChange('cost', parseFloat(e.target.value) || 0)}
-            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EF92A6] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
-            min="0"
-            step="0.01"
-            required
-            disabled
-          />
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Cost ($) *</label>
+          <div className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+            {formData.cost}
+          </div>
         </div>
+
       </div>      
       <div className="mt-4">
         <label htmlFor="reason" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Reason for Visit *</label>
