@@ -6,34 +6,12 @@ import appointmentService from '../../services/appointmentService';
 import { Appointment, AppointmentStatus } from '../../types';
 import { API_URL } from '../../config/api';
 import EmergencyAppointmentModal from './EmergencyAppointmentModal';
+import ConfirmCancelModal from './ConfirmCancelModal';
 import { Download, Plus, AlertCircle } from 'lucide-react';
 
 interface AppointmentViewProps {
   onBack: () => void;
 }
-
-// Helper function to format appointment data for display
-const formatAppointmentForDisplay = (appointment: Appointment) => {
-  // Handle populated vs unpopulated references
-  const staff = typeof appointment.staffId === 'object' ? appointment.staffId : null;
-  const pet = typeof appointment.petId === 'object' ? appointment.petId : null;
-  const user = typeof appointment.userId === 'object' ? appointment.userId : null;
-
-  return {
-    id: appointment._id,
-    time: appointment.time,
-    clientName: user ? `${user.firstName} ${user.lastName}` : 'Unknown Client',
-    petName: pet ? pet.name : 'Unknown Pet',
-    service: appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1).replace('_', ' '),
-    staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
-    description: appointment.description,
-    notes: appointment.notes,
-    status: appointment.status, // <-- Add status to the returned object
-    duration: appointment.duration,
-    cost: appointment.cost,
-    date: appointment.date
-  };
-};
 
 const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -50,6 +28,52 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
   // Success message state
   const [successMessage, setSuccessMessage] = useState<string>(''); const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
+  const [showConfirmCancelModal, setShowConfirmCancelModal] = useState(false);
+  const [cancelAptId, setCancelAptId] = useState<string | null>(null);
+
+  // Handler to open the cancel confirmation modal
+  const handleRequestCancel = (appointmentId: string) => {
+    setCancelAptId(appointmentId);
+    setShowConfirmCancelModal(true);
+  };
+
+  // Handler to close the cancel confirmation modal
+  const handleCloseCancelModal = () => {
+    setShowConfirmCancelModal(false);
+    setCancelAptId(null);
+  };
+
+  // Handler to confirm cancellation
+  const handleConfirmCancel = async () => {
+    if (cancelAptId) {
+      await handleCancelAppointment(cancelAptId);
+    }
+    setShowConfirmCancelModal(false);
+    setCancelAptId(null);
+  };
+
+  // Helper function to format appointment data for display
+  const formatAppointmentForDisplay = (appointment: Appointment) => {
+    // Handle populated vs unpopulated references
+    const staff = typeof appointment.staffId === 'object' ? appointment.staffId : null;
+    const pet = typeof appointment.petId === 'object' ? appointment.petId : null;
+    const user = typeof appointment.userId === 'object' ? appointment.userId : null;
+
+    return {
+      id: appointment._id,
+      time: appointment.time,
+      clientName: user ? `${user.firstName} ${user.lastName}` : 'Unknown Client',
+      petName: pet ? pet.name : 'Unknown Pet',
+      service: appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1).replace('_', ' '),
+      staffName: staff ? `${staff.firstName} ${staff.lastName}` : 'Unknown Staff',
+      description: appointment.description,
+      notes: appointment.notes,
+      status: appointment.status, // <-- Add status to the returned object
+      duration: appointment.duration,
+      cost: appointment.cost,
+      date: appointment.date
+    };
+  };
 
   // Check for direct navigation to add form
   useEffect(() => {
@@ -386,21 +410,24 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                 <button
                   onClick={handleExportToExcel}
                   disabled={appointments.length === 0 || isLoading}
-                  className="flex items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 h-11 bg-wine text-white font-bold rounded-full hover:bg-wineDark transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full text-base sm:text-lg px-2 sm:px-4"
                 >
                   <Download size={20} />
-                  Export Appointments to Excel for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  <span className="sm:hidden">Export today's meeting</span>
+                  <span className="hidden sm:inline">
+                    Export Appointments to Excel for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
                 </button>
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="flex items-center justify-center gap-2 h-11 bg-pinkDark text-white font-bold rounded-full hover:bg-pinkDarkHover transition-colors duration-200 cursor-pointer"
+                  className="flex items-center justify-center gap-2 h-11 bg-pinkDark text-white font-bold rounded-full hover:bg-pinkDarkHover transition-colors duration-200 cursor-pointer w-full text-base sm:text-lg"
                 >
                   <Plus size={20} />
                   Add New Appointment
                 </button>
                 <button
                   onClick={() => setShowEmergencyModal(true)}
-                  className="flex items-center justify-center gap-2 h-11 bg-redButton text-white font-bold rounded-full hover:bg-redButtonDark transition-colors duration-200 cursor-pointer"
+                  className="flex items-center justify-center gap-2 h-11 bg-redButton text-white font-bold rounded-full hover:bg-redButtonDark transition-colors duration-200 cursor-pointer w-full text-base sm:text-lg"
                 >
                   <AlertCircle size={20} />
                   Emergency Appointment
@@ -449,6 +476,14 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
         />
       )}
 
+      {showConfirmCancelModal && (
+        <ConfirmCancelModal
+          isOpen={showConfirmCancelModal}
+          onClose={handleCloseCancelModal}
+          onConfirm={handleConfirmCancel}
+        />
+      )}
+
       {/* Add Appointment Form Section */}
       {showAddForm && (
         <section className="mb-8 p-6 bg-white dark:bg-[#664147] rounded-lg shadow-xl max-w-7xl mx-auto">
@@ -479,70 +514,70 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             {sortedAppointments.map((apt) => {
               const formattedApt = formatAppointmentForDisplay(apt);
               return (
-                <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md bg-gray-50 dark:bg-darkMode hover:shadow-lg transition-shadow duration-200 ease-in-out">                  <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(formattedApt.status)}`}>
-                        {formattedApt.status.toUpperCase()}
+                <li key={apt._id} className="p-4 sm:p-6 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md bg-gray-50 dark:bg-darkMode hover:shadow-lg transition-shadow duration-200 ease-in-out flex flex-col gap-2 sm:gap-0">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2 sm:gap-0">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(formattedApt.status)}`}>
+                          {formattedApt.status.toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full inline-block">
+                        {formattedApt.service}
                       </span>
                     </div>
-                    <span className="px-3 py-1 text-sm font-semibold text-white bg-[#EF92A6] rounded-full inline-block">
-                      {formattedApt.service}
-                    </span>
-                  </div>                    <div className="flex gap-2">
-                    {/* Hide status dropdown for cancelled appointments */}
-                    {formattedApt.status !== AppointmentStatus.CANCELLED && (
-                      <select
-                        value={formattedApt.status}
-                        onChange={(e) => handleUpdateStatus(apt._id, e.target.value as AppointmentStatus)}
-                        className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200"
-                      >
-                        <option value={AppointmentStatus.SCHEDULED}>Scheduled</option>
-                        <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
-                        <option value={AppointmentStatus.IN_PROGRESS}>In Progress</option>
-                        <option value={AppointmentStatus.COMPLETED}>Completed</option>
-                        <option value={AppointmentStatus.NO_SHOW}>No Show</option>
-                      </select>
-                    )}
-
-                    {formattedApt.status === AppointmentStatus.COMPLETED && (
-                      <button
-                        onClick={() => handleEditNotes(apt._id)}
-                        className="px-3 py-1 bg-[#EF92A6] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-[#E57D98] transition-colors duration-150"
-                        title="Edit appointment notes"
-                      >
-                        {formattedApt.notes ? 'Edit Notes' : 'Add Notes'}
-                      </button>
-                    )}
-
-                    {/* Hide cancel button for cancelled appointments */}
-                    {formattedApt.status !== AppointmentStatus.CANCELLED && (
-                      <button
-                        onClick={() => handleCancelAppointment(apt._id)}
-                        className="px-3 py-1 bg-redButton text-white text-xs font-semibold rounded-md shadow-sm hover:bg-redButtonDark cursor-pointer transition-colors duration-150"
-                      >
-                        Cancel
-                      </button>
-                    )}
+                    <div className="flex flex-col gap-2 sm:flex-row sm:gap-2 w-full sm:w-auto">
+                      {/* Hide status dropdown for cancelled appointments */}
+                      {formattedApt.status !== AppointmentStatus.CANCELLED && (
+                        <select
+                          value={formattedApt.status}
+                          onChange={(e) => handleUpdateStatus(apt._id, e.target.value as AppointmentStatus)}
+                          className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200 w-full sm:w-auto"
+                        >
+                          <option value={AppointmentStatus.SCHEDULED}>Scheduled</option>
+                          <option value={AppointmentStatus.CONFIRMED}>Confirmed</option>
+                          <option value={AppointmentStatus.IN_PROGRESS}>In Progress</option>
+                          <option value={AppointmentStatus.COMPLETED}>Completed</option>
+                          <option value={AppointmentStatus.NO_SHOW}>No Show</option>
+                        </select>
+                      )}
+                      {formattedApt.status === AppointmentStatus.COMPLETED && (
+                        <button
+                          onClick={() => handleEditNotes(apt._id)}
+                          className="px-3 py-1 bg-[#EF92A6] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-[#E57D98] transition-colors duration-150 w-full sm:w-auto"
+                          title="Edit appointment notes"
+                        >
+                          {formattedApt.notes ? 'Edit Notes' : 'Add Notes'}
+                        </button>
+                      )}
+                      {/* Hide cancel button for cancelled appointments */}
+                      {formattedApt.status !== AppointmentStatus.CANCELLED && (
+                        <button
+                          onClick={() => handleRequestCancel(apt._id)}
+                          className="px-3 py-1 bg-redButton text-white text-xs font-semibold rounded-md shadow-sm hover:bg-redButtonDark cursor-pointer transition-colors duration-150 w-full sm:w-auto"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formattedApt.time}</p>
-                  <div className="grid grid-cols-2 text-sm">
-                    <div>                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Client:</strong> {formattedApt.clientName}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Time:</strong> {formattedApt.time}</p>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Client:</strong> {formattedApt.clientName}</p>
                       <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Pet:</strong> {formattedApt.petName}</p>
                     </div>
-                    <div>                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff:</strong> {formattedApt.staffName}</p>
+                    <div>
+                      <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Staff:</strong> {formattedApt.staffName}</p>
                       <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Duration:</strong> {formattedApt.duration} min</p>
+                      {formattedApt.cost && (
+                        <p className="text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formattedApt.cost}</p>
+                      )}
                     </div>
                   </div>
-                  {formattedApt.cost && (
-                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300"><strong className="font-medium text-gray-600 dark:text-gray-400">Cost:</strong> ${formattedApt.cost}</p>
-                  )}
-
                   {formattedApt.description && (
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400"><strong className="font-medium">Description:</strong> {formattedApt.description}</p>
                   )}
-
                   {formattedApt.notes && (
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400"><strong className="font-medium">Notes:</strong> {formattedApt.notes}</p>
                   )}
