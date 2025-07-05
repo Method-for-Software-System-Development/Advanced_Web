@@ -9,11 +9,12 @@ interface EmergencyAppointmentModalProps {
   isSubmitting: boolean;
 }
 
-const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
+const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps & { error?: string }> = ({
   open,
   onClose,
   onConfirm,
   isSubmitting,
+  error = "",
 }) => {
   const [reason, setReason] = useState("");
   const [checked, setChecked] = useState(false);
@@ -69,6 +70,12 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
         >
           &times;
         </button>
+        {/* Error message box for emergency errors */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded text-center">
+            {error}
+          </div>
+        )}
         <div className="mb-4 sm:mb-6 text-center">
           <span className="text-2xl sm:text-4xl block mb-2">🚨</span>
           <h2 className="text-lg sm:text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">Emergency Appointment</h2>
