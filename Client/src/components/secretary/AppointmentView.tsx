@@ -456,7 +456,9 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
               // Business rule: Block if emergency appointment for this pet in last 4 hours
               const hasRecent = await hasRecentEmergencyAppointment(petId, 4);
               if (hasRecent) {
-                setError('An emergency appointment for this pet was already scheduled in the last 4 hours. Please wait before scheduling another.');
+                const msg = 'An emergency appointment for this pet was already scheduled in the last 4 hours. Please wait before scheduling another.';
+                setError(msg);
+                alert(msg);
                 setIsSubmittingEmergency(false);
                 return;
               }
