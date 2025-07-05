@@ -82,8 +82,9 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
       }
       
       // Fetch all appointments for all pets
-      // Only keep future appointments for each pet
+      // Only keep future appointments for each pet (including today)
       const now = new Date();
+      now.setHours(0, 0, 0, 0); // Set to start of today to include appointments for today
       let allAppointments: Appointment[] = [];
       
       for (const pet of client.pets) {
@@ -92,15 +93,17 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
           const petId = typeof pet === 'string' ? pet : pet._id;
           
           if (!petId) {
-            console.error('Invalid pet ID:', pet);
+          console.error('Invalid pet ID:', pet);
             continue;
           }
           
-          console.log("Fetching appointments for pet ID:", petId);
           const petAppointments = await appointmentService.getAppointmentsByPet(petId);
-          console.log(`Received ${petAppointments.length} appointments for pet ${petId}`);
           
-          const futurePetAppointments = petAppointments.filter(appt => new Date(appt.date) >= now);
+          const futurePetAppointments = petAppointments.filter(appt => {
+            const apptDate = new Date(appt.date);
+            apptDate.setHours(0, 0, 0, 0); // Set to start of appointment day
+            return apptDate >= now;
+          });
           allAppointments = [...allAppointments, ...futurePetAppointments];
         } catch (err) {
           // Optionally handle per-pet errors
@@ -114,7 +117,6 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
         new Map(allAppointments.map(appt => [appt._id, appt])).values()
       ) as Appointment[];
       
-      console.log(`Final appointments list: ${dedupedAppointments.length} items`);
       setAppointments(dedupedAppointments);
     } catch (err: any) {
       let errorMsg = 'Failed to load appointments. Please try again.';
@@ -141,6 +143,52 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
       setShowAddForm(true);
       sessionStorage.removeItem("showAddFormDirectly"); // Clean up
     }
+  }, []);
+
+  // Check for refresh trigger from emergency appointment creation
+  useEffect(() => {
+    const refreshFlag = sessionStorage.getItem("refreshAppointments");
+    if (refreshFlag === "true") {
+      loadAppointments();
+      sessionStorage.removeItem("refreshAppointments"); // Clean up
+    }
+  }, []);
+
+  // Add a visibility change listener to check for refresh flag when component becomes visible
+  useEffect(() => {
+    const checkForRefreshFlag = () => {
+      const refreshFlag = sessionStorage.getItem("refreshAppointments");
+      if (refreshFlag === "true") {
+        loadAppointments();
+        sessionStorage.removeItem("refreshAppointments");
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkForRefreshFlag();
+      }
+    };
+
+    const handleFocus = () => {
+      checkForRefreshFlag();
+    };
+
+    // Check immediately when this effect runs
+    checkForRefreshFlag();
+
+    // Add multiple event listeners to catch different scenarios
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    // Also set up an interval to check periodically (as a fallback)
+    const interval = setInterval(checkForRefreshFlag, 1000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
   }, []);
 
   // Memoized sorted appointments based on sort field and direction
@@ -190,7 +238,6 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
   // Handler for when a new appointment is added
   const handleAppointmentAdded = (newAppointment: Appointment) => {
     setShowAddForm(false);
-    console.log("New appointment added:", newAppointment);
     
     // Reload all appointments to ensure consistency
     loadAppointments();
@@ -237,11 +284,13 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     try {
       await appointmentService.cancelAppointment(cancelingAppointmentId, reason);
       showSuccessMessage('Appointment cancelled successfully!');
+      // Immediately reload appointments to refresh the count and list
       loadAppointments();
     } catch (err) {
       setError('Failed to cancel appointment.');
     } finally {
-      setCancelingAppointmentId(null);    }
+      setCancelingAppointmentId(null);
+    }
   };
 
   return (
@@ -377,7 +426,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
           </div>        )}        {/* Showing appointment count */}
         {!showAddForm && !isLoading && !error && (
           <div className="mb-4 text-[14px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
-            Showing {filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled').length} appointment{filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled').length !== 1 ? 's' : ''}
+            Showing {filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() !== 'cancelled').length} upcoming appointment{filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() !== 'cancelled').length !== 1 ? 's' : ''}
           </div>
         )}
 
@@ -386,7 +435,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
         ) : filteredAppointments && filteredAppointments.length > 0 ? (
           <ul className="space-y-6">
             {filteredAppointments
-              .filter(apt => apt.status && apt.status.toLowerCase() === 'scheduled')
+              .filter(apt => apt.status && apt.status.toLowerCase() !== 'cancelled')
               .map(apt => {
                 const formatted = formatAppointmentForDisplay(apt);
                 let petName = formatted.petName;

@@ -149,6 +149,8 @@ const ClientPage: React.FC = () => {
       
       setShowEmergencyModal(false);
       showSuccessMessage('Emergency appointment created successfully!');
+      // Set a flag to trigger refresh in AppointmentViewClient
+      sessionStorage.setItem("refreshAppointments", "true");
       // Show success message or redirect to appointments
       setCurrentView("appointments");
     } catch (err: any) {
