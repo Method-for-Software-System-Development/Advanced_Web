@@ -42,6 +42,7 @@ const ClientPage: React.FC = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
   const [emergencyError, setEmergencyError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>('');
   const [chatOpen, setChatOpen] = useState(false);
   const [showFirstTimePasswordChange, setShowFirstTimePasswordChange] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -113,6 +114,15 @@ const ClientPage: React.FC = () => {
   const handleBackToDashboard = () => {
     setCurrentView("profile");
   };
+  
+  // Function to show success message with auto-dismiss
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000); // Auto-dismiss after 3 seconds
+  };
+  
   const handleEmergencyAppointmentClient = async (reasonFromModal?: string, petIdFromModal?: string) => {
     const clientRaw = sessionStorage.getItem("client");
     if (!clientRaw) return;
@@ -138,6 +148,7 @@ const ClientPage: React.FC = () => {
       }
       
       setShowEmergencyModal(false);
+      showSuccessMessage('Emergency appointment created successfully!');
       // Show success message or redirect to appointments
       setCurrentView("appointments");
     } catch (err: any) {
@@ -170,6 +181,18 @@ const ClientPage: React.FC = () => {
         <>
           <ChatButton onClick={() => setChatOpen(!chatOpen)} />
           <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
+
+          {/* Success Message Banner */}
+          {successMessage && (
+            <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                {successMessage}
+              </div>
+            </div>
+          )}
 
           <main className="flex-grow pt-40 pb-10 px-4 sm:px-6 lg:px-8">        <header className="mb-8 text-center">
           <h1 className="text-2xl sm:text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">Your Pet Clinic Dashboard</h1>
