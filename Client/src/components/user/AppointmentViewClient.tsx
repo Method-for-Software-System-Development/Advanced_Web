@@ -282,8 +282,19 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
     setCancelReason(reason);
     setShowCancelModal(false);
     try {
+      // Find the appointment being cancelled to check if it's an emergency
+      const appointmentToCancel = appointments.find(apt => apt._id === cancelingAppointmentId);
+      const isEmergencyAppointment = appointmentToCancel && appointmentToCancel.type === 'emergency_care';
+      
       await appointmentService.cancelAppointment(cancelingAppointmentId, reason);
       showSuccessMessage('Appointment cancelled successfully!');
+      
+      // If it's an emergency appointment, reset the cooldown
+      if (isEmergencyAppointment) {
+        // Dispatch custom event to notify ClientPage to reset cooldown
+        window.dispatchEvent(new CustomEvent('emergencyAppointmentCancelled'));
+      }
+      
       // Immediately reload appointments to refresh the count and list
       loadAppointments();
     } catch (err) {

@@ -46,6 +46,11 @@ const ClientPage: React.FC = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [showFirstTimePasswordChange, setShowFirstTimePasswordChange] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [lastEmergencyTime, setLastEmergencyTime] = useState<number | null>(null);
+  const [activeEmergencyAppointments, setActiveEmergencyAppointments] = useState<any[]>([]);
+
+  // Emergency cooldown period in milliseconds (4 hours)
+  const EMERGENCY_COOLDOWN = 4 * 60 * 60 * 1000;
 
   // Check for navigation signal from AboutSection
   useEffect(() => {
@@ -61,6 +66,33 @@ const ClientPage: React.FC = () => {
       // Note: We'll need to pass a signal to AppointmentViewClient to show the add form
       sessionStorage.setItem("showAddFormDirectly", "true");
     }
+
+    // Load last emergency appointment time from localStorage
+    const savedLastEmergencyTime = localStorage.getItem("lastEmergencyAppointmentTime");
+    if (savedLastEmergencyTime) {
+      setLastEmergencyTime(parseInt(savedLastEmergencyTime));
+    }
+
+    // Check for active emergency appointments on page load
+    checkActiveEmergencyAppointments();
+  }, []);
+
+  // Listen for emergency appointment cancellation
+  useEffect(() => {
+    const handleEmergencyCancellation = async () => {
+      // Reset the cooldown when emergency appointment is cancelled
+      setLastEmergencyTime(null);
+      localStorage.removeItem("lastEmergencyAppointmentTime");
+      // Also refresh the active emergency appointments list
+      await checkActiveEmergencyAppointments();
+    };
+
+    // Listen for the custom event
+    window.addEventListener('emergencyAppointmentCancelled', handleEmergencyCancellation);
+
+    return () => {
+      window.removeEventListener('emergencyAppointmentCancelled', handleEmergencyCancellation);
+    };
   }, []);
 
   // Check for first-time login on page load/refresh
@@ -115,6 +147,96 @@ const ClientPage: React.FC = () => {
     setCurrentView("profile");
   };
   
+  // Function to check for active emergency appointments
+  const checkActiveEmergencyAppointments = async () => {
+    try {
+      const clientRaw = sessionStorage.getItem("client");
+      if (!clientRaw) return [];
+
+      const client = JSON.parse(clientRaw);
+      if (!client.pets || client.pets.length === 0) return [];
+
+      const { default: appointmentService } = await import("../services/appointmentService");
+      
+      // Get current date to filter for upcoming appointments
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      
+      let emergencyAppointments: any[] = [];
+      
+      for (const pet of client.pets) {
+        try {
+          const petId = typeof pet === 'string' ? pet : pet._id;
+          if (!petId) continue;
+          
+          const petAppointments = await appointmentService.getAppointmentsByPet(petId);
+          
+          // Filter for upcoming emergency appointments that are not cancelled
+          const upcomingEmergencyAppointments = petAppointments.filter((appt: any) => {
+            const apptDate = new Date(appt.date);
+            apptDate.setHours(0, 0, 0, 0);
+            return apptDate >= now && 
+                   appt.type === 'emergency_care' && 
+                   appt.status !== 'cancelled';
+          });
+          
+          emergencyAppointments = [...emergencyAppointments, ...upcomingEmergencyAppointments];
+        } catch (err) {
+          console.error('Failed to load appointments for pet:', err);
+        }
+      }
+      
+      // Deduplicate by appointment ID
+      const uniqueEmergencyAppointments = Array.from(
+        new Map(emergencyAppointments.map(appt => [appt._id, appt])).values()
+      );
+      
+      setActiveEmergencyAppointments(uniqueEmergencyAppointments);
+      return uniqueEmergencyAppointments;
+    } catch (error) {
+      console.error('Failed to check emergency appointments:', error);
+      return [];
+    }
+  };
+
+  // Function to check if emergency cooldown is active
+  const isEmergencyCooldownActive = async () => {
+    // First check if there are any active emergency appointments
+    const activeEmergencies = await checkActiveEmergencyAppointments();
+    
+    // If there are no active emergency appointments, no cooldown should apply
+    if (activeEmergencies.length === 0) {
+      return false;
+    }
+    
+    // If there are active emergency appointments, check the timestamp cooldown
+    if (!lastEmergencyTime) return false;
+    const timeElapsed = Date.now() - lastEmergencyTime;
+    return timeElapsed < EMERGENCY_COOLDOWN;
+  };
+
+  // Function to get remaining cooldown time in hours and minutes
+  const getRemainingCooldownTime = () => {
+    if (!lastEmergencyTime) return { hours: 0, minutes: 0 };
+    const timeElapsed = Date.now() - lastEmergencyTime;
+    const remainingTime = EMERGENCY_COOLDOWN - timeElapsed;
+    const hours = Math.floor(remainingTime / (60 * 60 * 1000));
+    const minutes = Math.ceil((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+    return { hours, minutes };
+  };
+
+  // Function to format remaining time as string
+  const formatRemainingTime = () => {
+    const { hours, minutes } = getRemainingCooldownTime();
+    if (hours > 0 && minutes > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      return `${hours}h`;
+    } else {
+      return `${minutes}m`;
+    }
+  };
+
   // Function to show success message with auto-dismiss
   const showSuccessMessage = (message: string) => {
     setSuccessMessage(message);
@@ -124,6 +246,14 @@ const ClientPage: React.FC = () => {
   };
   
   const handleEmergencyAppointmentClient = async (reasonFromModal?: string, petIdFromModal?: string) => {
+    // Check cooldown before proceeding
+    const cooldownActive = await isEmergencyCooldownActive();
+    if (cooldownActive) {
+      const remainingTime = formatRemainingTime();
+      setEmergencyError(`You already have an emergency appointment scheduled. You can only request one emergency appointment every 4 hours. Please wait ${remainingTime} before requesting another emergency appointment.`);
+      return;
+    }
+
     const clientRaw = sessionStorage.getItem("client");
     if (!clientRaw) return;
     const client = JSON.parse(clientRaw);
@@ -146,6 +276,11 @@ const ClientPage: React.FC = () => {
         setIsSubmittingEmergency(false);
         return;
       }
+      
+      // Set the last emergency time and save to localStorage
+      const currentTime = Date.now();
+      setLastEmergencyTime(currentTime);
+      localStorage.setItem("lastEmergencyAppointmentTime", currentTime.toString());
       
       setShowEmergencyModal(false);
       showSuccessMessage('Emergency appointment created successfully!');
@@ -291,9 +426,16 @@ const ClientPage: React.FC = () => {
             </a>            {/* Emergency Button */}
             <button
             id="emergency-btn"
-            onClick={() => {
-              setEmergencyError(null);
-              setShowEmergencyModal(true);
+            onClick={async () => {
+              const cooldownActive = await isEmergencyCooldownActive();
+              if (cooldownActive) {
+                const remainingTime = formatRemainingTime();
+                setEmergencyError(`You already have an emergency appointment scheduled. You can only request one emergency appointment every 4 hours. Please wait ${remainingTime} before requesting another emergency appointment.`);
+                setShowEmergencyModal(true);
+              } else {
+                setEmergencyError(null);
+                setShowEmergencyModal(true);
+              }
             }}
             className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-redButton to-redButtonDark text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
           >
