@@ -508,6 +508,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
             }
           }}
           isSubmitting={isSubmittingEmergency}
+          error={error}
         />
       )}
 
