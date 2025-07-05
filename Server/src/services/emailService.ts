@@ -1,4 +1,29 @@
 /**
+ * Sends an email to the user when no veterinarians are available for an emergency appointment.
+ */
+async function sendNoVetAvailableEmergencyEmail({ to, petName }: { to: string; petName: string }) {
+  const subject = "FurEver Friends: Emergency Appointment - No Veterinarian Available";
+  const html = `
+    <div style="max-width: 480px; margin: auto; background: #fff6ee; border-radius: 16px; box-shadow: 0 2px 10px #c9c9c9; padding: 36px; font-family: 'Segoe UI', Arial, sans-serif; color: #684A36;">
+      <div style="text-align: center;">
+        <h2 style="color: #DC2626; margin-bottom: 8px;">EMERGENCY APPOINTMENT NOTICE</h2>
+      </div>
+      <hr style="border: none; border-top: 1px solid #b97e65; margin: 18px 0;">
+      <p>Dear Client,</p>
+      <p>We regret to inform you that at this moment, <b>no veterinarians are currently available for an emergency appointment for your pet ${petName}</b>.</p>
+      <p><b>Please arrive at the clinic as soon as possible.</b> A veterinarian will be assigned to you as soon as one becomes available.</p>
+      <p style="color: #b97e65; font-weight: bold;">If you have any questions, please call the clinic front desk.</p>
+      <p>Thank you for your understanding.<br><b>FurEver Friends Clinic</b></p>
+    </div>
+  `;
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    html
+  });
+}
+/**
  * Email service for sending transactional emails using Nodemailer.
  * Currently used for password reset codes.
  */
@@ -245,5 +270,6 @@ export {
   sendEmergencyCancelEmail,
   sendEmergencyVetAlertEmail,
   sendEmergencySecretaryAlertEmail,
-  sendEmergencyOwnerConfirmationEmail
+  sendEmergencyOwnerConfirmationEmail,
+  sendNoVetAvailableEmergencyEmail
 };

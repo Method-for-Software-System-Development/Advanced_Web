@@ -463,12 +463,28 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                 return;
               }
 
-              const result = await appointmentService.createEmergencyAppointment({
-                userId: patientId,
-                petId,
-                description: reason,
-                emergencyReason: reason || "EMERGENCY"
-              });
+              let result;
+              try {
+                result = await appointmentService.createEmergencyAppointment({
+                  userId: patientId,
+                  petId,
+                  description: reason,
+                  emergencyReason: reason || "EMERGENCY"
+                });
+              } catch (err: any) {
+                // Check for the specific error message from the backend
+                if (err instanceof Error && err.message && err.message.includes("No veterinarians are currently available for an emergency appointment")) {
+                  const msg = "No veterinarians are currently available for an emergency appointment. Please tell the client to arrive at the clinic and a veterinarian will be assigned as soon as possible.";
+                  setError(msg);
+                  alert(msg);
+                  setIsSubmittingEmergency(false);
+                  return;
+                } else {
+                  setError(err.message || "Failed to schedule emergency appointment.");
+                  setIsSubmittingEmergency(false);
+                  return;
+                }
+              }
               // Check if staff was assigned (assume result.newAppointment.staffId exists if assigned)
               if (!result.newAppointment || !result.newAppointment.staffId) {
                 const msg = "No staff available for this emergency appointment. Please try again later or contact the clinic director.";

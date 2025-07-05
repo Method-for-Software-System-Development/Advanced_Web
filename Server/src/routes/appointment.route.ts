@@ -121,6 +121,19 @@ appointmentRouter.post(
             err.message === "No available vet found for the emergency window."
           )
         ) {
+          // Send email to user (pet owner) if possible
+          try {
+            const user = await User.findById(userId);
+            const pet = await require("../models/petSchema").default.findById(petId);
+            if (user?.email && pet) {
+              await require("../services/emailService").sendNoVetAvailableEmergencyEmail({
+                to: user.email,
+                petName: pet.name
+              });
+            }
+          } catch (emailErr) {
+            console.error("Failed to send no-vet-available email to user:", emailErr);
+          }
           return res.status(503).json({
             error:
               "No veterinarians are currently available for an emergency appointment. Please arrive at the clinic and a veterinarian will be assigned as soon as possible."
