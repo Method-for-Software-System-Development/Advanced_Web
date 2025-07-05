@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import TailwindCalendar from './TailwindCalendar';
 import AddAppointmentForm from './AddAppointmentForm';
 import AppointmentNotesInline from './AppointmentNotesInline';
-import appointmentService from '../../services/appointmentService';
+import { appointmentService } from '../../services/appointmentService';
+import { hasRecentEmergencyAppointment } from '../../services/appointmentUtils';
 import { Appointment, AppointmentStatus } from '../../types';
 import { API_URL } from '../../config/api';
 import EmergencyAppointmentModal from './EmergencyAppointmentModal';
@@ -452,13 +453,21 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                 setIsSubmittingEmergency(false);
                 return;
               }
+              // Business rule: Block if emergency appointment for this pet in last 4 hours
+              const hasRecent = await hasRecentEmergencyAppointment(petId, 4);
+              if (hasRecent) {
+                setError('An emergency appointment for this pet was already scheduled in the last 4 hours. Please wait before scheduling another.');
+                setIsSubmittingEmergency(false);
+                return;
+              }
+
               await appointmentService.createEmergencyAppointment({
                 userId: patientId,
                 petId,
                 description: reason,
                 emergencyReason: reason || "EMERGENCY"
               });
-              alert("Emergency appointment request sent! Please come to the clinic immediately. Our staff will contact you soon.");
+              alert("Emergency appointment request sent!");
               setShowEmergencyModal(false);
             } catch (err: any) {
               if (err instanceof Error) {
