@@ -257,15 +257,32 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
         cost: formData.cost || 0
       };
       
+      // If this is an emergency appointment, check for staff assignment
+      if (appointmentData.type === AppointmentType.EMERGENCY_CARE) {
+        const result = await appointmentService.createEmergencyAppointment({
+          userId: appointmentData.userId,
+          petId: appointmentData.petId,
+          description: appointmentData.description,
+          emergencyReason: appointmentData.description || "EMERGENCY"
+        });
+        if (!result.newAppointment || !result.newAppointment.staffId) {
+          const msg = result.message || "No staff available for this emergency appointment. Please try again later or contact the clinic.";
+          setError(msg);
+          alert(msg);
+          setIsSubmitting(false);
+          return;
+        }
+        showSuccessMessage('Emergency appointment created successfully!');
+        onAppointmentAdded(result.newAppointment);
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+        return;
+      }
+      // Regular appointment
       const response = await appointmentService.createAppointment(appointmentData);
-      
-      // Show success message
       showSuccessMessage('Appointment created successfully!');
-      
-      // Pass just the appointment part to the handler
       onAppointmentAdded(response.appointment);
-      
-      // Close form after a brief delay to show success message
       setTimeout(() => {
         onClose();
       }, 1500);

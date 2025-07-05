@@ -463,12 +463,20 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                 return;
               }
 
-              await appointmentService.createEmergencyAppointment({
+              const result = await appointmentService.createEmergencyAppointment({
                 userId: patientId,
                 petId,
                 description: reason,
                 emergencyReason: reason || "EMERGENCY"
               });
+              // Check if staff was assigned (assume result.newAppointment.staffId exists if assigned)
+              if (!result.newAppointment || !result.newAppointment.staffId) {
+                const msg = "No staff available for this emergency appointment. Please try again later or contact the clinic director.";
+                setError(msg);
+                alert(msg);
+                setIsSubmittingEmergency(false);
+                return;
+              }
               alert("Emergency appointment request sent!");
               setShowEmergencyModal(false);
             } catch (err: any) {
