@@ -41,6 +41,7 @@ const ClientPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ClientView>("profile");
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
+  const [emergencyError, setEmergencyError] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [showFirstTimePasswordChange, setShowFirstTimePasswordChange] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -119,19 +120,34 @@ const ClientPage: React.FC = () => {
     const petId = petIdFromModal || (client.pets && client.pets.length > 0 ? (typeof client.pets[0] === 'string' ? client.pets[0] : client.pets[0]._id) : null);
     if (!petId) return;
     setIsSubmittingEmergency(true);
+    setEmergencyError(null);
     try {
-      await import("../services/appointmentService").then(({ default: appointmentService }) =>
-        appointmentService.createEmergencyAppointment({
-          userId: client._id,
-          petId,
-          description: reasonFromModal?.trim() || 'No description provided',
-          emergencyReason: reasonFromModal?.trim() || 'No reason provided',
-        })
-      );
+      const { default: appointmentService } = await import("../services/appointmentService");
+      const result = await appointmentService.createEmergencyAppointment({
+        userId: client._id,
+        petId,
+        description: reasonFromModal?.trim() || 'No description provided',
+        emergencyReason: reasonFromModal?.trim() || 'No reason provided',
+      });
+      
+      if (!result.newAppointment || !result.newAppointment.staffId) {
+        const msg = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
+        setEmergencyError(msg);
+        setIsSubmittingEmergency(false);
+        return;
+      }
+      
       setShowEmergencyModal(false);
-      // Optionally show a toast/notification here
-    } catch (err) {
-      // Optionally handle error
+      // Show success message or redirect to appointments
+      setCurrentView("appointments");
+    } catch (err: any) {
+      let errorMessage = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
+      if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+        errorMessage = err.message;
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      }
+      setEmergencyError(errorMessage);
     } finally {
       setIsSubmittingEmergency(false);
     }
@@ -250,7 +266,10 @@ const ClientPage: React.FC = () => {
             </a>            {/* Emergency Button */}
             <button
             id="emergency-btn"
-            onClick={() => setShowEmergencyModal(true)}
+            onClick={() => {
+              setEmergencyError(null);
+              setShowEmergencyModal(true);
+            }}
             className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-redButton to-redButtonDark text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
           >
             <div className="text-2xl mb-1">🚨</div>
@@ -269,8 +288,12 @@ const ClientPage: React.FC = () => {
         {showEmergencyModal && (
           <EmergencyAppointmentModal
             open={showEmergencyModal}
-            onClose={() => setShowEmergencyModal(false)}
+            onClose={() => {
+              setShowEmergencyModal(false);
+              setEmergencyError(null);
+            }}
             isSubmitting={isSubmittingEmergency}
+            error={emergencyError}
             onConfirm={async (reason, petId) => {
               await handleEmergencyAppointmentClient(reason, petId);
             }}

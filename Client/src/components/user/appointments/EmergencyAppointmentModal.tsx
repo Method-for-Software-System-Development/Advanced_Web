@@ -7,6 +7,7 @@ interface EmergencyAppointmentModalProps {
   onClose: () => void;
   onConfirm: (emergencyReason: string, petId: string) => void;
   isSubmitting: boolean;
+  error?: string | null;
 }
 
 const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
@@ -14,6 +15,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
   onClose,
   onConfirm,
   isSubmitting,
+  error,
 }) => {
   const [reason, setReason] = useState("");
   const [checked, setChecked] = useState(false);
@@ -96,6 +98,13 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
             Please arrive at the clinic immediately. Our staff will contact you right away.
           </p>
         </div>
+        {/* Display error message inside the modal, above the form */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-200 text-red-900 rounded-lg border border-red-400 text-center">
+            {error}
+          </div>
+        )}
+
         {client && (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Select Pet:</label>

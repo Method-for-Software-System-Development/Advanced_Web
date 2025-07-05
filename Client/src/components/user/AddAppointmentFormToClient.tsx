@@ -8,6 +8,7 @@ import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsCli
 import { API_URL } from '../../config/api';
 import UserNavButton from './UserNavButton';
 import { useNavigate } from 'react-router-dom';
+import EmergencyAppointmentModal from './appointments/EmergencyAppointmentModal';
 
 interface AddAppointmentFormToClientProps {
   onClose: () => void;
@@ -57,7 +58,54 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [staffAppointments, setStaffAppointments] = useState<Appointment[]>([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [openEmergencyModal, setOpenEmergencyModal] = useState(false);
+  const [emergencyError, setEmergencyError] = useState<string | null>(null);
+  /**
+ * Handles the emergency appointment confirmation.
+ * If failed, closes the modal and displays an error in the main form.
+ */
+const handleConfirmEmergency = async (reason: string, petId: string) => {
+  setIsSubmitting(true);
+  setEmergencyError(null);
 
+  try {
+    const result = await appointmentService.createEmergencyAppointment({
+      userId: client ? client._id : '',
+      petId,
+      description: reason || "EMERGENCY",
+      emergencyReason: reason || "EMERGENCY"
+    });
+
+    // If no appointment/staff returned, treat as failure
+    if (!result.newAppointment || !result.newAppointment.staffId) {
+      const msg = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
+      setEmergencyError(msg);           // Show error in main form
+      setOpenEmergencyModal(false);     // Close modal
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Success – show success message and close modal
+    showSuccessMessage('Emergency appointment created successfully!');
+    onAppointmentAdded(result.newAppointment);
+    setTimeout(() => {
+      setOpenEmergencyModal(false); // Close modal on success
+    }, 1500);
+
+  } catch (err: any) {
+    // Catch network/server/API errors and show them
+    let errorMessage = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
+    if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+      errorMessage = err.message;
+    } else if (typeof err === "string") {
+      errorMessage = err;
+    }
+    setEmergencyError(errorMessage);   // Show error in main form
+    setOpenEmergencyModal(false);      // Close modal
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   // Client and pet state
   const [clientPets, setClientPets] = useState<Pet[]>([]);
   const [client, setClient] = useState<Patient | null>(null);  const [selectedPetId, setSelectedPetId] = useState<string | null>(
@@ -265,10 +313,11 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
           description: appointmentData.description,
           emergencyReason: appointmentData.description || "EMERGENCY"
         });
+        console.log("EMERGENCY RESULT:", result);
         if (!result.newAppointment || !result.newAppointment.staffId) {
-          const msg = result.message || "No staff available for this emergency appointment. Please try again later or contact the clinic.";
+          const msg = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
+
           setError(msg);
-          alert(msg);
           setIsSubmitting(false);
           return;
         }
@@ -286,26 +335,52 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (err) {
-      console.error('Detailed error creating appointment:', err);
-      console.error('Error type:', typeof err);
-      console.error('Error message:', err instanceof Error ? err.message : String(err));
-      
-      // Show the actual error message from the server
-      let errorMessage = 'Failed to create appointment.';
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (err: any) {
+  // Log detailed information about the error for debugging purposes
+  console.error('Detailed error creating appointment:', err);
+  console.error('Error type:', typeof err);
+  console.error('Error message:', err instanceof Error ? err.message : String(err));
+
+  // Default error message if no specific server message is available
+  let errorMessage = 'No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.';
+
+  // If the error is an Error object with a message property, use that message
+  if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+    errorMessage = err.message;
+  } 
+  // If the error is a string, use it directly
+  else if (typeof err === "string") {
+    errorMessage = err;
+  }
+
+  // Display the error message to the user
+  setError(errorMessage);
+} finally {
+  // Ensure the submitting state is reset even if an error occurs
+  setIsSubmitting(false);
+}
   };
   useEffect(() => {
     loadStaff();
   }, []);
+  console.log("emergencyError UI:", emergencyError);
   return (
     <div className="w-full">
+      {/* Emergency Appointment Modal – Always mounted, only visible if openEmergencyModal === true */}
+    <EmergencyAppointmentModal
+      open={openEmergencyModal}
+      onClose={() => setOpenEmergencyModal(false)}
+      onConfirm={handleConfirmEmergency}
+      isSubmitting={isSubmitting}
+      error={emergencyError}
+    />
+
+    {/* Show emergency error message (main form, outside the modal) */}
+    {emergencyError && (
+      <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-sm dark:bg-red-900 dark:border-red-600 dark:text-red-300">
+        {emergencyError}
+      </div>
+    )}
       {/* Success Message Banner */}
       {successMessage && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
@@ -375,7 +450,33 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
             loadingStaff={loadingStaff}
             staffAppointments={staffAppointments}
             loadingAppointments={loadingAppointments}
-          />        </div>        {/* Form Actions */}
+          />        </div>        {/* Emergency Button Section */}
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="text-2xl mr-3">🚨</span>
+              <div>
+                <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-1">Emergency Appointment</h3>
+                <p className="text-sm text-red-600 dark:text-red-300">
+                  If this is an emergency, click here for immediate assistance
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmergencyError(null);
+                setOpenEmergencyModal(true);
+              }}
+              disabled={!client || clientPets.length === 0 || isSubmitting}
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Emergency
+            </button>
+          </div>
+        </div>
+
+        {/* Form Actions */}
         <div className="flex justify-between md:justify-between pt-4 space-x-2 md:space-x-3">
           <button
             type="button"
