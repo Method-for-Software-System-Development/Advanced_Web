@@ -452,7 +452,32 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
             loadingAppointments={loadingAppointments}
           />        </div>        {/* Emergency Button Section */}
         <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <div className="flex items-center justify-between">
+          {/* Mobile Layout - Stacked */}
+          <div className="md:hidden">
+            <div className="flex items-center mb-4">
+              <span className="text-xl mr-2">🚨</span>
+              <div>
+                <h3 className="text-base font-semibold text-red-700 dark:text-red-400 mb-1">Emergency Appointment</h3>
+                <p className="text-xs text-red-600 dark:text-red-300">
+                  If this is an emergency, click here for immediate assistance
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmergencyError(null);
+                setOpenEmergencyModal(true);
+              }}
+              disabled={!client || clientPets.length === 0 || isSubmitting}
+              className="w-full px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              Emergency
+            </button>
+          </div>
+          
+          {/* Desktop Layout - Side by Side */}
+          <div className="hidden md:flex items-center justify-between">
             <div className="flex items-center">
               <span className="text-2xl mr-3">🚨</span>
               <div>
@@ -469,7 +494,7 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
                 setOpenEmergencyModal(true);
               }}
               disabled={!client || clientPets.length === 0 || isSubmitting}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             >
               Emergency
             </button>
