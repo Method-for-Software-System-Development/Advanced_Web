@@ -313,7 +313,6 @@ const StaffForm: React.FC<StaffFormProps> = ({
             <option value={StaffRole.VETERINARIAN}>Veterinarian</option>
             <option value={StaffRole.VETERINARY_ASSISTANT}>Veterinary Assistant</option>
             <option value={StaffRole.RECEPTIONIST}>Receptionist</option>
-            <option value={StaffRole.CLINIC_DIRECTOR}>Clinic Director</option>
           </select>
         </div>
 
