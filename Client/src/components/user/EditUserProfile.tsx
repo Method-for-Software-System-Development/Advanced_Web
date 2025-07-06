@@ -262,7 +262,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
   const labelClasses = "block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[140px] sm:min-w-[140px] mb-1 sm:mb-0";
   
   return (
-    <div className="bg-[var(--color-cream)] dark:bg-[#58383E] p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)] dark:text-gray-200 w-full mobile:rounded-lg mobile:shadow-sm mobile:text-sm mobile:max-w-none mobile:px-4 mobile:w-[95vw]">
+    <div className="bg-[var(--color-cream)] dark:bg-darkModeLight p-6 rounded-xl shadow-md mb-6 text-[var(--color-greyText)] dark:text-gray-200 w-full mobile:rounded-lg mobile:shadow-sm mobile:text-sm mobile:max-w-none mobile:px-4 mobile:w-[95vw]">
       <h3 className="text-xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0] mb-4 min-w-[220px] h-12 flex items-center text-left justify-start sm:justify-center">
         <span className="block mobile:hidden w-full mobile:text-xl mobile:text-left">Edit Information</span>
       </h3>
@@ -353,7 +353,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
               setNewPassword("");
               setConfirmPassword("");
             }}
-            className="flex items-center justify-center sm:justify-between w-full p-3 text-left bg-[var(--color-cream)] dark:bg-[#58383E] border-2 border-[var(--color-wine)] dark:border-[#FDF6F0] rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150"
+            className="flex items-center cursor-pointer justify-center sm:justify-between w-full p-3 text-left bg-[var(--color-cream)] dark:bg-darkModeDark border-2 border-[var(--color-wine)] dark:border-[#FDF6F0] rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-150"
             disabled={isLoading}
           >
             <span className="text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0]">
@@ -372,7 +372,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
           </button>
 
           {showPasswordSection && (
-            <div className="mt-4 space-y-4 p-4 bg-[var(--color-cream)] dark:bg-[#58383E] rounded-xl border-2 border-[var(--color-wine)] dark:border-[#FDF6F0] shadow-md">
+            <div className="mt-4 space-y-4 p-4 bg-[var(--color-cream)] dark:bg-darkModeDark rounded-xl border-2 border-[var(--color-wine)] dark:border-[#FDF6F0] shadow-md">
               {/* Current Password */}
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                 <label className="block text-base font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] min-w-[140px] sm:min-w-[160px] mb-1 sm:mb-0">Current Password:</label>
@@ -493,7 +493,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
                 <button
                   type="button"
                   onClick={handlePasswordChange}
-                  className={`w-[100%] sm:w-auto px-4 py-2 bg-[var(--color-wine)] dark:bg-[#44292e] text-white rounded-lg hover:bg-[var(--color-wineDark)] dark:hover:bg-[#4A2F33] font-semibold transition-colors duration-150 text-[14px] sm:text-base ${
+                  className={`w-[100%] sm:w-auto px-4 py-2 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] font-semibold transition-colors duration-150 text-[14px] cursor-pointer sm:text-base ${
                     isChangingPassword ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                   disabled={isLoading || isChangingPassword}
@@ -515,7 +515,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
         <div className="flex flex-row pt-4 w-full sm:justify-end sm:gap-3 justify-between gap-4">
           <button
             onClick={handleSubmit}
-            className={`px-2 py-1 bg-[var(--color-wine)] dark:bg-[#44292e] text-white rounded-lg hover:bg-[var(--color-wineDark)] dark:hover:bg-[#4A2F33] font-semibold transition-colors duration-150 
+            className={`px-2 py-1 bg-[var(--color-wine)] text-white rounded-lg hover:bg-[var(--color-wineDark)] cursor-pointer font-semibold transition-colors duration-150 
               sm:w-24 sm:text-base w-[45%] text-xs
               ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={isLoading}
@@ -524,7 +524,7 @@ const EditUserProfile: React.FC<EditUserProfileProps> = ({
           </button>
           <button
             onClick={onCancel}
-            className="px-2 py-1 bg-[var(--color-redButton)] dark:bg-[#ff7070] text-white dark:text-[#FDF6F0] rounded-lg hover:bg-[var(--color-sky)] dark:hover:bg-[#ff9b9b] font-semibold transition-colors duration-150
+            className="px-2 py-1 bg-[var(--color-redButton)] text-white dark:text-[#FDF6F0] rounded-lg hover:bg-redButtonDark cursor-pointer font-semibold transition-colors duration-150
               sm:w-24 sm:text-base w-[45%] text-xs"
             disabled={isLoading}
           >

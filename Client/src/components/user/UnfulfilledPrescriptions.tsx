@@ -78,7 +78,7 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
       </div>
     );
   }  return (
-    <div className="bg-gray-50 dark:bg-[#4A2F33] rounded-lg shadow w-full">
+    <div className="bg-gray-50 dark:bg-darkModeLight rounded-lg shadow w-full">
       <h4 className="font-bold mb-3 sm:mb-4 text-[#664147] dark:text-[#FDF6F0] text-[17px] sm:text-lg flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 p-3 sm:p-4">
         <span> Unfulfilled Prescriptions</span>
       </h4>
@@ -92,7 +92,7 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ prescriptionIds }) 
           const isExpired = expiry < now;
           const isExpiringSoon = !isExpired && (expiry.getTime() - now.getTime()) < (7 * 24 * 60 * 60 * 1000); // 7 days
           
-          return (            <div key={presc._id} className="bg-white dark:bg-[#58383E] rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors">              {/* Medicine header with status */}
+          return (            <div key={presc._id} className="bg-white dark:bg-darkModeDark rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors">              {/* Medicine header with status */}
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2 sm:gap-0">
                 <div className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] text-sm sm:text-lg break-words">
                   {presc.medicineType}

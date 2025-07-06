@@ -16,10 +16,10 @@ interface AddAppointmentFormToClientProps {
   selectedDate: Date;
 }
 
-const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({ 
-  onClose, 
-  onAppointmentAdded, 
-  selectedDate 
+const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
+  onClose,
+  onAppointmentAdded,
+  selectedDate
 }) => {
   const navigate = useNavigate();
 
@@ -38,7 +38,7 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
       setSuccessMessage('');
     }, 3000);
   };
-  
+
   const [formData, setFormData] = useState<Partial<Appointment>>({
     date: formatDateToYYYYMMDD(selectedDate),
     time: '',
@@ -64,51 +64,51 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
  * Handles the emergency appointment confirmation.
  * If failed, closes the modal and displays an error in the main form.
  */
-const handleConfirmEmergency = async (reason: string, petId: string) => {
-  setIsSubmitting(true);
-  setEmergencyError(null);
+  const handleConfirmEmergency = async (reason: string, petId: string) => {
+    setIsSubmitting(true);
+    setEmergencyError(null);
 
-  try {
-    const result = await appointmentService.createEmergencyAppointment({
-      userId: client ? client._id : '',
-      petId,
-      description: reason || "EMERGENCY",
-      emergencyReason: reason || "EMERGENCY"
-    });
+    try {
+      const result = await appointmentService.createEmergencyAppointment({
+        userId: client ? client._id : '',
+        petId,
+        description: reason || "EMERGENCY",
+        emergencyReason: reason || "EMERGENCY"
+      });
 
-    // If no appointment/staff returned, treat as failure
-    if (!result.newAppointment || !result.newAppointment.staffId) {
-      const msg = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
-      setEmergencyError(msg);           // Show error in main form
-      setOpenEmergencyModal(false);     // Close modal
+      // If no appointment/staff returned, treat as failure
+      if (!result.newAppointment || !result.newAppointment.staffId) {
+        const msg = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
+        setEmergencyError(msg);           // Show error in main form
+        setOpenEmergencyModal(false);     // Close modal
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Success – show success message and close modal
+      showSuccessMessage('Emergency appointment created successfully!');
+      onAppointmentAdded(result.newAppointment);
+      setTimeout(() => {
+        setOpenEmergencyModal(false); // Close modal on success
+      }, 1500);
+
+    } catch (err: any) {
+      // Catch network/server/API errors and show them
+      let errorMessage = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
+      if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+        errorMessage = err.message;
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      }
+      setEmergencyError(errorMessage);   // Show error in main form
+      setOpenEmergencyModal(false);      // Close modal
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    // Success – show success message and close modal
-    showSuccessMessage('Emergency appointment created successfully!');
-    onAppointmentAdded(result.newAppointment);
-    setTimeout(() => {
-      setOpenEmergencyModal(false); // Close modal on success
-    }, 1500);
-
-  } catch (err: any) {
-    // Catch network/server/API errors and show them
-    let errorMessage = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
-    if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
-      errorMessage = err.message;
-    } else if (typeof err === "string") {
-      errorMessage = err;
-    }
-    setEmergencyError(errorMessage);   // Show error in main form
-    setOpenEmergencyModal(false);      // Close modal
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
   // Client and pet state
   const [clientPets, setClientPets] = useState<Pet[]>([]);
-  const [client, setClient] = useState<Patient | null>(null);  const [selectedPetId, setSelectedPetId] = useState<string | null>(
+  const [client, setClient] = useState<Patient | null>(null); const [selectedPetId, setSelectedPetId] = useState<string | null>(
     () => {
       const clientRaw = sessionStorage.getItem("client");
       if (clientRaw) {
@@ -117,10 +117,10 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
           if (parsedClient.pets && parsedClient.pets.length > 0) {
             return parsedClient.pets[0]._id;
           }
-        } catch {}
+        } catch { }
       }
       return null;
-    }  );
+    });
 
   // Load client and pets from session storage and fetch pets if needed
   useEffect(() => {
@@ -249,9 +249,9 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
   };
-  
-   // Handle form submission for creating a new appointment
-   const handleSubmit = async (e: React.FormEvent) => {
+
+  // Handle form submission for creating a new appointment
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
@@ -283,7 +283,7 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
     const selectedDate = new Date(formData.date as string);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate < today) {
       setError('Cannot schedule appointments in the past. Please select a future date.');
       setIsSubmitting(false);
@@ -304,7 +304,7 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
         notes: formData.notes || '',
         cost: formData.cost || 0
       };
-      
+
       // If this is an emergency appointment, check for staff assignment
       if (appointmentData.type === AppointmentType.EMERGENCY_CARE) {
         const result = await appointmentService.createEmergencyAppointment({
@@ -336,29 +336,29 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
         onClose();
       }, 1500);
     } catch (err: any) {
-  // Log detailed information about the error for debugging purposes
-  console.error('Detailed error creating appointment:', err);
-  console.error('Error type:', typeof err);
-  console.error('Error message:', err instanceof Error ? err.message : String(err));
+      // Log detailed information about the error for debugging purposes
+      console.error('Detailed error creating appointment:', err);
+      console.error('Error type:', typeof err);
+      console.error('Error message:', err instanceof Error ? err.message : String(err));
 
-  // Default error message if no specific server message is available
-  let errorMessage = 'No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.';
+      // Default error message if no specific server message is available
+      let errorMessage = 'No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.';
 
-  // If the error is an Error object with a message property, use that message
-  if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
-    errorMessage = err.message;
-  } 
-  // If the error is a string, use it directly
-  else if (typeof err === "string") {
-    errorMessage = err;
-  }
+      // If the error is an Error object with a message property, use that message
+      if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+        errorMessage = err.message;
+      }
+      // If the error is a string, use it directly
+      else if (typeof err === "string") {
+        errorMessage = err;
+      }
 
-  // Display the error message to the user
-  setError(errorMessage);
-} finally {
-  // Ensure the submitting state is reset even if an error occurs
-  setIsSubmitting(false);
-}
+      // Display the error message to the user
+      setError(errorMessage);
+    } finally {
+      // Ensure the submitting state is reset even if an error occurs
+      setIsSubmitting(false);
+    }
   };
   useEffect(() => {
     loadStaff();
@@ -367,20 +367,20 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
   return (
     <div className="w-full">
       {/* Emergency Appointment Modal – Always mounted, only visible if openEmergencyModal === true */}
-    <EmergencyAppointmentModal
-      open={openEmergencyModal}
-      onClose={() => setOpenEmergencyModal(false)}
-      onConfirm={handleConfirmEmergency}
-      isSubmitting={isSubmitting}
-      error={emergencyError}
-    />
+      <EmergencyAppointmentModal
+        open={openEmergencyModal}
+        onClose={() => setOpenEmergencyModal(false)}
+        onConfirm={handleConfirmEmergency}
+        isSubmitting={isSubmitting}
+        error={emergencyError}
+      />
 
-    {/* Show emergency error message (main form, outside the modal) */}
-    {emergencyError && (
-      <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-sm dark:bg-red-900 dark:border-red-600 dark:text-red-300">
-        {emergencyError}
-      </div>
-    )}
+      {/* Show emergency error message (main form, outside the modal) */}
+      {emergencyError && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-sm dark:bg-red-900 dark:border-red-600 dark:text-red-300">
+          {emergencyError}
+        </div>
+      )}
       {/* Success Message Banner */}
       {successMessage && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-green-700 transition-all duration-300 ease-in-out">
@@ -394,15 +394,15 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
       )}      {/* Desktop view for header and button */}
       <div className="mb-6 hidden md:flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-[#4A3F35] dark:text-[#FDF6F0] mb-2">New Appointment Scheduler</h2>
-          <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-2"></div>
+          <h2 className="text-2xl font-semibold text-grayText dark:text-white mb-2">New Appointment Scheduler</h2>
+          <div className="h-1 w-full bg-pinkDark rounded-full mb-2"></div>
         </div>        <UserNavButton
           label="< Return to Upcoming Appointments"
           onClick={onClose}
-          className="px-4 py-2 bg-[#4A3F35] text-white border border-[#4A3F35] rounded-md text-sm font-bold hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] shadow-md disabled:opacity-50 dark:bg-[#FDF6F0] dark:text-[#4A3F35] dark:border-[#FDF6F0]"
+          className="px-4 py-2 bg-pinkDark text-white border rounded-md text-sm font-bold hover:bg-pinkDarkHover cursor-pointer shadow-md disabled:opacity-50"
         />
       </div>
-        {/* Mobile view for header and button */}      <div className="mb-6 md:hidden">
+      {/* Mobile view for header and button */}      <div className="mb-6 md:hidden">
         <h2 className="text-[19px] font-semibold text-[#533139] dark:text-[#FDF6F0] mb-2">New Appointment Scheduler</h2>
         <div className="h-1 w-16 bg-[#EF92A6] rounded-full mb-4"></div>        <UserNavButton
           label="Return to Appointments"
@@ -417,7 +417,7 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8 bg-[#FDF6F0] dark:bg-[#4A3F35] p-6 rounded-xl shadow-md border border-[#EF92A6] dark:border-[#D17C8F]">        {/* Pet Selection */}
+      <form onSubmit={handleSubmit} className="space-y-8 bg-cream dark:bg-darkMode p-6 rounded-xl shadow-md border border-pinkDark">        {/* Pet Selection */}
         {client && (
           <div className="mb-4 text-[13px] md:text-base">
             <PetSelectionClient
@@ -428,8 +428,8 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
               showPetType={false}
             />
           </div>
-        )}        
-        {/* Appointment Form Fields */}        
+        )}
+        {/* Appointment Form Fields */}
         <div className="mb-4 text-[13px] md:text-base">
           <AppointmentFormFieldsClient
             formData={{
@@ -494,7 +494,7 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
                 setOpenEmergencyModal(true);
               }}
               disabled={!client || clientPets.length === 0 || isSubmitting}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+              className="px-4 py-2 bg-redButton hover:bg-redButtonDark cursor-pointer text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             >
               Emergency
             </button>
@@ -505,7 +505,7 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
         <div className="flex justify-between md:justify-between pt-4 space-x-2 md:space-x-3">
           <button
             type="button"
-            onClick={onClose}            className="px-3 md:px-4 py-1.5 md:py-2 w-[35%] md:w-auto bg-red-500 text-white rounded-md text-xs md:text-sm font-medium focus:ring-[#FF5757] hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed min-w-[70px]"          >
+            onClick={onClose} className="px-3 md:px-4 py-1.5 md:py-2 w-[35%] md:w-auto bg-redButton cursor-pointer text-white rounded-md text-xs md:text-sm font-medium hover:bg-redButtonDark transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed min-w-[70px]"          >
             Cancel
           </button>
           <button
@@ -519,7 +519,7 @@ const handleConfirmEmergency = async (reason: string, petId: string) => {
               loadingStaff ||
               isSubmitting
             }
-            className="flex items-center justify-center px-2 md:px-4 py-1.5 md:py-2 w-[65%] md:w-auto bg-[#EF92A6] text-white rounded-md text-xs md:text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md"
+            className="flex items-center justify-center px-2 md:px-4 py-1.5 md:py-2 w-[65%] md:w-auto bg-pinkDark text-white rounded-md text-xs md:text-sm font-medium hover:bg-pinkDarkHover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 shadow-md"
           >
             {isSubmitting ? (
               <>

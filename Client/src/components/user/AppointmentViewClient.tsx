@@ -329,14 +329,14 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
             <div className="hidden sm:flex gap-2">
               <button
                 onClick={() => setShowAddForm(true)}
-                className="px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition">
+                className="px-4 py-2 bg-pinkDark text-white rounded-md text-sm font-medium hover:bg-pinkDarkHover cursor-pointer transition">
                 Schedule an Appointment
               </button>
             </div>            {/* Mobile Add button - centered and full width with desktop style */}
             <div className="flex sm:hidden w-full py-1 px-2">
               <button
                 onClick={() => setShowAddForm(true)}
-                className="w-full mx-auto px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition text-[12px]">
+                className="w-full mx-auto px-4 py-2 bg-pinkDark text-white rounded-md text-sm font-medium hover:bg-pinkDarkHover transition text-[12px]">
                 Schedule an Appointment
               </button>
             </div>
@@ -393,7 +393,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                   loadAppointments();
                 }}
                 disabled={isLoading}
-                className="hidden sm:flex px-4 py-2 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2"
+                className="hidden sm:flex px-4 py-2 cursor-pointer bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -454,7 +454,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                   petName = apt.petId.name;
                 }
                 return (
-                  <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl shadow bg-[#FDF6F0] dark:bg-[#4A3F35] hover:shadow-lg transition-shadow duration-200 ease-in-out">                    {/* Desktop view header */}
+                  <li key={apt._id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl shadow bg-[#FDF6F0] dark:bg-darkMode hover:shadow-lg transition-shadow duration-200 ease-in-out">                    {/* Desktop view header */}
                     <div className="hidden sm:flex sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
                       <div className="flex items-center gap-3">
                         <h2 className="text-2xl font-bold text-[var(--color-wine)] dark:text-[#FDF6F0]">
@@ -467,7 +467,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                         {editingAppointmentId !== apt._id && (
                           <button
                             onClick={() => handleCancelClick(apt._id)}
-                            className="flex-1 px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-red-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed min-w-[70px]"
+                            className="flex-1 px-3 py-1 bg-redButton text-white text-xs font-semibold rounded-md shadow-sm hover:bg-redButtonDark cursor-pointer transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed min-w-[70px]"
                             disabled={apt.status && apt.status.toLowerCase() === 'cancelled'}
                           >
                             Cancel
@@ -476,7 +476,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                         {editingAppointmentId !== apt._id && (
                           <button
                             onClick={() => setEditingAppointmentId(apt._id)}
-                            className="flex-1 px-3 py-1 bg-[#664147] hover:bg-[#58383E] text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 min-w-[70px]"
+                            className="flex-1 px-3 py-1 bg-wine hover:bg-wineDark cursor-pointer text-white text-xs font-semibold rounded-md shadow-sm transition-colors duration-150 min-w-[70px]"
                             disabled={editingAppointmentId === apt._id}
                           >
                             Edit
@@ -561,7 +561,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
                     {!editingAppointmentId && !showCancelModal && (
                       <>
                                         {formatted.description && (
-                      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-[#4A2F33] rounded-lg border border-gray-200 dark:border-gray-600">
+                      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white dark:bg-darkModeDark rounded-lg border border-gray-200 dark:border-gray-600">
                         {/* Desktop view */}
                         <div className="hidden sm:flex sm:items-start">
                           <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] sm:mr-3 mb-1 sm:mb-0 flex-shrink-0">Description:</span>

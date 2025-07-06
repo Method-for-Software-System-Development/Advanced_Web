@@ -102,7 +102,7 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
     );
   }    if (!lastTreatment) {
     return (
-      <div className="text-center py-8 bg-gray-50 dark:bg-[#4A2F33] rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+      <div className="text-center py-8 bg-gray-50 dark:bg-darkModeLight rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
         <p className="text-gray-500 dark:text-gray-300 font-medium flex items-center justify-center gap-2">
           <svg className="h-6 w-6 sm:h-6 sm:w-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -111,7 +111,7 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
         </p>
       </div>
     );
-  }return (    <div className="bg-gray-50 dark:bg-[#4A2F33] rounded-lg shadow w-full">
+  }return (    <div className="bg-gray-50 dark:bg-darkModeLight rounded-lg shadow w-full">
       <div className="mb-3 sm:mb-4 p-3 sm:p-4">
         <h4 className="font-bold text-[#664147] dark:text-[#FDF6F0] text-[17px] sm:text-xl">Most Recent Treatment</h4>
       </div>      {/* Desktop grid view */}
@@ -193,7 +193,7 @@ const PetLastTreatment: React.FC<PetLastTreatmentProps> = ({ petId }) => {
           <span className="text-xs text-right break-words text-[var(--color-wine)] dark:text-[#FDF6F0]">{lastTreatment.visitationCategory}</span>
         </div>      </div>      {lastTreatment.notes && lastTreatment.notes !== 'No notes available' && (
         <div className="p-3 sm:p-4 pt-0">
-          <div className="bg-white dark:bg-[#58383E] rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors">
+          <div className="bg-white dark:bg-darkModeDark rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors">
             {/* Desktop view */}
             <div className="hidden sm:flex sm:items-start">
               <span className="font-semibold text-[var(--color-wine)] dark:text-[#FDF6F0] sm:mr-3 flex-shrink-0"> Notes:</span>
