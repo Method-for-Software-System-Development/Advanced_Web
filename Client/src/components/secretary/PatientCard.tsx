@@ -36,7 +36,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
   };
   
   return (
-    <div className="p-6 bg-white dark:bg-darkMode rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 mb-4">
+    <div className="p-6 bg-gray-50 dark:bg-darkMode rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 mb-4">
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-xl font-semibold text-wine dark:text-white">{patient.firstName+' '+patient.lastName}</h3>
         <button 

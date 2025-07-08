@@ -28,7 +28,7 @@ const StaffGrid: React.FC<StaffGridProps> = ({
           key={staffMember._id}
           className={`border rounded-lg p-4 shadow-md transition-all duration-200 flex flex-col h-full ${
             staffMember.isActive 
-              ? 'bg-white border-gray-200 dark:bg-darkMode dark:border-gray-600' 
+              ? 'bg-gray-50 border-gray-200 dark:bg-darkMode dark:border-gray-600' 
               : 'bg-gray-50 border-red-200 opacity-70 dark:bg-gray-800 dark:border-red-500'
           }`}
         >
@@ -67,7 +67,7 @@ const StaffGrid: React.FC<StaffGridProps> = ({
             </div>
             
             {staffMember.description && (
-              <div className="text-xs text-gray-500 mb-2 italic bg-gray-50 p-2 rounded dark:text-gray-400 dark:bg-gray-700">
+              <div className="text-xs text-gray-500 mb-2 italic bg-gray-100 p-2 rounded dark:text-gray-400 dark:bg-darkModeDark">
                 {staffMember.description}
               </div>
             )}
