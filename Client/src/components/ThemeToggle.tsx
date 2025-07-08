@@ -1,34 +1,43 @@
 import { useState, useEffect } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 
+// Available theme modes that can be selected
 const themeOptions = ["light", "dark", "system"] as const;
 type ThemeMode = (typeof themeOptions)[number];
 
+/**
+ * Props for the ThemeToggle component
+ */
 interface ThemeToggleProps {
-  /** “icon” (navbar) or full-width “button” (mobile drawer) */
+  /** Display variant: "icon" for navbar or "button" for mobile menu */
   variant?: "icon" | "button";
-  /** Tailwind utility overrides */
+  /** Additional CSS classes for styling customization */
   className?: string;
 }
 
 /**
- * Utility: Returns initial theme value from localStorage or defaults to "system".
+ * Utility function to get initial theme from localStorage or default to system preference
  */
 function getInitialTheme(): ThemeMode {
   if (typeof window === "undefined") return "system";
   return (localStorage.getItem("theme") as ThemeMode) || "system";
 }
 
+/**
+ * Theme toggle component that allows users to switch between light, dark, and system themes.
+ * Supports two display variants: icon for navbar and button for mobile menu.
+ * Automatically syncs with system preferences and persists user choice in localStorage.
+ */
 const ThemeToggle: React.FC<ThemeToggleProps> = ({
   variant = "icon",
   className = "",
 }) => {
-  // State: user-chosen theme or “system”
+  // User's selected theme preference
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
-  // State: real-time OS preference
+  // Current system theme preference
   const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
 
-  // Watch OS setting
+  // Monitor system theme preference changes
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const update = () => setSystemTheme(mq.matches ? "dark" : "light");
@@ -37,17 +46,18 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  // Apply effective theme + persist user choice
+  // Apply the effective theme to the document and persist user choice
   useEffect(() => {
     const root = document.documentElement;
     const effective = theme === "system" ? systemTheme : theme;
     root.classList.toggle("dark", effective === "dark");
 
+    // Store user preference or remove if using system default
     if (theme === "system") localStorage.removeItem("theme");
     else localStorage.setItem("theme", theme);
   }, [theme, systemTheme]);
 
-  // Sync across browser tabs/windows (optional)
+  // Sync theme changes across browser tabs
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === "theme") {
@@ -58,14 +68,14 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  // Cycle through modes
+  // Cycle through available theme modes
   const handleClick = () =>
     setTheme((prev) => {
       const i = themeOptions.indexOf(prev);
       return themeOptions[(i + 1) % themeOptions.length];
     });
 
-  // Select icon + tooltip
+  // Determine icon and tooltip based on current theme
   const { Icon, tooltip }: { Icon: React.ElementType; tooltip: string } =
     theme === "light"
       ? { Icon: Moon, tooltip: "Switch to dark mode" }
@@ -73,7 +83,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
         ? { Icon: Monitor, tooltip: "Switch to system mode" }
         : { Icon: Sun, tooltip: "Switch to light mode" };
 
-  // Full-width button (mobile)
+  // Render full-width button variant for mobile menu
   if (variant === "button")
     return (
       <button
@@ -91,7 +101,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       </button>
     );
 
-  // Circular icon (navbar)
+  // Render circular icon variant for navbar
   return (
     <button
       onClick={handleClick}

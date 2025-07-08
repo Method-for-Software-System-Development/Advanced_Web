@@ -11,9 +11,8 @@ interface HomeProps {
   onLoginClick: () => void; // Pass login modal trigger function to Navbar
 }
 
-
 const Home: React.FC<HomeProps> = ({ onLoginClick }) => {
-   /** Local chat-window state for the Home page */
+  /** Local chat-window state for the Home page */
   const [chatOpen, setChatOpen] = useState(false);
   return (
     <>
@@ -28,7 +27,7 @@ const Home: React.FC<HomeProps> = ({ onLoginClick }) => {
         <ContactSection />
         <FooterSection />
       </main>
-       {/* Floating chat button + chat window */}
+      {/* Floating chat button + chat window */}
       <ChatButton onClick={() => setChatOpen(!chatOpen)} />
       <ChatWindow open={chatOpen} onClose={() => setChatOpen(false)} />
     </>

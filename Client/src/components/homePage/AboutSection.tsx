@@ -2,39 +2,55 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import cuteDog from '../../assets/aboutSecImg.png';
 
+/**
+ * Props for the AboutSection component
+ */
 interface AboutSectionProps {
+  /** Callback function triggered when login is required */
   onLoginClick?: () => void;
 }
 
+/**
+ * About section component for the homepage that introduces the FurEver Friends Pet Clinic.
+ * Displays clinic information and provides a call-to-action button for booking appointments.
+ * Handles authentication and role-based navigation for appointment booking.
+ */
+
 const AboutSection: React.FC<AboutSectionProps> = ({ onLoginClick }) => {
   const navigate = useNavigate();
+
+  /**
+   * Handle appointment booking button click with authentication check
+   * and role-based navigation
+   */
   const handleBookAppointmentClick = () => {
-    // Check if user is logged in
     const token = sessionStorage.getItem("token");
     const role = sessionStorage.getItem("role");
 
+    // Redirect to login if user is not authenticated
     if (!token) {
-      // User is not logged in, trigger login modal
       if (onLoginClick) {
         onLoginClick();
       }
       return;
-    }    // User is logged in, navigate based on role
-    if (role === "secretary") {      // Navigate to secretary page and trigger add appointment form directly
+    }
+
+    // Navigate to appropriate dashboard based on user role
+    if (role === "secretary") {
       navigate("/secretary");
-      // Communicate to show the add appointment form directly
+      // Signal to show appointment form directly
       sessionStorage.setItem("navigateToAddAppointment", "true");
     } else {
-      // Navigate to client page and trigger add appointment form directly
       navigate("/client");
-      // Communicate to show the add appointment form directly
+      // Signal to show appointment form directly
       sessionStorage.setItem("navigateToAddAppointment", "true");
     }
   };
 
   return (
     <section id="about" className="scroll-mt-32 px-6 md:px-20 pb-0 flex flex-col md:flex-row items-center justify-between gap-12 bg-gradient-to-b from-[#F5D2B3] to-[#FDF6F0]">
-      {/* Text */}
+      
+      {/* Clinic information */}
       <div className="flex-1 text-center md:text-left self-center">
         <h2 className="font-[Nunito] text-4xl font-bold text-[#664147] mb-6">Who We Are</h2>
         <p className="text-lg text-[#3B3B3B] mb-6 leading-relaxed">
@@ -45,6 +61,8 @@ const AboutSection: React.FC<AboutSectionProps> = ({ onLoginClick }) => {
           <br /><br />
           <span className="font-semibold text-[#664147]">Schedule a free introductory consultation or your first appointment today.</span>
         </p>
+
+        {/* Appointment booking button */}
         <div className="flex justify-center mt-10 mb-20">
           <button
             onClick={handleBookAppointmentClick}
@@ -54,9 +72,11 @@ const AboutSection: React.FC<AboutSectionProps> = ({ onLoginClick }) => {
           </button>
         </div>
       </div>
-
-      {/* Image */}
-      <div className="flex-1 self-end"><img src={cuteDog} alt="Cute Dog" className="max-h-[600px] w-auto object-contain mx-auto" /></div>
+      
+      {/* Decorative image */}
+      <div className="flex-1 self-end">
+        <img src={cuteDog} alt="Cute Dog" className="max-h-[600px] w-auto object-contain mx-auto" />
+      </div>
 
     </section>
   );

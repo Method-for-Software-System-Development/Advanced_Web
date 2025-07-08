@@ -5,9 +5,9 @@ import { Staff } from "../../types";
 import { API_BASE_URL } from "../../config/api";
 
 /**
- * Maps backend role identifiers to display names for UI.
- * @param role - The staff member's role identifier from the database.
- * @returns User-friendly role display string.
+ * Maps backend role identifiers to user-friendly display names.
+ * @param role - The staff member's role identifier from the database
+ * @returns User-friendly role display string
  */
 function mapRoleToDisplayName(role: string): string {
   switch (role) {
@@ -24,12 +24,19 @@ function mapRoleToDisplayName(role: string): string {
   }
 }
 
+/**
+ * Team section component for the homepage that displays clinic staff members.
+ * Fetches staff data from the API and renders individual team member cards
+ * in a horizontally scrollable layout with decorative wave divider.
+ */
 const TeamSection: React.FC = () => {
+  // Staff members data from API
   const [members, setMembers] = useState<Staff[]>([]);
+  // Loading state for data fetching
   const [loading, setLoading] = useState<boolean>(true);
 
   /**
-   * Fetches the active staff members from the API on mount.
+   * Fetch active staff members from the API on component mount
    */
   useEffect(() => {
     staffService
@@ -39,16 +46,16 @@ const TeamSection: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Show loading state while fetching data
   if (loading) {
-    return <div>Loading team...</div>;
+    return <div className="bg-white dark:bg-wine">Loading team...</div>;
   }
-
   return (
     <section
       id="team"
       className="scroll-mt-32 relative w-full bg-white dark:bg-wine pt-10 pb-10 px-6 md:px-20"
     >
-      {/* SVG Shape Divider – Positioned at the top */}
+      {/* Decorative wave divider at the top */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] -translate-y-full rotate-180">
         <svg
           viewBox="0 0 1200 120"
@@ -63,9 +70,12 @@ const TeamSection: React.FC = () => {
         </svg>
       </div>
 
+      {/* Section title */}
       <h2 className="text-4xl font-bold text-[#664147] dark:text-white mb-6 text-center font-[Nunito]">
         Our Team
       </h2>
+
+      {/* Horizontally scrollable team member cards */}
       <div className="flex overflow-x-auto gap-6 team-custom-scrollbar justify-start justify-center-2172">
         {members.map((member) => (
           <TeamMemberCard

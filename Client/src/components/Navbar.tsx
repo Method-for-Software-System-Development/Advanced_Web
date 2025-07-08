@@ -5,46 +5,56 @@ import { Menu, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import LogoutButton from "./auth/LogoutButton";
 
+/**
+ * Props for the Navbar component
+ */
 interface NavbarProps {
+  /** Callback function triggered when login button is clicked */
   onLoginClick?: () => void;
+  /** Callback function for returning to dashboard (used in secretary subviews) */
   onBackToDashboard?: () => void;
+  /** Callback function triggered when user logs out */
   onLogout?: () => void;
 }
 
+/**
+ * Navigation bar component for the FurEver Friends Pet Clinic application.
+ * Provides responsive navigation with different views for desktop and mobile.
+ * Handles user authentication state and role-based navigation.
+ */
+
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogout }) => {
+  // State for controlling mobile menu visibility
   const [menuOpen, setMenuOpen] = useState(false);
-  // Dummy state to force a re-render when localStorage changes
+  // Force re-render when authentication state changes
   const [refresh, setRefresh] = useState(0);
 
   /**
-   * Listen for 'storage' events (localStorage changes in any tab)
-   * This ensures that the Navbar always reflects the latest login/logout status,
-   * even if authentication status changes in another tab or after login/logout in this tab.
+   * Listen for storage events to sync authentication state across tabs
    */
   useEffect(() => {
     const onStorage = () => setRefresh(r => r + 1);
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, []);  // Track whether the user is logged in by checking for a JWT token in sessionStorage
-  const isLoggedIn = !!sessionStorage.getItem("token");
+  }, []);
 
-  // Get the user's role from sessionStorage
+  // Check if user is logged in by looking for JWT token
+  const isLoggedIn = !!sessionStorage.getItem("token");
+  // Get user role for role-based navigation
   const role = sessionStorage.getItem("role");
-  // useNavigate hook for programmatic navigation
   const navigate = useNavigate();
+
   /**
-   * Handle navigation to the user's dashboard based on role.
-   * If the user is a secretary, navigate to /secretary.
-   * Otherwise, navigate to /client.
+   * Navigate to appropriate dashboard based on user role
    */
   const handleDashboardClick = () => {
-    // If we have a back to dashboard callback (for secretary subviews), use it
+    // Use callback for secretary subviews if provided
     if (onBackToDashboard) {
       onBackToDashboard();
       return;
     }
 
-    // Otherwise, navigate normally based on role
+    // Navigate based on user role
     if (role === "secretary") {
       navigate("/secretary");
     } else {
@@ -52,7 +62,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
     }
   }; return (
     <nav className="bg-gradient-to-r from-pink to-pinkDark dark:from-wine dark:to-wineDark shadow-md fixed top-0 w-full z-50">
-      <div className="px-6 md:px-20 py-4 flex justify-between items-center">        {/* Logo and Clinic Name */}
+      <div className="px-6 md:px-20 py-4 flex justify-between items-center">
+        
+        {/* Logo and clinic branding */}
         <div className="flex items-center space-x-4">
           <a href="/#">
             <img
@@ -66,12 +78,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
             <p className="text-sm md:text-md 2xl:text-lg italic text-wine dark:text-white">Your pet's health. Our FurEver mission.</p>
           </div>
         </div>
-        {/* Desktop Nav Links */}
+
+        {/* Desktop navigation menu */}
         <div className="hidden lg:flex items-center space-x-6 font-[Nunito] text-md 2xl:text-lg text-wine dark:text-white font-bold">
           <a href="/#about" className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark">About Us</a>
           <a href="/#team" className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark">Our Team</a>
           <a href="/#contact" className="inline-block transition duration-200 transform hover:scale-110 hover:text-wineDark dark:hover:text-whiteDark">Contact Us</a>
-          {/* Dashboard button: appears only if user is logged in */}
+
+          {/* Dashboard button - only visible when logged in */}
           {isLoggedIn && (
             <button
               onClick={handleDashboardClick}
@@ -80,11 +94,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
               Dashboard
             </button>
           )}
+
+          {/* Authentication controls */}
           {isLoggedIn ? (
             <LogoutButton onLogout={() => {
-              setRefresh(r => r + 1);  // Force a re-render of navbar state
-              if (onLogout) onLogout(); // Call parent onLogout to close chat
-            }} />) : (
+              setRefresh(r => r + 1);  // Update navbar state
+              if (onLogout) onLogout(); // Notify parent component
+            }} />
+          ) : (
             onLoginClick && (
               <button
                 onClick={onLoginClick}
@@ -95,12 +112,10 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
             )
           )}
 
-          {/* Theme Toggle Button */}
           <ThemeToggle />
-
         </div>
 
-        {/* Hamburger Icon - Mobile only */}
+        {/* Mobile menu toggle */}
         <button
           className="lg:hidden p-2 rounded focus:outline-none focus:ring-2 focus:ring-wine dark:focus:ring-white"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -109,8 +124,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
           {menuOpen ? <X size={32} color="#664147" className="dark:stroke-white" /> : <Menu size={32} color="#664147" className="dark:stroke-white" />}
         </button>
       </div>
-
-      {/* Mobile Menu Dropdown */}
+      
+      {/* Mobile navigation menu */}
       {menuOpen && (
         <div className="lg:hidden bg-pink dark:bg-wine shadow-md border-t border-pinkDark dark:border-wineDark">
           <div className="flex flex-col items-center space-y-4 py-6 font-[Nunito] text-lg text-wine dark:text-white font-bold">
@@ -118,7 +133,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
             <a href="/#team" className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark" onClick={() => setMenuOpen(false)}>Our Team</a>
             <a href="/#contact" className="w-full text-center transition hover:text-wineDark dark:hover:text-whiteDark" onClick={() => setMenuOpen(false)}>Contact Us</a>
 
-            {/* Dashboard button: appears only if user is logged in */}
+            {/* Dashboard button for mobile - only visible when logged in */}
             {isLoggedIn && (
               <button
                 onClick={() => {
@@ -130,6 +145,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onBackToDashboard, onLogo
                 Dashboard
               </button>
             )}
+
+            {/* Mobile authentication controls */}
             {isLoggedIn ? (
               <LogoutButton
                 variant="mobile"
