@@ -51,7 +51,7 @@ const AppointmentNotesInline: React.FC<AppointmentNotesInlineProps> = ({
   };
 
   return (
-    <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+    <div className="mt-4 p-4 bg-gray-100 dark:bg-darkModeDark rounded-lg border border-gray-200 dark:border-gray-600">
       <div className="mb-3">
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           {isEditMode ? 'Edit Appointment Notes' : 'Add Appointment Notes'}
@@ -91,14 +91,14 @@ const AppointmentNotesInline: React.FC<AppointmentNotesInlineProps> = ({
         <button
           onClick={handleCancel}
           disabled={isSaving}
-          className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF92A6] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-1.5 border cursor-pointer border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancel
         </button>
         <button
           onClick={handleSave}
           disabled={isSaving || !notes.trim()}
-          className="px-3 py-1.5 bg-[#EF92A6] text-white rounded text-sm hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          className="px-3 py-1.5 bg-pinkDark text-white rounded text-sm hover:bg-pinkDarkHover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
         >
           {isSaving ? (
             <>

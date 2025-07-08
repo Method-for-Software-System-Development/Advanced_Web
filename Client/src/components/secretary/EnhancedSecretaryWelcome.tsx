@@ -126,8 +126,8 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
               onClick={onNavigateToAppointments}
               className="block p-6 bg-gradient-to-br from-pink to-pinkDark text-white rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none cursor-pointer"
             >
-              <h3 className="text-xl font-semibold mb-2 text-grayText">&#128197; View Appointments</h3>
-              <p className="text-sm opacity-90 text-grayText">Access calendar, view schedules, and export reports</p>              {statistics && (
+              <h3 className="text-xl font-semibold mb-2 text-grayText">&#128197; Manage Appointments</h3>
+              <p className="text-sm opacity-90 text-grayText">View schedule, update appointments, add vet notes and export reports</p>              {statistics && (
                 <div className="mt-3 text-sm">
                   <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-grayText">
                     {statistics.todayStats.total} today

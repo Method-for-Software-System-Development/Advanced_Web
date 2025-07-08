@@ -390,8 +390,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
       <section className="mt-5 mb-8 p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl max-w-7xl mx-auto">
 
         <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">&#128197; View Appointments</h1>
-          <p className="text-lg text-grayText dark:text-lightGrayText">Access calendar, view schedules, and export reports</p>
+          <h1 className="text-4xl font-bold text-wine font-[Nunito] dark:text-white mb-1">&#128197; Manage Appointments</h1>
+          <p className="text-lg text-grayText dark:text-lightGrayText">View schedule, update appointments, add vet notes and export reports</p>
         </header>
 
         <div className="flex justify-center">
@@ -535,6 +535,23 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
           Appointments for {selectedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
         </h2>
 
+        {/* Instructions for Secretary */}
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
+          <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">📋 Secretary Instructions</h3>
+          <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
+            <p><strong>Status Management:</strong> Use the dropdown to update appointment status based on the situation:</p>
+            <ul className="list-disc list-inside ml-4 space-y-1">
+              <li><strong>Scheduled:</strong> Initial status when appointment is first created</li>
+              <li><strong>Confirmed:</strong> Clinic (secretary and veterinarian) has confirmed the appointment</li>
+              <li><strong>In Progress:</strong> Client has arrived and is currently with the veterinarian</li>
+              <li><strong>Completed:</strong> Appointment finished successfully - this enables adding vet notes</li>
+              <li><strong>No Show:</strong> Client didn't arrive for their scheduled appointment</li>
+            </ul>
+            <p><strong>Cancellation:</strong> Use the "Cancel Appointment" button if the client requests to cancel their appointment or if the clinic needs to cancel the appointment.</p>
+            <p><strong>Veterinarian Notes:</strong> After marking an appointment as "Completed", you can add or edit notes from the veterinarian about the treatment, diagnosis, or follow-up instructions.</p>
+          </div>
+        </div>
+
         {error && (
           <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded">
             {error}
@@ -580,7 +597,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                       {formattedApt.status === AppointmentStatus.COMPLETED && (
                         <button
                           onClick={() => handleEditNotes(apt._id)}
-                          className="px-3 py-1 bg-[#EF92A6] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-[#E57D98] transition-colors duration-150 w-full sm:w-auto"
+                          className="px-3 py-1 cursor-pointer bg-[#EF92A6] text-white text-xs font-semibold rounded-md shadow-sm hover:bg-[#E57D98] transition-colors duration-150 w-full sm:w-auto"
                           title="Edit appointment notes"
                         >
                           {formattedApt.notes ? 'Edit Notes' : 'Add Notes'}
@@ -592,7 +609,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ onBack }) => {
                           onClick={() => handleRequestCancel(apt._id)}
                           className="px-3 py-1 bg-redButton text-white text-xs font-semibold rounded-md shadow-sm hover:bg-redButtonDark cursor-pointer transition-colors duration-150 w-full sm:w-auto"
                         >
-                          Cancel
+                          Cancel Appointment
                         </button>
                       )}
                     </div>
