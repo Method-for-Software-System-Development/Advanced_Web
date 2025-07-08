@@ -69,7 +69,7 @@ const FirstTimePasswordChangeModal: React.FC<FirstTimePasswordChangeModalProps> 
 
   return (
     <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
-      <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4">        
+      <div className="relative bg-white dark:bg-darkMode rounded-lg shadow-xl p-6 w-full max-w-md mx-4">        
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
             Welcome! Please Change Your Password
@@ -98,7 +98,7 @@ const FirstTimePasswordChangeModal: React.FC<FirstTimePasswordChangeModalProps> 
                 id="currentPassword"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                 required
                 placeholder="Enter your current password"
               />
@@ -133,7 +133,7 @@ const FirstTimePasswordChangeModal: React.FC<FirstTimePasswordChangeModalProps> 
                 id="newPassword"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                 required
                 placeholder="Enter your new password"
               />
@@ -168,7 +168,7 @@ const FirstTimePasswordChangeModal: React.FC<FirstTimePasswordChangeModalProps> 
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                 required
                 placeholder="Confirm your new password"
               />
@@ -205,7 +205,7 @@ const FirstTimePasswordChangeModal: React.FC<FirstTimePasswordChangeModalProps> 
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-wine text-white rounded-md hover:bg-wineDark cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Changing Password...' : 'Change Password'}
             </button>

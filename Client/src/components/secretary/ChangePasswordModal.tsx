@@ -106,7 +106,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-md p-6 bg-white dark:bg-darkModeLight rounded-lg shadow-xl border border-gray-200 dark:border-gray-600">
+      <div className="relative w-full max-w-md p-6 bg-white dark:bg-darkMode rounded-lg shadow-xl border border-gray-200 dark:border-gray-600">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            className="cursor-pointer text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
@@ -223,14 +223,14 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors"
+              className="cursor-pointer flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !!success}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-wine hover:bg-wineDark disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+              className="cursor-pointer flex-1 px-4 py-2 text-sm font-medium text-white bg-wine hover:bg-wineDark disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
             >
               {isLoading ? 'Changing...' : 'Change Password'}
             </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import statisticsService, { DashboardStatistics } from '../../services/statisticsService';
 import ChangePasswordModal from './ChangePasswordModal';
+import { Lock } from 'lucide-react';
 
 interface EnhancedSecretaryWelcomeProps {
   onNavigateToAppointments: () => void;
@@ -286,13 +287,12 @@ const EnhancedSecretaryWelcome: React.FC<EnhancedSecretaryWelcomeProps> = ({
             disabled={loading}
           >
             {loading ? 'Refreshing...' : '⟲ Refresh Dashboard'}
-          </button>
-          
-          <button
+          </button>          <button
             onClick={() => setShowChangePasswordModal(true)}
-            className="inline-block bg-pinkDark dark:bg-pinkDark text-white w-60 h-11 rounded-full hover:bg-pinkDarkHover dark:hover:bg-pinkDarkHover transform transition duration-200 hover:scale-110 cursor-pointer font-bold"
+            className="bg-pinkDark text-white w-60 h-11 rounded-full hover:bg-pinkDarkHover transform transition duration-200 hover:scale-110 cursor-pointer font-bold flex items-center justify-center gap-2"
           >
-            🔒 Change Password
+            <Lock size={18} />
+            Change Password
           </button>
         </div>
       </div>

@@ -35,7 +35,7 @@ export const CancelReasonModal: React.FC<CancelReasonModalProps> = ({ isOpen, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f8d7da]/80 backdrop-blur-sm">      {/* Modal Dialog */}
-      <div className="relative w-full max-w-md bg-[#FDF6F0] dark:bg-[#4A3F35] p-4 sm:p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn mx-3">
+      <div className="relative w-full max-w-md bg-[#FDF6F0] dark:bg-darkMode p-4 sm:p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn mx-3">
         {/* Close (X) Button */}
         <button
           type="button"

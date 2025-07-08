@@ -160,7 +160,7 @@ const ShowPrescriptions: React.FC = () => {
             <div className="hidden sm:flex gap-2">
               <button
                 onClick={() => setShowUnfulfilledOnly((v) => !v)}
-                className="px-4 py-2 bg-white text-[#533139] border border-[#533139] rounded-md text-sm font-medium hover:bg-[#EF92A6] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] transition"
+                className="px-4 py-2 bg-pinkDark text-white rounded-md text-sm font-medium hover:bg-pinkDarkHover transition cursor-pointer"
               >
                 {showUnfulfilledOnly ? "Show All" : "Show Unfulfilled Only"}
               </button>
@@ -253,7 +253,7 @@ const ShowPrescriptions: React.FC = () => {
                   fetchPrescriptions();
                 }}
                 disabled={isLoading}
-                className="hidden sm:flex px-4 py-2 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2"
+                className="hidden sm:flex cursor-pointer px-4 py-2 bg-[var(--color-wine)] dark:bg-[#58383E] text-white rounded-md hover:bg-opacity-90 dark:hover:bg-[#4A2F33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

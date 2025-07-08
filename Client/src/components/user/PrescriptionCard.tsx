@@ -26,7 +26,7 @@ const PrescriptionCard: React.FC<PrescriptionCardProps> = ({ prescription }) => 
   const isExpired = expiry < now;
   const isExpiringSoon = !isExpired && (expiry.getTime() - now.getTime()) < (7 * 24 * 60 * 60 * 1000); // 7 days
   return (
-    <div className="bg-[var(--color-cream)] dark:bg-[#4A2F33] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 w-full text-[var(--color-greyText)] dark:text-gray-200 mobile:p-3 mobile:rounded-lg mobile:shadow-sm border border-gray-100 dark:border-gray-600">      {/* Header with Medicine Name and Status */}      {/* Desktop/Tablet view - horizontal layout */}
+    <div className="bg-[var(--color-cream)] dark:bg-darkMode rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 w-full text-[var(--color-greyText)] dark:text-gray-200 mobile:p-3 mobile:rounded-lg mobile:shadow-sm border border-gray-100 dark:border-gray-600">      {/* Header with Medicine Name and Status */}      {/* Desktop/Tablet view - horizontal layout */}
       <div className="hidden sm:flex items-center justify-between mb-4">
         <h2 className="text-[23px] font-bold text-[var(--color-wine)] dark:text-[#FDF6F0]">
            {prescription.medicineName} - {prescription.medicineType}

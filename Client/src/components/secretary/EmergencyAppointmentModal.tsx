@@ -62,7 +62,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps & { err
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f8d7da]/80 backdrop-blur-sm">
-      <div className="relative w-[95vw] max-w-xs sm:w-full sm:max-w-md bg-[#FDF6F0] dark:bg-[#4A3F35] p-3 sm:p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn max-h-[70vh] overflow-y-auto">
+      <div className="relative w-[95vw] max-w-xs sm:w-full sm:max-w-md bg-[#FDF6F0] dark:bg-darkMode p-3 sm:p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn max-h-[70vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-[#EF92A6] dark:hover:text-[#D17C8F] text-xl sm:text-2xl font-bold focus:outline-none cursor-pointer"
