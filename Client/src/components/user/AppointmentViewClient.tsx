@@ -83,6 +83,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
       
       // Fetch all appointments for all pets
       // Only keep future appointments for each pet (including today)
+      // Emergency appointments have special filtering logic - they are shown from booking time until 4 hours after appointment time
       const now = new Date();
       now.setHours(0, 0, 0, 0); // Set to start of today to include appointments for today
       let allAppointments: Appointment[] = [];
@@ -103,6 +104,37 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
             const apptDate = new Date(appt.date);
             apptDate.setHours(0, 0, 0, 0); // Set to start of appointment day
             
+            // Special handling for emergency appointments
+            if (appt.type === 'emergency_care') {
+              // Helper function to convert time string (e.g., "2:30 PM") to minutes since midnight
+              const timeToMinutes = (timeStr: string): number => {
+                const [time, period] = timeStr.split(' ');
+                const [hours, minutes] = time.split(':').map(Number);
+                let totalMinutes = hours * 60 + minutes;
+                
+                if (period === 'PM' && hours !== 12) {
+                  totalMinutes += 12 * 60;
+                } else if (period === 'AM' && hours === 12) {
+                  totalMinutes = minutes; // 12:xx AM is 00:xx in 24-hour format
+                }
+                
+                return totalMinutes;
+              };
+              
+              // Create full datetime for emergency appointment
+              const emergencyDateTime = new Date(appt.date);
+              const appointmentTimeMinutes = timeToMinutes(appt.time);
+              emergencyDateTime.setHours(Math.floor(appointmentTimeMinutes / 60), appointmentTimeMinutes % 60, 0, 0);
+              
+              // Emergency appointments are shown from booking time until 4 hours after appointment time
+              const currentDateTime = new Date();
+              const emergencyEndTime = new Date(emergencyDateTime.getTime() + (4 * 60 * 60 * 1000)); // Add 4 hours
+              
+              // Show emergency appointment if current time is before the 4-hour window ends
+              return currentDateTime < emergencyEndTime;
+            }
+            
+            // Regular appointment logic - unchanged
             // If appointment is in the future (after today), include it
             if (apptDate > now) {
               return true;
