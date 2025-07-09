@@ -102,7 +102,38 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
           const futurePetAppointments = petAppointments.filter(appt => {
             const apptDate = new Date(appt.date);
             apptDate.setHours(0, 0, 0, 0); // Set to start of appointment day
-            return apptDate >= now;
+            
+            // If appointment is in the future (after today), include it
+            if (apptDate > now) {
+              return true;
+            }
+            
+            // If appointment is today, check if the time has not passed yet
+            if (apptDate.getTime() === now.getTime()) {
+              const currentTime = new Date();
+              const currentTimeMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+              
+              // Parse appointment time to minutes
+              const timeToMinutes = (timeStr: string): number => {
+                const [time, period] = timeStr.split(' ');
+                const [hours, minutes] = time.split(':').map(Number);
+                let totalMinutes = hours * 60 + minutes;
+                
+                if (period === 'PM' && hours !== 12) {
+                  totalMinutes += 12 * 60;
+                } else if (period === 'AM' && hours === 12) {
+                  totalMinutes = minutes; // 12:xx AM is 00:xx in 24-hour format
+                }
+                
+                return totalMinutes;
+              };
+              
+              const appointmentTimeMinutes = timeToMinutes(appt.time);
+              return appointmentTimeMinutes > currentTimeMinutes;
+            }
+            
+            // Appointment is in the past
+            return false;
           });
           allAppointments = [...allAppointments, ...futurePetAppointments];
         } catch (err) {
@@ -437,7 +468,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
           </div>        )}        {/* Showing appointment count */}
         {!showAddForm && !isLoading && !error && (
           <div className="mb-4 text-[14px] sm:text-base text-gray-700 dark:text-gray-300 font-medium" style={{ color: 'var(--color-skyDark)' }}>
-            Showing {filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() !== 'cancelled').length} upcoming appointment{filteredAppointments.filter(apt => apt.status && apt.status.toLowerCase() !== 'cancelled').length !== 1 ? 's' : ''}
+            Showing {filteredAppointments.filter(apt => apt.status && !['cancelled', 'completed', 'no_show'].includes(apt.status.toLowerCase())).length} upcoming appointment{filteredAppointments.filter(apt => apt.status && !['cancelled', 'completed', 'no_show'].includes(apt.status.toLowerCase())).length !== 1 ? 's' : ''}
           </div>
         )}
 
@@ -446,7 +477,7 @@ const AppointmentViewClient: React.FC<AppointmentViewClientProps> = () => {
         ) : filteredAppointments && filteredAppointments.length > 0 ? (
           <ul className="space-y-6">
             {filteredAppointments
-              .filter(apt => apt.status && apt.status.toLowerCase() !== 'cancelled')
+              .filter(apt => apt.status && !['cancelled', 'completed', 'no_show'].includes(apt.status.toLowerCase()))
               .map(apt => {
                 const formatted = formatAppointmentForDisplay(apt);
                 let petName = formatted.petName;

@@ -604,14 +604,7 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid appointment type" });
     }
 
-    // Validate date is not in the past
-    const appointmentDate = new Date(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (appointmentDate < today) {
-      return res.status(400).json({ error: "Cannot schedule appointments in the past" });
-    }    // Helper function to convert time string to minutes since midnight
+    // Helper function to convert time string to minutes since midnight
     const timeToMinutes = (timeStr: string): number => {
       const [time, period] = timeStr.split(' ');
       const [hours, minutes] = time.split(':').map(Number);
@@ -625,6 +618,30 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
       
       return totalMinutes;
     };
+
+    // Validate date is not in the past
+    const appointmentDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (appointmentDate < today) {
+      return res.status(400).json({ error: "Cannot schedule appointments in the past" });
+    }
+    
+    // Additional validation: if appointment is for today, check if time has passed
+    const now = new Date();
+    const isToday = appointmentDate.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+      const appointmentTimeMinutes = timeToMinutes(time);
+      
+      if (appointmentTimeMinutes <= currentTimeMinutes) {
+        return res.status(400).json({ 
+          error: "Cannot schedule appointments for times that have already passed today" 
+        });
+      }
+    }
 
     // Check for time overlaps with existing appointments
     const existingAppointments = await Appointment.find({

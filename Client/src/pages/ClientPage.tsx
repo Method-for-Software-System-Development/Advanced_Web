@@ -175,9 +175,40 @@ const ClientPage: React.FC = () => {
           const upcomingEmergencyAppointments = petAppointments.filter((appt: any) => {
             const apptDate = new Date(appt.date);
             apptDate.setHours(0, 0, 0, 0);
-            return apptDate >= now && 
-                   appt.type === 'emergency_care' && 
-                   appt.status !== 'cancelled';
+            
+            // If appointment is in the future (after today), include it
+            if (apptDate > now) {
+              return appt.type === 'emergency_care' && appt.status !== 'cancelled';
+            }
+            
+            // If appointment is today, check if the time has not passed yet
+            if (apptDate.getTime() === now.getTime()) {
+              const currentTime = new Date();
+              const currentTimeMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+              
+              // Parse appointment time to minutes
+              const timeToMinutes = (timeStr: string): number => {
+                const [time, period] = timeStr.split(' ');
+                const [hours, minutes] = time.split(':').map(Number);
+                let totalMinutes = hours * 60 + minutes;
+                
+                if (period === 'PM' && hours !== 12) {
+                  totalMinutes += 12 * 60;
+                } else if (period === 'AM' && hours === 12) {
+                  totalMinutes = minutes; // 12:xx AM is 00:xx in 24-hour format
+                }
+                
+                return totalMinutes;
+              };
+              
+              const appointmentTimeMinutes = timeToMinutes(appt.time);
+              return appointmentTimeMinutes > currentTimeMinutes && 
+                     appt.type === 'emergency_care' && 
+                     appt.status !== 'cancelled';
+            }
+            
+            // Appointment is in the past
+            return false;
           });
           
           emergencyAppointments = [...emergencyAppointments, ...upcomingEmergencyAppointments];

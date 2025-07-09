@@ -98,7 +98,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
   return (
     <div className="border-b pb-4 dark:border-gray-600">
       <h3 className="text-lg font-semibold text-gray-700 mb-3 dark:text-[#FDF6F0]">Appointment Details</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
           <label htmlFor="appointmentDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date *</label>
           <input
@@ -113,14 +113,14 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
           />
         </div>
         
-        <div>
+        <div className="col-span-1 lg:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
             Staff Member *
           </label>
           <select
             value={formData.staffId}
             onChange={(e) => onStaffChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-sm md:text-base"
             required
             disabled={loadingStaff}
           >

@@ -68,9 +68,25 @@ const TimeSlotSelectorClient: React.FC<TimeSlotSelectorClientProps> = ({
     const startMinutes = parseTime(startTime);
     const endMinutes = parseTime(endTime);
     
+    // Check if selected date is today
+    const today = new Date();
+    const selectedDateObj = new Date(selectedDate);
+    const isToday = selectedDateObj.toDateString() === today.toDateString();
+    
+    // Get current time in minutes if today
+    let currentTimeMinutes = 0;
+    if (isToday) {
+      currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
+    }
+    
     // Generate 30-minute slots
     for (let time = startMinutes; time + duration <= endMinutes; time += 30) {
       const timeSlot = formatTime(time);
+      
+      // Skip past time slots if appointment is for today
+      if (isToday && time <= currentTimeMinutes) {
+        continue;
+      }
       
       // Check if this slot conflicts with existing appointments
       const hasConflict = staffAppointments.some(apt => {
