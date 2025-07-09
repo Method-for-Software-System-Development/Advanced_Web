@@ -1,5 +1,5 @@
 /* ────────────────────────────────────────────────────────────────────────────
-   FurEver Friends  - Chatbot Route  (TypeScript, fully documented in English)
+   FurEver Friends  - Chatbot Route  
 ──────────────────────────────────────────────────────────────────────────── */
 
 import express, { Request, Response } from "express";
@@ -67,13 +67,13 @@ function normaliseSpecialty(raw: string): string {
   const lower = raw.trim().toLowerCase();
   if (ALIAS_MAP[lower]) return ALIAS_MAP[lower];
 
-  /* "…ologist" → "…ology"  (neurologist → neurology) */
+  /* "…ologist" -> "…ology"  (neurologist -> neurology) */
   if (lower.endsWith("ologist")) {
     const base = lower.slice(0, -7); // remove "ologist"
     return `${base.charAt(0).toUpperCase()}${base.slice(1)}ology`;
   }
 
-  /* "…ist" → "…y"  (therapist → therapy) */
+  /* "…ist" -> "…y"  (therapist -> therapy) */
   if (lower.endsWith("ist")) {
     const base = lower.slice(0, -3); // remove "ist"
     return `${base.charAt(0).toUpperCase()}${base.slice(1)}y`;
@@ -171,7 +171,7 @@ router.post("/", async (req, res) => {
   if (["help", "support", "assistance"].some((kw) => lower.includes(kw)))
     return res.json({ reply: numberedMenu(), menu: [] });
 
-  /* ─────────────────────── 6. ACTIVE WIZARDS  ─────────────────────────── */
+  /* ─────────────────────── 6. ACTIVE WIZARDS  ────────────────────────── */
 
   /* ===== HISTORY WIZARD – Step choosePet ===== */
   if (s?.step === "choosePetForHistory") {
@@ -261,7 +261,7 @@ router.post("/", async (req, res) => {
     const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
     if (!pets.length) return res.json({ reply: "You have no registered pets.", menu: [] });
 
-    /* Single pet → skip choosePet step. */
+    /* Single pet -> skip choosePet step. */
     if (pets.length === 1) {
       const pet  = pets[0];
       const past = (await getAppointmentHistoryByPet(String(pet._id)))
@@ -282,7 +282,7 @@ router.post("/", async (req, res) => {
       });
     }
 
-    /* Multiple pets → ask user. */
+    /* Multiple pets -> ask user. */
     sessions.set(uid, { step: "choosePetForHistory", pets });
     return res.json({
       reply:
@@ -305,7 +305,7 @@ router.post("/", async (req, res) => {
     const pets = (user?.pets ?? []).filter(isPet).filter(pet => pet.isActive);
     if (!pets.length) return res.json({ reply: "You have no registered pets."+ MENU_HINT, menu: [] });
 
-    /* one pet → skip choosePet */
+    /* one pet -> skip choosePet */
     if (pets.length === 1) {
       const [pet] = pets;
       sessions.set(uid, { step: "chooseDate", petId: pet._id, petName: pet.name, pets });
@@ -325,7 +325,7 @@ router.post("/", async (req, res) => {
     });
   }
 
-  /* choosePet → chooseDate */
+  /* choosePet -> chooseDate */
   if (s?.step === "choosePet") {
     const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
     const pets: IPet[] = s.pets;
@@ -340,7 +340,7 @@ router.post("/", async (req, res) => {
     });
   }
 
-  /* chooseDate → chooseTime */
+  /* chooseDate -> chooseTime */
   if (s?.step === "chooseDate") {
     const pickedDate = parseUserDate(text);
 
@@ -380,7 +380,7 @@ router.post("/", async (req, res) => {
     });
   }
 
-  /* chooseTime → chooseVet */
+  /* chooseTime -> chooseVet */
   if (s?.step === "chooseTime") {
     const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
     const { freeSlots, date, petId, petName, pets } = s;
@@ -401,7 +401,7 @@ router.post("/", async (req, res) => {
     });
   }
 
-  /* chooseVet → chooseReason */
+  /* chooseVet -> chooseReason */
   if (s?.step === "chooseVet") {
     const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
     const { vets } = s;
@@ -413,7 +413,7 @@ router.post("/", async (req, res) => {
     return res.json({ reply: "Briefly describe the reason for the visit:", menu: [] });
   }
 
-  /* chooseReason → confirmBooking */
+  /* chooseReason -> confirmBooking */
   if (s?.step === "chooseReason") {
     const reason = text.trim();
     if (!reason) return res.json({ reply: "Please enter a reason:", menu: [] });
@@ -428,7 +428,7 @@ router.post("/", async (req, res) => {
     });
   }
 
-  /* confirmBooking → create appointment */
+  /* confirmBooking -> create appointment */
   if (s?.step === "confirmBooking") {
     if (lower === "accept") {
       const { petId, vetId, date, time, description } = s;
@@ -572,7 +572,7 @@ if (s?.step === "emergencyConfirm") {
     });
   }
 
-  /* chooseAppointmentToCancel → confirmCancelAppointment */
+  /* chooseAppointmentToCancel -> confirmCancelAppointment */
   if (s?.step === "chooseAppointmentToCancel") {
     const idx = Number.isNaN(+text) ? -1 : parseInt(text) - 1;
     const { appts } = s;
@@ -589,7 +589,7 @@ if (s?.step === "emergencyConfirm") {
     });
   }
 
-  /* confirmCancelAppointment → update DB */
+  /* confirmCancelAppointment -> update DB */
   if (s?.step === "confirmCancelAppointment") {
     if (lower === "accept") {
       const ok = await cancelAppointment(uid!, s.selectedAppt._id);
@@ -662,7 +662,6 @@ if (specMatch) {
     return res.json({ reply: "I need a specialty or role to search for.", menu: [] });
   }
 
-  // ** הנה התיקון החשוב: נרמל את המילה לפני החיפוש **
   const normalizedPhrase = normaliseSpecialty(phrase);
   
   console.log(`Original phrase: "${phrase}" -> Normalized: "${normalizedPhrase}"`); // לצרכי debug
