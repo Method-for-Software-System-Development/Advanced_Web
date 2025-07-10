@@ -29,6 +29,7 @@ usersRouter.get("/", async (req: Request, res: Response) => {
           postalCode: user.postalCode,
           contact: user.email,
           pets: user.pets || [],
+          role: user.role, // Include role for filtering
         }));
         res.send(mappedUsers);
       } catch (error) {
