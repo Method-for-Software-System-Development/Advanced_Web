@@ -7,7 +7,7 @@ import { API_URL } from '../config/api';
 const API_BASE_URL = API_URL;
 
 export const medicineService = {
-  // Get all medicines with optional search
+  /** Fetches all medicines with optional search filtering */
   async getAllMedicines(search?: string): Promise<Medicine[]> {
     try {
       const params = new URLSearchParams();
@@ -30,24 +30,9 @@ export const medicineService = {
     }
   },
 
-  // Search medicines (alias for getAllMedicines with search)
+  /** Searches medicines by term - alias for getAllMedicines with search */
   async searchMedicines(searchTerm: string): Promise<Medicine[]> {
     return this.getAllMedicines(searchTerm);
-  },
-
-  // Get medicine by ID
-  async getMedicineById(id: string): Promise<Medicine> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/medicines/${id}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching medicine:', error);
-      throw error;
-    }
   },
 };
 
