@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
+/** Props for pet creation form component */
 interface AddPetFormProps {
   selectedPatientName: string;
   selectedPatientId: string;
@@ -7,6 +8,7 @@ interface AddPetFormProps {
   onCancel: () => void;
 }
 
+/** Pet creation form with validation for patient's pet details */
 const AddPetForm: React.FC<AddPetFormProps> = ({ 
   selectedPatientName, 
   selectedPatientId,
@@ -19,7 +21,9 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
   const [petBirthYear, setPetBirthYear] = useState('');
   const [petWeight, setPetWeight] = useState('');
   const [petSex, setPetSex] = useState('');
-  const [isActive, setIsActive] = useState(true);  // Effect to reset pet form fields if the selected patient changes or form is re-shown
+  const [isActive, setIsActive] = useState(true);
+
+  /** Resets form fields when patient selection changes */
   useEffect(() => {
     setPetName('');
     setPetType('');
@@ -29,6 +33,8 @@ const AddPetForm: React.FC<AddPetFormProps> = ({
     setPetSex('');
     setIsActive(true);
   }, [selectedPatientId]);
+  
+  /** Handles form submission with validation for all required fields */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!petName.trim() || !petType.trim() || !petBreed.trim() || !petBirthYear.trim() || !petWeight.trim() || !petSex.trim()) {

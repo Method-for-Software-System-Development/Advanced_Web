@@ -81,6 +81,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
     }
   }, [formData.duration]);
 
+  /** Loads staff appointments for selected staff member and date */
   const loadStaffAppointments = async () => {
     if (!selectedStaff || !formData.date) return;
 
@@ -99,6 +100,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
     }
   };
 
+  /** Loads all active staff members from the API */
   const loadStaff = async () => {
     try {
       setLoadingStaff(true);
@@ -112,6 +114,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
     }
   };
 
+  /** Handles staff member selection and updates form state */
   const handleStaffChange = (staffId: string) => {
     const selectedStaffMember = staff.find(s => s._id === staffId) || null;
     setSelectedStaff(selectedStaffMember);
@@ -119,10 +122,12 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
     handleInputChange('time', '');
   };
 
+  /** Updates form data for specific field */
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  /** Handles client selection and resets pet selection */
   const handleClientSelect = (client: Patient) => {
     setSelectedClient(client);
     setSelectedPetId(null);
@@ -164,6 +169,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
     }
   };
 
+  /** Handles form submission with validation and appointment creation */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -224,6 +230,7 @@ const AddAppointmentForm: React.FC<AddAppointmentFormProps> = ({
 
   };
 
+  /** Resets form to initial state and clears all selections */
   const handleClear = () => {
     // Reset form data to initial state
     setFormData({

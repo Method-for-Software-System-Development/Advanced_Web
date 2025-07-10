@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Patient } from '../../types'; // Import Patient type
 import { patientService } from '../../services/patientService';
 
+/** Props for patient creation form component */
 interface AddPatientFormProps {
   onSave: (patientData: Omit<Patient, '_id' | 'pets'> | Patient) => void; // Adjusted to handle both add and update
   onCancel: () => void;
 }
 
+/** Patient creation form with validation and duplicate email checking */
 const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState(''); 
@@ -18,6 +20,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
   const [password, setPassword] = useState('password'); // Default password 
   const [errorMessage, setErrorMessage] = useState('');
 
+  /** Handles form submission with validation and duplicate checking */
   const handleSubmit = async () => {
     // Collect missing required fields
     const missingFields = [];
@@ -73,7 +76,7 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
     onSave(patientData); // add new patient
   };
 
-  // Password strength calculation
+  /** Calculates password strength based on length and character variety */
   const getPasswordStrength = (pwd: string) => {
     if (!pwd) return { label: '—', color: 'text-gray-400' };
     const hasLower = /[a-z]/.test(pwd);

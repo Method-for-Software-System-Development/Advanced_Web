@@ -3,6 +3,7 @@ import PatientCard from './PatientCard';
 import EditPatientForm from './EditPatientForm';
 import { Patient, Pet } from '../../types';
 
+/** Props for patient list component with form state management */
 interface PatientListProps {
   patients: Patient[];
   onSaveEdit: (updatedPatient: Patient) => void;
@@ -16,6 +17,7 @@ interface PatientListProps {
   setEditingPatientId: (id: string | null) => void;
 }
 
+/** Patient list component managing cards/forms display and form state coordination */
 const PatientList: React.FC<PatientListProps> = ({ 
   patients, 
   onSaveEdit, 
@@ -29,7 +31,7 @@ const PatientList: React.FC<PatientListProps> = ({
   setEditingPatientId
 }) => {
 
-  // Helper function to check if patient has all required fields
+  /** Helper function to validate patient data before rendering */
   const isValidPatient = (patient: Patient) => {
     return patient && 
            patient._id && 
@@ -37,16 +39,20 @@ const PatientList: React.FC<PatientListProps> = ({
            patient.lastName && 
            Array.isArray(patient.pets);
   };
+  
+  /** Opens patient edit form and closes other forms */
   const handleEditPatient = (patient: Patient) => {
     setEditingPatientId(patient._id);
     setOpenAddPetForId(null); // Close add pet form if open
     setOpenEditPetForId(null); // Close edit pet form if open
   };
 
+  /** Cancels patient editing and closes edit form */
   const handleCancelEdit = () => {
     setEditingPatientId(null);
   };
 
+  /** Saves patient edits and closes edit form */
   const handleSaveEdit = (updatedPatient: Patient) => {
     onSaveEdit(updatedPatient);
     setEditingPatientId(null);

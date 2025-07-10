@@ -6,10 +6,12 @@ import { patientService } from '../../services/patientService';
 import { petService } from '../../services/petService';
 import { Plus } from 'lucide-react';
 
+/** Props for patient management view component */
 interface ManagePatientsViewProps { // Renamed from EditManagePatientsViewProps for clarity
   onBack: () => void;
 }
 
+/** Patient management view with operations, search, and auto-refresh */
 const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,11 +21,12 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
   const [openAddPetForId, setOpenAddPetForId] = useState<string | null>(null); const [openEditPetForId, setOpenEditPetForId] = useState<string | null>(null);
   const [editingPatientId, setEditingPatientId] = useState<string | null>(null);
 
-  // Initial load effect - runs only once on mount
+  /** Initial load effect - runs only once on mount */
   useEffect(() => {
     loadPatients(true);
   }, []); // Empty dependency array - runs only once
-  // Interval effect - updates when form states change
+  
+  /** Interval effect - auto-refreshes data when no forms are open */
   useEffect(() => {
     const intervalId = setInterval(() => {
       // Check if any forms are currently open before refreshing
@@ -40,6 +43,8 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
 
     return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, [showAddPatientForm, openAddPetForId, openEditPetForId, editingPatientId]); // Dependencies to track form states
+  
+  /** Loads patients data with optional loading state management */
   const loadPatients = async (isInitialCall: boolean = false) => { // Added type for isInitialCall
     if (isInitialCall) {
       setLoading(true); // Only set global loading true for initial load
@@ -66,6 +71,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     }
   };
 
+  /** Handles creation of new patient with API call and state update */
   const handleSaveNewPatient = async (patientData: Omit<Patient, '_id' | 'pets'>) => {
     try {
       // Call the backend API to create the patient
@@ -81,6 +87,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     }
   };
 
+  /** Handles patient information updates with API call and state sync */
   const handleSaveUpdatedPatient = async (updatedPatientData: Patient) => {
     try {
       // Call the backend API to update the patient
@@ -105,7 +112,10 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       alert(error.message || 'Failed to update patient.');
       console.error('Error updating patient:', error);
     }
-  }; const handleAddNewPet = async (patientId: string, petName: string, petType: string, petBreed: string, petBirthYear: number, petWeight: number, sex: string, isActive: boolean) => {
+  }; 
+
+  /** Handles adding new pet to a patient with API call and state update */
+  const handleAddNewPet = async (patientId: string, petName: string, petType: string, petBreed: string, petBirthYear: number, petWeight: number, sex: string, isActive: boolean) => {
     try {
       const newPetData = {
         name: petName,
@@ -139,6 +149,7 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     }
   };
 
+  /** Handles pet information updates with API call and state sync */
   const handleEditPet = async (petId: string, petData: Partial<Omit<Pet, '_id' | 'prescriptions' | 'treatments'>>) => {
     try {
       // Call the service to update the pet
@@ -158,7 +169,8 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
       alert("Failed to update pet. Please try again.");
     }
   };
-  // Memoized filtered and sorted patients list
+  
+  /** Memoized filtered and sorted patients list based on search term */
   const filteredPatients = useMemo(() => {
     let result = patients;
 

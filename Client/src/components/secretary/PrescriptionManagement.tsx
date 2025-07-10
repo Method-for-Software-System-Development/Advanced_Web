@@ -6,10 +6,12 @@ import ClientSearchPrescription from './prescription/ClientSearchPrescription';
 import PetSelectionPrescription from './prescription/PetSelectionPrescription';
 import MedicineSearch from './prescription/MedicineSearch';
 
+/** Props for prescription management component */
 interface PrescriptionManagementProps {
   onBack: () => void;
 }
 
+/** Form data structure for prescription creation */
 interface PrescriptionFormData {
   medicineType: string;
   medicineName: string;
@@ -28,6 +30,7 @@ const initialFormData: PrescriptionFormData = {
   petId: ''
 };
 
+/** Prescription management component with operations, filtering, and statistics */
 const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack }) => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -43,10 +46,12 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [clientPets, setClientPets] = useState<Pet[]>([]);
 
-  // Load initial data
+  /** Load initial data on component mount */
   useEffect(() => {
     loadData();
   }, []);
+  
+  /** Loads prescriptions and patients data from API */
   const loadData = async () => {
     setIsLoading(true);
     setError(null);
@@ -66,6 +71,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       setIsLoading(false);
     }
   };
+  
+  /** Handles prescription form submission with validation */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -141,6 +148,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     }
   };
 
+  /** Toggles prescription fulfilled status */
   const handleToggleFulfilled = async (prescriptionId: string, currentStatus: boolean) => {
     try {
       await prescriptionService.updatePrescription(prescriptionId, { fulfilled: !currentStatus });
@@ -153,6 +161,7 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     }
   };
 
+  /** Handles prescription deletion with confirmation */
   const handleDeletePrescription = async (prescriptionId: string) => {
     if (!confirm('Are you sure you want to delete this prescription?')) return; try {
       await prescriptionService.deletePrescription(prescriptionId);
@@ -164,6 +173,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       console.error('Error deleting prescription:', err);
     }
   };
+  
+  /** Gets patient and pet names for a prescription */
   const getPatientInfo = (prescription: Prescription) => {
     // Find the patient who owns the pet
     const patient = patients.find(p => {
@@ -188,7 +199,10 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown Patient';
 
     return { patientName, petName };
-  }; const filteredPrescriptions = prescriptions
+  }; 
+
+  /** Filtered and sorted prescriptions based on search and filter criteria */
+  const filteredPrescriptions = prescriptions
     .filter(prescription => {
       const { patientName, petName } = getPatientInfo(prescription);
       const searchLower = searchTerm.toLowerCase();
@@ -223,6 +237,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       const dateB = new Date(b.issueDate).getTime();
       return dateB - dateA;
     });
+    
+  /** Handles client selection and updates pet list */
   const handleClientSelect = (client: Patient) => {
     setSelectedClient(client);
     setSelectedPetId(null);
@@ -239,6 +255,8 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
     }
     // Update selectedPatientId for backward compatibility if needed
   };
+  
+  /** Handles pet selection and resets form data */
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
     // Clear form data when changing pets, but keep the selected petId
@@ -246,7 +264,10 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       ...initialFormData,
       petId
     });
-  }; const handleMedicineChange = (medicineName: string, medicineType: string, referralType: string) => {
+  }; 
+
+  /** Handles medicine search results and updates form data */
+  const handleMedicineChange = (medicineName: string, medicineType: string, referralType: string) => {
     const newFormData = {
       ...formData,
       medicineName,

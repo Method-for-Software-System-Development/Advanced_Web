@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 import { Patient } from '../../../types';
 import { patientService } from '../../../services/patientService';  
 
+/** Props for patient search component used in prescription management */
 interface ClientSearchPrescriptionProps {
   onClientSelect: (client: Patient) => void;
   selectedClient: Patient | null;
 }
 
+/** Patient search component for prescription management with real-time search and selection */
 const ClientSearchPrescription: React.FC<ClientSearchPrescriptionProps> = ({ onClientSelect, selectedClient }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  /** Searches patients by name, email, or phone when query length > 1 */
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (query.length > 1) {
@@ -30,6 +33,7 @@ const ClientSearchPrescription: React.FC<ClientSearchPrescriptionProps> = ({ onC
     }
   };
 
+  /** Selects a patient and clears search results */
   const handleSelectClient = (client: Patient) => {
     onClientSelect(client);
     setSearchQuery('');
@@ -80,7 +84,8 @@ const ClientSearchPrescription: React.FC<ClientSearchPrescriptionProps> = ({ onC
                 {selectedClient.firstName} {selectedClient.lastName}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">{selectedClient.email}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{selectedClient.phone}</p>              {selectedClient.pets && selectedClient.pets.length > 0 && (
+              <p className="text-sm text-gray-600 dark:text-gray-300">{selectedClient.phone}</p>              
+              {selectedClient.pets && selectedClient.pets.length > 0 && (
                 <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                   {(() => {
                     const activePets = selectedClient.pets.filter(pet => 

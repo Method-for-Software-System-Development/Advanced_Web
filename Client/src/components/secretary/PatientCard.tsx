@@ -3,6 +3,7 @@ import { Patient } from '../../types';
 import AddPetForm from './AddPetForm';
 import EditPetForm from './EditPetForm';
 
+/** Props for patient card component with pet management functionality */
 interface PatientCardProps {
   patient: Patient;
   onEditPatient: (patient: Patient) => void;
@@ -14,6 +15,7 @@ interface PatientCardProps {
   onToggleEditPetForm: () => void;
 }
 
+/** Patient card component displaying patient info and pet management with filtering */
 const PatientCard: React.FC<PatientCardProps> = ({ 
   patient, 
   onEditPatient, 
@@ -25,11 +27,14 @@ const PatientCard: React.FC<PatientCardProps> = ({
   onToggleEditPetForm 
 }) => {
   const [showInactivePets, setShowInactivePets] = useState(true);
+  
+  /** Handles pet addition and closes the add pet form */
   const handleAddPet = (patientId: string, petName: string, petType:string, petBreed:string, petBirthYear:number, petWeight:number, sex: string, isActive: boolean) => {
     onAddPet(patientId, petName, petType, petBreed, petBirthYear, petWeight, sex, isActive);
     onToggleAddPetForm();
   };
 
+  /** Handles pet editing and closes the edit pet form */
   const handleEditPet = (petId: string, petData: any) => {
     onEditPet(petId, petData);
     onToggleEditPetForm();

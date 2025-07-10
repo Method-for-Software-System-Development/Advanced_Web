@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pet } from '../../types';
 
+/** Props for pet editing form component */
 interface EditPetFormProps {
   patientName: string;
   pets: Pet[];
@@ -8,6 +9,7 @@ interface EditPetFormProps {
   onCancel: () => void;
 }
 
+/** Pet editing form with selection dropdown and pre-populated fields */
 const EditPetForm: React.FC<EditPetFormProps> = ({ 
   patientName, 
   pets,
@@ -21,7 +23,9 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
   const [petBirthYear, setPetBirthYear] = useState('');
   const [petWeight, setPetWeight] = useState('');
   const [petSex, setPetSex] = useState('');
-  const [isActive, setIsActive] = useState(true);  // Reset form when pets change
+  const [isActive, setIsActive] = useState(true);
+
+  /** Resets form fields when pets list changes */
   useEffect(() => {
     setSelectedPetId('');
     setPetName('');
@@ -31,7 +35,9 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
     setPetWeight('');
     setPetSex('');
     setIsActive(true);
-  }, [pets]);  // Update form fields when a pet is selected
+  }, [pets]);
+
+  /** Updates form fields when a pet is selected from dropdown */
   useEffect(() => {
     if (selectedPetId) {
       const selectedPet = pets.find(pet => pet._id === selectedPetId);
@@ -54,6 +60,8 @@ const EditPetForm: React.FC<EditPetFormProps> = ({
       setIsActive(true);
     }
   }, [selectedPetId, pets]);
+  
+  /** Handles form submission with validation and pet data updates */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPetId) {

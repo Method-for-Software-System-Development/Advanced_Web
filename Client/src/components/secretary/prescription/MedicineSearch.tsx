@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Medicine } from '../../../types';
 import { medicineService } from '../../../services/medicineService';
 
+/** Props for medicine search component with auto-complete functionality */
 interface MedicineSearchProps {
   onMedicineChange: (medicineName: string, medicineType: string, referralType: string) => void;
   medicineName: string;
@@ -10,6 +11,7 @@ interface MedicineSearchProps {
   placeholder?: string;
 }
 
+/** Medicine search component with debounced auto-complete and auto-fill functionality */
 const MedicineSearch: React.FC<MedicineSearchProps> = ({
   onMedicineChange,
   medicineName,
@@ -23,7 +25,8 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({
   const [inputFocused, setInputFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  // Debounced search
+  
+  /** Debounced search effect - searches medicines after 300ms delay */
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (medicineName.trim().length >= 2 && inputFocused) {
@@ -37,7 +40,7 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({
     return () => clearTimeout(timeoutId);
   }, [medicineName, inputFocused]);
 
-  // Click outside to close dropdown
+  /** Click outside effect - closes dropdown when clicking outside */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -47,7 +50,10 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);  const searchMedicines = async (searchTerm: string) => {
+  }, []);
+
+  /** Searches medicines via API and updates suggestions dropdown */
+  const searchMedicines = async (searchTerm: string) => {
     try {
       setIsLoading(true);
       const results = await medicineService.searchMedicines(searchTerm);
@@ -61,7 +67,10 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };  const handleMedicineNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  };
+
+  /** Handles medicine name input changes and resets auto-fill if manually edited */
+  const handleMedicineNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
     
     // If user is typing manually, reset auto-fill state
@@ -70,7 +79,10 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({
     }
     
     onMedicineChange(name, medicineType, referralType);
-  };  const handleMedicineSelect = (medicine: Medicine) => {
+  };
+
+  /** Handles medicine selection from dropdown and auto-fills related fields */
+  const handleMedicineSelect = (medicine: Medicine) => {
     setIsAutoFilled(true);
     
     // Call the parent callback
@@ -86,22 +98,30 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({
     }
   };
 
+  /** Handles medicine type input changes and resets auto-fill state */
   const handleMedicineTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const type = e.target.value;
     setIsAutoFilled(false); // Reset auto-fill if manually edited
     onMedicineChange(medicineName, type, referralType);
   };
 
+  /** Handles referral type input changes and resets auto-fill state */
   const handleReferralTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const referral = e.target.value;
     setIsAutoFilled(false); // Reset auto-fill if manually edited
     onMedicineChange(medicineName, medicineType, referral);
-  };  const handleInputFocus = () => {
+  };
+
+  /** Sets input focus state and shows suggestions if available */
+  const handleInputFocus = () => {
     setInputFocused(true);
     if (searchResults.length > 0) {
       setShowSuggestions(true);
     }
-  };  const handleInputBlur = () => {
+  };
+
+  /** Handles input blur with delay to allow dropdown interactions */
+  const handleInputBlur = () => {
     setInputFocused(false);
     // Delay hiding suggestions to allow for dropdown clicks
     setTimeout(() => {

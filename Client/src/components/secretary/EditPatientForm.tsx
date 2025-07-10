@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import DashboardButton from './DashboardButton';
 import { Patient } from '../../types';
 
+/** Props for patient editing form component */
 export interface EditPatientFormProps {
   initialData: Patient;
   onSave: (updatedPatient: Patient) => void;
   onCancel: () => void;
 }
 
+/** Patient editing form with pre-populated fields and validation */
 const EditPatientForm: React.FC<EditPatientFormProps> = ({ initialData, onSave, onCancel }) => {
   const [firstName, setFirstName] = useState(initialData.firstName);
   const [lastName, setLastName] = useState(initialData.lastName);
@@ -18,6 +20,7 @@ const EditPatientForm: React.FC<EditPatientFormProps> = ({ initialData, onSave, 
   const [postalCode, setPostalCode] = useState(initialData.postalCode || '');
   const [errorMessage, setErrorMessage] = useState('');
 
+  /** Handles form submission with validation and updates patient data */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const missingFields = [];

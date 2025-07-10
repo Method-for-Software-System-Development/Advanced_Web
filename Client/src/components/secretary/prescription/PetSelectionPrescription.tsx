@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pet } from '../../../types';
 
+/** Props for pet selection component in prescription workflow */
 interface PetSelectionPrescriptionProps {
   pets: Pet[];
   selectedPetId: string | null;
@@ -8,6 +9,7 @@ interface PetSelectionPrescriptionProps {
   clientName: string;
 }
 
+/** Pet selection component for prescription management with radio button interface */
 const PetSelectionPrescription: React.FC<PetSelectionPrescriptionProps> = ({ 
   pets, 
   selectedPetId, 
