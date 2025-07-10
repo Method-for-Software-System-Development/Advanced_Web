@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Appointment, AppointmentStatus, AppointmentType, Staff, Patient, Pet } from '../../types';
 import appointmentService from '../../services/appointmentService';
-console.log("DEBUG-IMPORT", appointmentService);
 import staffService from '../../services/staffService';
 import PetSelectionClient from './appointments/PetSelectionClient';
 import AppointmentFormFieldsClient from './appointments/AppointmentFormFieldsClient';
@@ -10,11 +10,27 @@ import UserNavButton from './UserNavButton';
 import { useNavigate } from 'react-router-dom';
 import EmergencyAppointmentModal from './appointments/EmergencyAppointmentModal';
 
+/**
+ * AddAppointmentFormToClient
+ *
+ * This component renders a form for clients to schedule a new appointment (regular or emergency).
+ * It handles staff/pet selection, time slot selection, validation, and submission.
+ *
+ * Props:
+ * - onClose: Function to close the form/modal
+ * - onAppointmentAdded: Callback when a new appointment is successfully created
+ * - selectedDate: The date to pre-fill in the form
+ */
+
 interface AddAppointmentFormToClientProps {
+  /** Close the form/modal */
   onClose: () => void;
+  /** Callback when a new appointment is created */
   onAppointmentAdded: (newAppointment: Appointment) => void;
+  /** The selected date for the appointment */
   selectedDate: Date;
 }
+
 
 const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
   onClose,
@@ -23,7 +39,9 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Helper to format a Date object to 'YYYY-MM-DD' string for input fields
+  /**
+   * Formats a Date object to 'YYYY-MM-DD' for input fields
+   */
   const formatDateToYYYYMMDD = (date: Date): string => {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -31,7 +49,9 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  // Show a success message for a few seconds
+  /**
+   * Shows a success message for a few seconds
+   */
   const showSuccessMessage = (message: string) => {
     setSuccessMessage(message);
     setTimeout(() => {
@@ -39,6 +59,8 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     }, 3000);
   };
 
+  // --- State ---
+  /** Form data for the appointment */
   const [formData, setFormData] = useState<Partial<Appointment>>({
     date: formatDateToYYYYMMDD(selectedDate),
     time: '',
@@ -50,24 +72,33 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     cost: 55,
     description: '',
   });
+  /** List of all staff members */
   const [staff, setStaff] = useState<Staff[]>([]);
+  /** Loading state for staff list */
   const [loadingStaff, setLoadingStaff] = useState(true);
+  /** Error message for the form */
   const [error, setError] = useState<string | null>(null);
+  /** Submitting state for the form */
   const [isSubmitting, setIsSubmitting] = useState(false);
+  /** Success message for the form */
   const [successMessage, setSuccessMessage] = useState<string>('');
+  /** Currently selected staff member */
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  /** Appointments for the selected staff and date */
   const [staffAppointments, setStaffAppointments] = useState<Appointment[]>([]);
+  /** Loading state for staff appointments */
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  /** Whether the emergency modal is open */
   const [openEmergencyModal, setOpenEmergencyModal] = useState(false);
+  /** Error message for emergency modal */
   const [emergencyError, setEmergencyError] = useState<string | null>(null);
   /**
- * Handles the emergency appointment confirmation.
- * If failed, closes the modal and displays an error in the main form.
- */
+   * Handles the emergency appointment confirmation.
+   * If failed, closes the modal and displays an error in the main form.
+   */
   const handleConfirmEmergency = async (reason: string, petId: string) => {
     setIsSubmitting(true);
     setEmergencyError(null);
-
     try {
       const result = await appointmentService.createEmergencyAppointment({
         userId: client ? client._id : '',
@@ -75,7 +106,6 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
         description: reason || "EMERGENCY",
         emergencyReason: reason || "EMERGENCY"
       });
-
       // If no appointment/staff returned, treat as failure
       if (!result.newAppointment || !result.newAppointment.staffId) {
         const msg = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
@@ -84,14 +114,12 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
         setIsSubmitting(false);
         return;
       }
-
       // Success – show success message and close modal
       showSuccessMessage('Emergency appointment created successfully!');
       onAppointmentAdded(result.newAppointment);
       setTimeout(() => {
         setOpenEmergencyModal(false); // Close modal on success
       }, 1500);
-
     } catch (err: any) {
       // Catch network/server/API errors and show them
       let errorMessage = "No emergency appointments are available at the moment. Please visit the clinic and our team will assist you as soon as possible.";
@@ -106,9 +134,13 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
       setIsSubmitting(false);
     }
   };
-  // Client and pet state
+  // --- Client and pet state ---
+  /** List of pets for the client */
   const [clientPets, setClientPets] = useState<Pet[]>([]);
-  const [client, setClient] = useState<Patient | null>(null); const [selectedPetId, setSelectedPetId] = useState<string | null>(
+  /** Client object (from session) */
+  const [client, setClient] = useState<Patient | null>(null);
+  /** Selected pet ID */
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(
     () => {
       const clientRaw = sessionStorage.getItem("client");
       if (clientRaw) {
@@ -122,7 +154,10 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
       return null;
     });
 
-  // Load client and pets from session storage and fetch pets if needed
+  /**
+   * Loads client and pets from session storage and fetches full pet objects if needed.
+   * Filters out inactive pets.
+   */
   useEffect(() => {
     try {
       const clientRaw = sessionStorage.getItem("client");
@@ -183,7 +218,9 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     }
   }, []);
 
-  // Load staff appointments for the selected staff and date
+  /**
+   * Loads all appointments for the selected staff and date.
+   */
   useEffect(() => {
     if (selectedStaff && formData.date) {
       loadStaffAppointments();
@@ -192,14 +229,18 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     }
   }, [selectedStaff, formData.date]);
 
-  // Clear selected time when duration changes
+  /**
+   * Clears selected time when duration changes.
+   */
   useEffect(() => {
     if (formData.time) {
       handleInputChange('time', '');
     }
   }, [formData.duration]);
 
-  // Fetch all staff members from the server
+  /**
+   * Loads all staff members from the server.
+   */
   const loadStaff = async () => {
     try {
       setLoadingStaff(true);
@@ -213,7 +254,9 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     }
   };
 
-  // Fetch all appointments for a staff member on a specific date
+  /**
+   * Loads all appointments for a staff member on a specific date.
+   */
   const loadStaffAppointments = async () => {
     if (!selectedStaff || !formData.date) return;
 
@@ -232,7 +275,9 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     }
   };
 
-  // Handle staff selection change
+  /**
+   * Handles staff selection change.
+   */
   const handleStaffChange = (staffId: string) => {
     const selectedStaffMember = staff.find(s => s._id === staffId) || null;
     setSelectedStaff(selectedStaffMember);
@@ -240,17 +285,24 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
     handleInputChange('time', '');
   };
 
-  // Handle input change for form fields
+  /**
+   * Handles input change for form fields.
+   */
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Handle pet selection change
+  /**
+   * Handles pet selection change.
+   */
   const handlePetSelect = (petId: string) => {
     setSelectedPetId(petId);
   };
 
-  // Handle form submission for creating a new appointment
+  /**
+   * Handles form submission for creating a new appointment.
+   * Validates all fields and handles both regular and emergency appointments.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -360,6 +412,7 @@ const AddAppointmentFormToClient: React.FC<AddAppointmentFormToClientProps> = ({
       setIsSubmitting(false);
     }
   };
+  // Load staff on mount
   useEffect(() => {
     loadStaff();
   }, []);
