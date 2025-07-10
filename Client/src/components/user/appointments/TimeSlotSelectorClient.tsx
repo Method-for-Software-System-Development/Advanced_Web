@@ -1,6 +1,16 @@
-
 import React from 'react';
 import { Staff, Appointment } from '../../../types';
+
+interface TimeSlotSelectorClientProps {
+  selectedStaff: Staff | null;
+  selectedDate: string;
+  duration: number;
+  selectedTime: string;
+  onTimeSelect: (time: string) => void;
+  staffAppointments: Appointment[];
+  isLoading: boolean;
+}
+
 
 /**
  * TimeSlotSelectorClient
@@ -17,25 +27,6 @@ import { Staff, Appointment } from '../../../types';
  * - staffAppointments: Array of existing appointments for the staff
  * - isLoading: Whether to show loading state
  */
-
-interface TimeSlotSelectorClientProps {
-  /** Staff member to show slots for */
-  selectedStaff: Staff | null;
-  /** Date to show slots for (YYYY-MM-DD) */
-  selectedDate: string;
-  /** Appointment duration in minutes */
-  duration: number;
-  /** Currently selected time slot */
-  selectedTime: string;
-  /** Callback when a time is selected */
-  onTimeSelect: (time: string) => void;
-  /** Existing appointments for the staff */
-  staffAppointments: Appointment[];
-  /** Show loading state */
-  isLoading: boolean;
-}
-
-
 const TimeSlotSelectorClient: React.FC<TimeSlotSelectorClientProps> = ({
   selectedStaff,
   selectedDate,
@@ -45,36 +36,6 @@ const TimeSlotSelectorClient: React.FC<TimeSlotSelectorClientProps> = ({
   staffAppointments,
   isLoading
 }) => {
-  /**
-   * Parses a time string ("HH:MM" or "H:MM AM/PM") to minutes since midnight.
-   */
-  const parseTime = (timeStr: string): number => {
-    if (timeStr.includes('AM') || timeStr.includes('PM')) {
-      // 12-hour format
-      const [time, period] = timeStr.split(' ');
-      const [hours, minutes] = time.split(':').map(Number);
-      let hours24 = hours;
-      if (period === 'PM' && hours !== 12) hours24 += 12;
-      if (period === 'AM' && hours === 12) hours24 = 0;
-      return hours24 * 60 + minutes;
-    } else {
-      // 24-hour format
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return hours * 60 + minutes;
-    }
-  };
-
-  /**
-   * Formats minutes since midnight to a 12-hour time string (e.g., "2:30 PM").
-   */
-  const formatTime = (minutes: number): string => {
-    const hours24 = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    const hours12 = hours24 === 0 ? 12 : hours24 > 12 ? hours24 - 12 : hours24;
-    const ampm = hours24 >= 12 ? 'PM' : 'AM';
-    return `${hours12}:${mins.toString().padStart(2, '0')} ${ampm}`;
-  };
-
   /**
    * Generates all available time slots for the selected staff and date.
    * Excludes slots that are in the past (if today) or that conflict with existing appointments.
@@ -91,6 +52,36 @@ const TimeSlotSelectorClient: React.FC<TimeSlotSelectorClientProps> = ({
     const timeMatch = staffSlot.match(/(\d{2}:\d{2})-(\d{2}:\d{2})/);
     if (!timeMatch) return [];
     const [, startTime, endTime] = timeMatch;
+
+    /**
+     * Parses a time string ("HH:MM" or "H:MM AM/PM") to minutes since midnight.
+     */
+    const parseTime = (timeStr: string): number => {
+      if (timeStr.includes('AM') || timeStr.includes('PM')) {
+        // 12-hour format
+        const [time, period] = timeStr.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        let hours24 = hours;
+        if (period === 'PM' && hours !== 12) hours24 += 12;
+        if (period === 'AM' && hours === 12) hours24 = 0;
+        return hours24 * 60 + minutes;
+      } else {
+        // 24-hour format
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+      }
+    };
+
+    /**
+     * Formats minutes since midnight to a 12-hour time string (e.g., "2:30 PM").
+     */
+    const formatTime = (minutes: number): string => {
+      const hours24 = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      const hours12 = hours24 === 0 ? 12 : hours24 > 12 ? hours24 - 12 : hours24;
+      const ampm = hours24 >= 12 ? 'PM' : 'AM';
+      return `${hours12}:${mins.toString().padStart(2, '0')} ${ampm}`;
+    };
 
     const startMinutes = parseTime(startTime);
     const endMinutes = parseTime(endTime);
@@ -125,8 +116,6 @@ const TimeSlotSelectorClient: React.FC<TimeSlotSelectorClientProps> = ({
   };
 
   const availableSlots = generateTimeSlots();
-
-  // UI: No staff selected
   if (!selectedStaff) {
     return (
       <div>
@@ -143,7 +132,6 @@ const TimeSlotSelectorClient: React.FC<TimeSlotSelectorClientProps> = ({
     );
   }
 
-  // UI: Loading state
   if (isLoading) {
     return (
       <div>
@@ -160,7 +148,6 @@ const TimeSlotSelectorClient: React.FC<TimeSlotSelectorClientProps> = ({
     );
   }
 
-  // UI: Main time slot selector
   return (
     <div>
       <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
