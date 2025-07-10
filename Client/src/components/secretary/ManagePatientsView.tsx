@@ -54,7 +54,9 @@ const ManagePatientsView: React.FC<ManagePatientsViewProps> = ({ onBack }) => {
     try {
       // The list will simply update when new data arrives.
       const data = await patientService.getAllPatients();
-      setPatients(data);
+      // Filter out secretaries - only show users with role "user" (patients)
+      const patientsOnly = data.filter((user: any) => user.role === 'user' || !user.role);
+      setPatients(patientsOnly);
       setError(null); // Clear any previous error on successful fetch (initial or poll)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch patients');
