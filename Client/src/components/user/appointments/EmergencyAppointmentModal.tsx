@@ -1,14 +1,34 @@
+
 import React, { useState, useEffect } from "react";
 import { Pet, Patient } from '../../../types';
 import { API_URL } from '../../../config/api';
 
+/**
+ * EmergencyAppointmentModal
+ * Modal for submitting an emergency appointment request for a pet.
+ * Allows the user to select a pet, describe the emergency, and confirm the high-fee emergency request.
+ *
+ * Props:
+ * - open: Whether the modal is visible
+ * - onClose: Function to close the modal
+ * - onConfirm: Function called with (reason, petId) when submitting
+ * - isSubmitting: Whether the form is currently submitting
+ * - error: Optional error message to display
+ */
+
 interface EmergencyAppointmentModalProps {
+  /** Whether the modal is open */
   open: boolean;
+  /** Close the modal */
   onClose: () => void;
+  /** Confirm the emergency appointment (reason, petId) */
   onConfirm: (emergencyReason: string, petId: string) => void;
+  /** Is the form submitting */
   isSubmitting: boolean;
+  /** Optional error message */
   error?: string | null;
 }
+
 
 const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
   open,
@@ -17,12 +37,22 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
   isSubmitting,
   error,
 }) => {
+  // State for the emergency reason/description
   const [reason, setReason] = useState("");
+  // State for the confirmation checkbox
   const [checked, setChecked] = useState(false);
+  // State for the client's pets (full objects)
   const [clientPets, setClientPets] = useState<Pet[]>([]);
+  // State for the client object
   const [client, setClient] = useState<Patient | null>(null);
+  // State for the selected pet ID
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
 
+  /**
+   * Loads client and pet data from sessionStorage when modal opens.
+   * Handles both pet objects and pet ID arrays.
+   * Filters out inactive pets.
+   */
   useEffect(() => {
     if (!open) return;
     try {
@@ -32,6 +62,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
       setClient(parsedClient);
       if (parsedClient.pets && parsedClient.pets.length > 0) {
         let petsArr = parsedClient.pets;
+        // If pets are stored as IDs, fetch their full objects from the server
         if (typeof petsArr[0] === 'string') {
           const validPetIds = petsArr.filter((id: string) => typeof id === 'string' && id.length === 24);
           if (validPetIds.length === 0) {
@@ -45,6 +76,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
           })
             .then((res) => res.json())
             .then((data) => {
+              // Only include active pets
               const activePets = Array.isArray(data) ? data.filter((pet: any) => pet.isActive !== false) : [];
               setClientPets(activePets);
               if (activePets.length > 0) {
@@ -58,6 +90,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
               setSelectedPetId(null);
             });
         } else {
+          // If pets are already objects, just filter for active
           const activePets = petsArr.filter((pet: any) => pet.isActive !== false);
           setClientPets(activePets);
           if (activePets.length > 0) {
@@ -73,15 +106,21 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
     } catch { }
   }, [open]);
 
+  /**
+   * Handles checkbox state for user confirmation
+   */
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(e.target.checked);
   };
 
+  // Do not render modal if not open
   if (!open) return null;
 
   return (
+    // Modal overlay and dialog
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f8d7da]/80 backdrop-blur-sm">
       <div className="relative w-[95vw] max-w-xs sm:w-full sm:max-w-md bg-[#FDF6F0] dark:bg-darkMode p-3 sm:p-8 rounded-xl shadow-xl border border-[#EF92A6] dark:border-[#D17C8F] animate-fadeIn">
+        {/* Close (X) button */}
         <button
           onClick={onClose}
           className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-[#EF92A6] dark:hover:text-[#D17C8F] text-xl sm:text-2xl font-bold focus:outline-none cursor-pointer"
@@ -98,13 +137,14 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
             Please arrive at the clinic immediately. Our staff will contact you right away.
           </p>
         </div>
-        {/* Display error message inside the modal, above the form */}
+        {/* Error message display */}
         {error && (
           <div className="mb-4 p-3 bg-red-200 text-red-900 rounded-lg border border-red-400 text-center">
             {error}
           </div>
         )}
 
+        {/* Pet selection dropdown */}
         {client && (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Select Pet:</label>
@@ -121,6 +161,7 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
             </select>
           </div>
         )}
+        {/* Emergency reason textarea and confirmation checkbox */}
         <form onSubmit={e => { e.preventDefault(); if (selectedPetId) onConfirm(reason, selectedPetId); }} className="space-y-6">
           <div>
             <textarea
@@ -146,14 +187,16 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps> = ({
               I understand that this appointment is for emergencies only and agree to the fee.
             </label>
           </div>
-          <div className="flex justify-end space-x-3 pt-4">            <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border border-[var(--color-redButton)] rounded-md text-sm font-medium text-[var(--color-redButton)] hover:bg-[var(--color-redButton)] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-redButton)] transition-colors duration-150 cursor-pointer"
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
+          {/* Action buttons */}
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-[var(--color-redButton)] rounded-md text-sm font-medium text-[var(--color-redButton)] hover:bg-[var(--color-redButton)] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-redButton)] transition-colors duration-150 cursor-pointer"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               className="px-4 py-2 bg-[#EF92A6] text-white rounded-md text-sm font-medium hover:bg-[#E57D98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D17C8F] disabled:opacity-50 dark:bg-[#D17C8F] dark:hover:bg-[#C66B8C] transition-colors duration-150 shadow-md cursor-pointer"
