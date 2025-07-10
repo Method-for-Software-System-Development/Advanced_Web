@@ -63,7 +63,9 @@ const PrescriptionManagement: React.FC<PrescriptionManagementProps> = ({ onBack 
       ]);
 
       setPrescriptions(prescriptionsData);
-      setPatients(patientsData);
+      // Filter out secretaries - only show users with role "user" (patients)
+      const patientsOnly = patientsData.filter((user: any) => user.role === 'user' || !user.role);
+      setPatients(patientsOnly);
     } catch (err) {
       setError('Failed to load data. Please try again.');
       console.error('Error loading data:', err);

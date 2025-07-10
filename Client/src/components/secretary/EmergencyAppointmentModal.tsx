@@ -26,12 +26,14 @@ const EmergencyAppointmentModal: React.FC<EmergencyAppointmentModalProps & { err
   useEffect(() => {
     if (!open) return;
     patientService.getAllPatients().then((data) => {
-      setPatients(data);
+      // Filter out secretaries - only show users with role "user" (patients)
+      const patientsOnly = data.filter((user: any) => user.role === 'user' || !user.role);
+      setPatients(patientsOnly);
       // If a patient was previously selected, keep it if still in the list
-      if (selectedPatientId && data.some(p => p._id === selectedPatientId)) {
+      if (selectedPatientId && patientsOnly.some(p => p._id === selectedPatientId)) {
         setSelectedPatientId(selectedPatientId);
-      } else if (data.length > 0) {
-        setSelectedPatientId(data[0]._id);
+      } else if (patientsOnly.length > 0) {
+        setSelectedPatientId(patientsOnly[0]._id);
       } else {
         setSelectedPatientId(null);
       }

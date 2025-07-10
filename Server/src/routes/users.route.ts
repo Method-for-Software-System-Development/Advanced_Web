@@ -191,11 +191,23 @@ usersRouter.get("/search", async (req: Request, res: Response) => {
         }
 
         const users = await User.find({
-            $or: [
-                { firstName: { $regex: query, $options: "i" } },
-                { lastName: { $regex: query, $options: "i" } },
-                { email: { $regex: query, $options: "i" } },
-            ],
+            $and: [
+                {
+                    $or: [
+                        { firstName: { $regex: query, $options: "i" } },
+                        { lastName: { $regex: query, $options: "i" } },
+                        { email: { $regex: query, $options: "i" } },
+                    ],
+                },
+                // Only include users with role "user" or no role (patients)
+                {
+                    $or: [
+                        { role: "user" },
+                        { role: { $exists: false } },
+                        { role: null }
+                    ]
+                }
+            ]
         }).populate('pets'); // Populate pets if needed
 
         res.status(200).send(users);

@@ -40,7 +40,9 @@ const AddPatientForm: React.FC<AddPatientFormProps> = ({ onSave, onCancel }) => 
     // Check if email already exists in the DB
     try {
       const allPatients = await patientService.getAllPatients();
-      const emailExists = allPatients.find(p => p.email.toLowerCase() === email.trim().toLowerCase());
+      // Filter out secretaries to only check against actual patients
+      const patientsOnly = allPatients.filter((user: any) => user.role === 'user' || !user.role);
+      const emailExists = patientsOnly.find(p => p.email.toLowerCase() === email.trim().toLowerCase());
       if (emailExists) {
         setErrorMessage('A patient with this email already exists.');
         // Clear the form fields
