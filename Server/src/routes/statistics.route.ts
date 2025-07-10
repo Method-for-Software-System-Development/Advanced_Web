@@ -49,8 +49,14 @@ statisticsRouter.get("/dashboard", async (req: Request, res: Response) => {
       .sort({ date: 1, time: 1 })
       .limit(10);
 
-    // Count statistics
-    const totalPatients = await User.countDocuments();
+    // Count statistics - only count users with role "user" or no role as patients
+    const totalPatients = await User.countDocuments({
+      $or: [
+        { role: "user" },
+        { role: { $exists: false } },
+        { role: null }
+      ]
+    });
     const totalStaff = await Staff.countDocuments({ isActive: true });
     
     // Today's appointment stats
