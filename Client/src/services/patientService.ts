@@ -4,7 +4,7 @@ import { API_URL } from '../config/api';
 const API_BASE_URL = API_URL;
 
 export const patientService = {
-  // Get all patients
+  /** Fetches all patients from the API */
   async getAllPatients(): Promise<Patient[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/users`);
@@ -18,7 +18,7 @@ export const patientService = {
     }
   },
 
-  // Create a new patient
+  /** Creates a new patient with registration endpoint */
   async createPatient(patientData: Omit<Patient, '_id'>): Promise<Patient> {
     try {
       const response = await fetch(`${API_BASE_URL}/users/register`, {
@@ -37,7 +37,7 @@ export const patientService = {
     }
   },
 
-  // Update patient
+  /** Updates patient information with partial data */
   async updatePatient(id: string, patientData: {
     firstName?: string;
     lastName?: string;
@@ -64,7 +64,7 @@ export const patientService = {
     }
   },
 
-  // Search patients by name or email
+  /** Searches patients by name, email, or phone number */
     async searchPatients(query: string): Promise<Patient[]> {
       try {
         const response = await fetch(`${API_BASE_URL}/users/search?q=${encodeURIComponent(query)}`);

@@ -30,7 +30,9 @@ export const prescriptionService = {
       console.error('Error fetching prescription:', error);
       throw error;
     }
-  },  // Create new prescription
+  },
+
+  // Create new prescription
   async createPrescription(prescriptionData: {
     issueDate: string;
     medicineType: string;

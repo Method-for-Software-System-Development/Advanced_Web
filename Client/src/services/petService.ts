@@ -3,7 +3,8 @@ import { API_URL } from '../config/api';
 
 const API_BASE_URL = API_URL;
 
-export const petService = {  // Get all pets for a specific patient
+export const petService = {
+  // Get all pets for a specific patient
   async getPetsByPatientId(patientId: string): Promise<Pet[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/pets/user/${patientId}`);
