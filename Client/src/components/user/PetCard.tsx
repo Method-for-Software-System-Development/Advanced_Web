@@ -62,6 +62,11 @@ const PetCard: React.FC<{ pet: Pet }> = ({ pet }) => {
     "/assets/animals/snake_m.png": snakeM,
   };  // Get the actual image URL for Vite
   const getImageUrl = (imageUrl: string) => {
+    // If it's a Cloudinary URL (starts with http/https), use it directly
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
     // If it's an uploaded image (starts with /uploads/), use the full server URL
     if (imageUrl.startsWith('/uploads/')) {
       return `${API_BASE_URL}${imageUrl}`;

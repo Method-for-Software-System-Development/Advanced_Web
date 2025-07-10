@@ -8,28 +8,19 @@ import Pet from "../models/petSchema";
 import User from "../models/userSchema"; 
 import mongoose from "mongoose";
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
 
 const petRouter = Router();
 
-// Create uploads directory for pets if it doesn't exist
-const petUploadsDir = path.join(__dirname, '../../UserUploads');
-if (!fs.existsSync(petUploadsDir)) {
-  fs.mkdirSync(petUploadsDir, { recursive: true });
-}
-
-// Configure multer for pet image uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, petUploadsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'pet-' + uniqueSuffix + path.extname(file.originalname));
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Configure multer for memory storage (since we can't use disk storage on Vercel)
+const storage = multer.memoryStorage();
 const upload = multer({ 
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
@@ -165,7 +156,7 @@ petRouter.delete("/:id", async (req: Request, res: Response) => {
 
 /**
  * POST /api/pets/upload-image
- * Upload an image for a pet
+ * Upload an image for a pet using Cloudinary
  */
 petRouter.post("/upload-image", upload.single('image'), async (req: Request, res: Response) => {
   try {
@@ -178,8 +169,27 @@ petRouter.post("/upload-image", upload.single('image'), async (req: Request, res
       return res.status(400).send({ error: "Pet ID is required" });
     }
 
-    // Construct the image URL
-    const imageUrl = `/uploads/${req.file.filename}`;
+    // Upload to Cloudinary using buffer
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'pet-images',
+          public_id: `pet-${petId}-${Date.now()}`,
+          resource_type: 'image'
+        },
+        (error: any, result: any) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+      
+      uploadStream.end(req.file!.buffer);
+    });
+
+    const imageUrl = (uploadResult as any).secure_url;
 
     // Update the pet with the new image URL
     const updatedPet = await Pet.findByIdAndUpdate(
@@ -189,10 +199,6 @@ petRouter.post("/upload-image", upload.single('image'), async (req: Request, res
     );
 
     if (!updatedPet) {
-      // Clean up uploaded file if pet not found
-      fs.unlink(req.file.path, (err) => {
-        if (err) console.error('Error deleting file:', err);
-      });
       return res.status(404).send({ error: "Pet not found" });
     }
 
@@ -202,12 +208,6 @@ petRouter.post("/upload-image", upload.single('image'), async (req: Request, res
       pet: updatedPet
     });
   } catch (error) {
-    // Clean up uploaded file if there's an error
-    if (req.file) {
-      fs.unlink(req.file.path, (err) => {
-        if (err) console.error('Error deleting file:', err);
-      });
-    }
     console.error('Error uploading pet image:', error);
     res.status(500).send({ error: error instanceof Error ? error.message : "Unknown error" });
   }
